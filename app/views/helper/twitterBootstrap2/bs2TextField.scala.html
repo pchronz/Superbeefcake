@@ -1,0 +1,3 @@
+@(name: String, size: Int, placeholder: Option[String], args: (Symbol,String)*)
+
+<input type="text" name="@name" class="span@size" placeholder="@{placeholder match {case None => ""; case Some(text) => text}}">

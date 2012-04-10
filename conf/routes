@@ -1,0 +1,19 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                           controllers.Application.index(day: Option[Int], month: Option[Int], year: Option[Int])
+GET		/login						controllers.Application.login
+POST	/submitMacroEntry			controllers.Application.submitMacroEntry
+POST	/submitDateFilter			controllers.Application.submitDateFilter
+POST	/deleteEntry				controllers.Application.deleteEntry
+POST	/submitMacroEntryByFood		controllers.Application.submitMacroEntryByFood
+POST	/auth						controllers.Application.auth
+GET		/deauth						controllers.Application.deauth
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+# AJAX requests
+GET		/suggestFood				controllers.Application.suggestFood(query: String)

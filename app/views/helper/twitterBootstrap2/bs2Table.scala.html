@@ -1,0 +1,14 @@
+@(headEls: List[Html], args: (Symbol,String)*)(body: Html)
+
+<table class="table @{for(arg <- args if(arg._1=='class)) yield arg._2}" @toHtmlArgs(args.toMap)>
+	<thead>
+		<tr>
+			@headEls.map { el: Html =>
+			<th>@el</th>
+			}
+		</tr>
+	</thead>
+	<tbody>
+		@body
+	</tbody>
+</table>

@@ -1,0 +1,6 @@
+@(args: (Symbol,String)*)(body: => Html) 
+
+<div class="row" @toHtmlArgs(args.toMap)>
+	@body
+</div>
+

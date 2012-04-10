@@ -1,0 +1,6 @@
+@(size: Int, offset: Option[Int], args: (Symbol,String)*)(body: => Html) 
+
+<div class="span@{size} @{offset match {case Some(x: Int) => x; case None => ""}}" @toHtmlArgs(args.toMap)>
+	@body
+</div>
+

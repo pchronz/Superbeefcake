@@ -1,0 +1,230 @@
+package controllers
+
+import play.api._
+import play.api.mvc._
+import models._
+import play.api.data._
+import play.api.data.Forms._
+
+object Application extends Controller {
+
+  private def sessionToDate(session: Session): Date = {
+    val day = session.get("day").map { day =>
+      day
+    }
+    val month = session.get("month").map { month =>
+      month
+    }
+    val year = session.get("year").map { year =>
+      year
+    }
+    (day, month, year) match {
+      case (Some(d), Some(m), Some(y)) => Date(d.toInt, m.toInt, y.toInt)
+      case _ => Date()
+    }
+  }
+
+  private def getUserFromSession(session: Session): Option[Beefcake] = {
+    session.get("beefcake") match {
+      case Some(username) => Logger.info("Got user from session: " + username); Beefcake.findByUsername(username)
+      case None => Logger.info("No user in session scope."); None
+    }
+  }
+
+  def index(day: Option[Int], month: Option[Int], year: Option[Int]) = Action { request =>
+    println(request.session)
+    // in case the user is already logged in
+    getUserFromSession(request.session) match {
+      case None => Redirect(routes.Application.login)
+      case Some(user) => {
+        (day, month, year) match {
+          case (Some(d), Some(m), Some(y)) => {
+            val macroEntries = MacroEntry.findByDate(Date(d, m, y), user)
+            Ok(views.html.index(day, month, year, macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm)).withSession(Map("day" -> d.toString, "month" -> m.toString, "year" -> y.toString).foldRight(request.session)((a,b) => b+a))
+          }
+          case _ => {
+            val date = sessionToDate(request.session)
+            val macroEntries = MacroEntry.findByDate(date, user)
+            Ok(views.html.index(Some(date.day), Some(date.month), Some(date.year), macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm))
+          }
+        }
+      }
+    }
+  }
+  
+  val macroEntryForm = Form(
+    tuple(
+      "food" -> optional(text),
+      "day" -> number,
+      "month" -> number,
+      "year" -> number,
+      "kCal" -> number,
+      "protein" -> number,
+      "fat" -> number,
+      "carbs" -> number
+    )
+  )
+
+  def submitMacroEntry = Action { implicit request =>
+    getUserFromSession(request.session) match {
+      case None => Ok("Not logged in")
+      case Some(user) =>{
+        macroEntryForm.bindFromRequest.fold(
+          {form => 
+            Logger.error("binding errors for new macro entry")
+            Logger.error(form.errors.mkString(", ")) 
+            Redirect(routes.Application.index(None, None, None))
+          },
+          {fields => 
+            val food = fields._1
+            val day = fields._2
+            val month = fields._3
+            val year = fields._4
+            val kCal = fields._5
+            val protein = fields._6
+            val fat = fields._7
+            val carbs = fields._8
+            Logger.info(fields.toString)
+            MacroEntry.create(MacroEntry(None, time=Some(Date(day, month, year)), name=food, kCal=kCal, protein=protein, fat=fat, carbs=carbs), user)
+            Redirect(routes.Application.index(Some(day), Some(month), Some(year)))
+          }
+        )
+      }
+    }
+  }
+
+  val dateFilterForm = Form (
+    tuple(
+      "day" -> number,
+      "month" -> number,
+      "year" -> number
+    )
+  )
+
+  def submitDateFilter = Action { implicit request =>
+    dateFilterForm.bindFromRequest.fold(
+      {errors => Logger.error("binding errors"); Date()
+        Redirect(routes.Application.index(None, None, None))
+      },
+      {values =>
+        Logger.info("Filter date bound successfully")
+        Redirect(routes.Application.index(Some(values._1), Some(values._2), Some(values._3)))
+      }
+    )
+  }
+
+  def deleteEntry = Action { implicit request =>
+    getUserFromSession(session) match {
+      case None => Ok("Not logged in")
+      case Some(user) => {
+        request.body.asFormUrlEncoded match {
+          case None => {
+            Logger.error("Cannot delete an entry when no id is provided at all!")
+            Redirect(routes.Application.index(None, None, None))
+          }
+          case Some(params) => {
+            val entryId = params.filterKeys{key => key.startsWith("entryId_")}.keys.head.split("_").last.toInt
+            Logger.info("Going to delete macroEntry with id == " + entryId)
+            MacroEntry.deleteById(entryId, user)
+            Redirect(routes.Application.index(None, None, None)).withSession(session + ("beefcake"->user.username))
+          }
+        }
+      }
+    }
+  }
+
+  val macroEntryByFoodForm = Form(
+    tuple(
+      "foodName" -> text,
+      "amount" -> number,
+      "day" -> number,
+      "month" -> number,
+      "year" -> number
+    )
+  )
+
+  def submitMacroEntryByFood = Action { implicit request =>
+    getUserFromSession(session) match {
+      case None => Ok("Not logged in")
+      case Some(user) => {
+        macroEntryByFoodForm.bindFromRequest.fold (
+          {form => 
+            Logger.error("Could not bind the form in the request")
+            Logger.error(form.toString)
+            Redirect(routes.Application.index(None, None, None))
+          },
+          {fields =>
+            val (foodName, amount, day, month, year) = fields
+            MacroEntry(None, Some(Date(day, month, year)), foodName, amount) match {
+              case None =>
+              case Some(macroEntry) => MacroEntry.create(macroEntry, user)
+            }
+            Redirect(routes.Application.index(Some(day), Some(month), Some(year)))
+          }
+        )
+      }
+    }
+  }
+
+  val loginForm = Form(
+    tuple(
+      "username"->text,
+      "password"->text
+    )
+  )
+
+  def auth = Action { implicit request =>
+    loginForm.bindFromRequest.fold (
+      {form =>
+        Logger.error("User log failure")
+        Redirect(routes.Application.login())
+      },
+      {fields =>
+        val (username, password) = fields
+        Beefcake.findByUsername(username) match {
+          case None => {
+            Logger.error("Username " + username + " not found")
+            Redirect(routes.Application.login())
+          }
+          case Some(user) => {
+            if(user.password == password) {
+              Logger.info("User " + user.username + " just logged in successfully.")
+              // TODO update with current date
+              redirectWithDateFromSession(session).withSession(session + ("beefcake"->user.username))
+            }
+            else {
+              Logger.info("User " + user.username + " tried to login with wrong password.")
+              Redirect(routes.Application.login())
+            }
+          }
+        }
+      }
+    )
+  }
+
+  def login() = Action { request =>
+    Ok(views.html.login())
+  }
+
+  private def redirectWithDateFromSession(session: Session): SimpleResult[Results.EmptyContent] = {
+      val date = sessionToDate(session)
+      Redirect(routes.Application.index(Some(date.day), Some(date.month), Some(date.year)))
+  }
+  
+  def deauth() = Action { implicit request =>
+    redirectWithDateFromSession(session).withSession(session - "beefcake")
+  }
+
+  // AJAX 
+  def suggestFood(query: String) = Action {implicit request =>
+    val foodSuggestions = Food.suggestFor(query)
+
+    val foodNames = foodSuggestions.map { suggestion =>
+      suggestion.name
+    }
+
+    val response = "{\"items\": [\"" + foodNames.mkString("\", \"") + "\"]}"
+    Ok(response)
+  }
+}
+

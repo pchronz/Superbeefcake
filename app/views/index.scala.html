@@ -1,0 +1,118 @@
+@(day: Option[Int], month: Option[Int], year: Option[Int], macroEntries: List[MacroEntry], macroEntryForm: Form[(Option[String], Int, Int, Int, Int, Int, Int, Int)], macroEntryByFoodForm: Form[(String, Int, Int, Int, Int)], dateFilterForm: Form[(Int, Int, Int)])
+
+@import helper._
+@import helper.twitterBootstrap2._
+@import helper.twitterBootstrap2.Bootstrap2Helpers._
+@import models.Date
+
+@main(Html("Superbeefcake!")) {
+    
+	@bs2Row(){
+		@bs2Span(6, None) {
+			<a href="@(routes.Application.deauth)">Logout</a>
+		}
+	}
+	
+	<div class="row">
+		<div class="span6">
+			@form(routes.Application.submitDateFilter, ('class, "form-horizontal")) {
+				<fieldset>
+					<legend>Choose your date</legend>
+					<div class="control-group">
+						<label class="control-label" for="input-date">Date</label>
+						<div class="controls">
+							@{/* TODO select the selected day using CoffeeScript */}
+							<select class="span1" name="day">
+								@{for(i <- 1 to 31) yield 
+									if(i == day.get) Html("<option selected='selected'>" + i.toString + "</option>")
+									else Html("<option>" + i.toString + "</option>")
+								}
+							</select>
+							<select class="span1" name="month">
+								@{for(i <- 1 to 12) yield
+									if(i == month.get) Html("<option selected='selected'>" + i.toString + "</option>")
+									else Html("<option>" + i.toString + "</option>")
+								}
+							</select>
+							<select class="span1" name="year">
+								@{for(i <- 2012 to 2012) yield
+									if(i == year.get) Html("<option selected='selected'>" + i.toString + "</option>")
+									else Html("<option>" + i.toString + "</option>")
+								}
+							</select>
+							<input class="btn" type="submit" value="Go!" />
+						</div>
+					</div>
+				</fieldset>
+			}
+		</div>
+	</div>
+
+	@bs2Row() {
+		@bs2Span(6, None) {
+			@bs2Table(List(Html(""),Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
+				@form(routes.Application.deleteEntry) {
+						@macroEntries.map{macroEntry => 
+						<tr>
+							<td>@{macroEntry.food match {case None => ""; case Some(food) => food}}</td>
+							<td>@macroEntry.kCal.toString</td>
+							<td>@macroEntry.protein.toString</td>
+							<td>@macroEntry.fat.toString</td>
+							<td>@macroEntry.carbs.toString</td>
+							<td>
+								<input type="submit" name="entryId_@macroEntry.id.get" value="Delete" class="btn" />
+							</td>
+						</tr>
+						}
+				}
+				<tr>
+					<td>Sum</td>
+					<td>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_)</td>
+					<td>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_)</td>
+					<td>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_)</td>
+					<td>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_)</td>
+					<td></td>
+				</tr>
+				@form(routes.Application.submitMacroEntry, ('class -> "form-horizontal")) {
+					<tr>
+						@{/* TODO make sure the hidden field is synchronized with the other date field */}
+						<input type="hidden" name="day" value="@{day match { case None => Date().day; case Some(day) => day}}" />
+						<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
+						<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
+						<td>@bs2TextField("food", 3, Some("Label"))</td>
+						<td>@bs2TextField("kCal", 1, Some("kCal"))</td>
+						<td>@bs2TextField("protein", 1, Some("protein"))</td>
+						<td>@bs2TextField("fat", 1, Some("fat"))</td>
+						<td>@bs2TextField("carbs", 1, Some("carbs"))</td>
+						<td><input type="submit" value="Add" class="btn" /></td>
+					</tr>
+				}
+				@form(routes.Application.submitMacroEntryByFood, ('class->"form-horizontal")) {
+					<tr>
+						<input type="hidden" name="day" value="@{day match { case None => Date().day; case Some(day) => day}}" />
+						<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
+						<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
+						<td><input type="text" name="foodName" class="span3" placeholder="Food" data-provide="typeahead" autocomplete="off" /></td>
+						<td colspan="2">@bs2TextField("amount", 2, Some("Amount"))</td>
+						<td></td>
+						<td></td>
+						<td><input type="submit" value="Add" class="btn" /></td>
+					</tr>
+				}
+			}
+		}
+	}
+
+	<script type="text/javascript" charset="utf-8">
+		$(function(){
+			$("input[name='foodName']").typeahead({source: function(typeahead, query) {
+				console.log("getting new source");
+				var url = '@routes.Application.suggestFood("")';
+				$.getJSON(url + query, function(response) {
+					typeahead.process(response.items);
+				});
+			}
+			})
+		});
+	</script>
+}

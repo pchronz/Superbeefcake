@@ -1,0 +1,18 @@
+@()
+
+@import helper._
+@import helper.twitterBootstrap2._
+@import helper.twitterBootstrap2.Bootstrap2Helpers._
+@import models.Date
+
+@main(Html("Superbeefcake!")) {
+	@bs2Row() {
+		@bs2Span(6, Some(3)) {
+			@form(routes.Application.auth, ('class, "form-horizontal")){
+				@bs2TextField("username", 2, Some("Username"))
+				@bs2PasswordField("password", 2, Some("Password"))
+				<input type="submit" value="Login" class="btn" />
+			}
+		}
+	}
+}
