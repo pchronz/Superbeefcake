@@ -7,7 +7,7 @@ GET     /                           controllers.Application.index(day: Option[In
 GET		/login						controllers.Application.login
 POST	/submitMacroEntry			controllers.Application.submitMacroEntry
 POST	/submitDateFilter			controllers.Application.submitDateFilter
-POST	/deleteEntry				controllers.Application.deleteEntry
+GET		/deleteEntry/:id			controllers.Application.deleteEntry(id: Int)
 POST	/submitMacroEntryByFood		controllers.Application.submitMacroEntryByFood
 POST	/auth						controllers.Application.auth
 GET		/deauth						controllers.Application.deauth

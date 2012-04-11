@@ -113,22 +113,13 @@ object Application extends Controller {
     )
   }
 
-  def deleteEntry = Action { implicit request =>
+  def deleteEntry(id: Int) = Action { implicit request =>
     getUserFromSession(session) match {
       case None => Ok("Not logged in")
       case Some(user) => {
-        request.body.asFormUrlEncoded match {
-          case None => {
-            Logger.error("Cannot delete an entry when no id is provided at all!")
-            Redirect(routes.Application.index(None, None, None))
-          }
-          case Some(params) => {
-            val entryId = params.filterKeys{key => key.startsWith("entryId_")}.keys.head.split("_").last.toInt
-            Logger.info("Going to delete macroEntry with id == " + entryId)
-            MacroEntry.deleteById(entryId, user)
-            Redirect(routes.Application.index(None, None, None)).withSession(session + ("beefcake"->user.username))
-          }
-        }
+        Logger.info("Going to delete macroEntry with id == " + id)
+        MacroEntry.deleteById(id, user)
+        Redirect(routes.Application.index(None, None, None)).withSession(session + ("beefcake"->user.username))
       }
     }
   }
@@ -190,7 +181,8 @@ object Application extends Controller {
             if(user.password == password) {
               Logger.info("User " + user.username + " just logged in successfully.")
               // TODO update with current date
-              redirectWithDateFromSession(session).withSession(session + ("beefcake"->user.username))
+              val date = Date()
+              redirectWithDateFromSession(session).withSession(Map("beefcake"->user.username, "day"->date.day.toString, "month"->date.month.toString, "year"->date.year.toString).foldLeft(session)((a,b) => a+b))
             }
             else {
               Logger.info("User " + user.username + " tried to login with wrong password.")
@@ -212,7 +204,7 @@ object Application extends Controller {
   }
   
   def deauth() = Action { implicit request =>
-    redirectWithDateFromSession(session).withSession(session - "beefcake")
+    redirectWithDateFromSession(session).withNewSession
   }
 
   // AJAX 

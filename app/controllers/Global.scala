@@ -1,18 +1,21 @@
 import play.api._
-import models.Food
-import models.Beefcake
+import models._
 
 object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
     // bootstrap users
     if(Beefcake.all().isEmpty) {
+      Logger.info("Bootstrapping beefcakes")
       Beefcake.create(Beefcake("peter", "secret"))
-      Beefcake.create(Beefcake("michael", "secret"))
+      val michael = Beefcake("michael", "secret")
+      Beefcake.create(michael)
+      // Boostrap a few entries for Michael
+      (1 to 20).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(), 100, 30, 5, 30), michael)}
     }
     // Bootstrap foods
-    Logger.info("Bootstrapping foods")
     if(Food.all().isEmpty) {
+      Logger.info("Bootstrapping foods")
       // Paula's collection
       Food.create(Food("Haehnchenbrustfilet", 87, 18.1, 1, 1.5))
       Food.create(Food("Burgi Bratkartoffeln", 81, 2.1, 1.4, 15.1))

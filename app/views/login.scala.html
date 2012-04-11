@@ -9,9 +9,12 @@
 	@bs2Row() {
 		@bs2Span(6, Some(3)) {
 			@form(routes.Application.auth, ('class, "form-horizontal")){
-				@bs2TextField("username", 2, Some("Username"))
-				@bs2PasswordField("password", 2, Some("Password"))
-				<input type="submit" value="Login" class="btn" />
+				<fieldset>
+					<legend>Please login</legend>
+					@bs2TextField("username", 2, Some("Username"))
+					@bs2PasswordField("password", 2, Some("Password"))
+					<input type="submit" value="Login" class="btn" />
+				</fieldset>
 			}
 		}
 	}

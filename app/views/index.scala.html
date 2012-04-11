@@ -6,22 +6,13 @@
 @import models.Date
 
 @main(Html("Superbeefcake!")) {
-    
-	@bs2Row(){
-		@bs2Span(6, None) {
-			<a href="@(routes.Application.deauth)">Logout</a>
-		}
-	}
-	
 	<div class="row">
-		<div class="span6">
-			@form(routes.Application.submitDateFilter, ('class, "form-horizontal")) {
+		<div class="span8 offset1">
+			@form(routes.Application.submitDateFilter, ('class, "form-vertical")) {
 				<fieldset>
 					<legend>Choose your date</legend>
 					<div class="control-group">
-						<label class="control-label" for="input-date">Date</label>
 						<div class="controls">
-							@{/* TODO select the selected day using CoffeeScript */}
 							<select class="span1" name="day">
 								@{for(i <- 1 to 31) yield 
 									if(i == day.get) Html("<option selected='selected'>" + i.toString + "</option>")
@@ -40,7 +31,13 @@
 									else Html("<option>" + i.toString + "</option>")
 								}
 							</select>
-							<input class="btn" type="submit" value="Go!" />
+							<script type="text/javascript" charset="utf-8">
+								$(function() {
+									$("select[name='day'], select[name='month'], select[name='year']").change(function(){
+										$(this).closest("form").submit();
+									});
+								});
+							</script>
 						</div>
 					</div>
 				</fieldset>
@@ -49,21 +46,19 @@
 	</div>
 
 	@bs2Row() {
-		@bs2Span(6, None) {
+		@bs2Span(8, Some(1)) {
 			@bs2Table(List(Html(""),Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
-				@form(routes.Application.deleteEntry) {
-						@macroEntries.map{macroEntry => 
-						<tr>
-							<td>@{macroEntry.food match {case None => ""; case Some(food) => food}}</td>
-							<td>@macroEntry.kCal.toString</td>
-							<td>@macroEntry.protein.toString</td>
-							<td>@macroEntry.fat.toString</td>
-							<td>@macroEntry.carbs.toString</td>
-							<td>
-								<input type="submit" name="entryId_@macroEntry.id.get" value="Delete" class="btn" />
-							</td>
-						</tr>
-						}
+				@macroEntries.map{macroEntry => 
+					<tr>
+						<td>@{macroEntry.food match {case None => ""; case Some(food) => food}}</td>
+						<td>@macroEntry.kCal.toString</td>
+						<td>@macroEntry.protein.toString</td>
+						<td>@macroEntry.fat.toString</td>
+						<td>@macroEntry.carbs.toString</td>
+						<td>
+							<a href="@{routes.Application.deleteEntry(macroEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
+						</td>
+					</tr>
 				}
 				<tr>
 					<td>Sum</td>
