@@ -3,7 +3,8 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index(day: Option[Int], month: Option[Int], year: Option[Int])
+GET     /                           controllers.Application.index
+GET		/eat						controllers.Application.eat(day: Option[Int], month: Option[Int], year: Option[Int])
 GET		/login						controllers.Application.login
 POST	/submitMacroEntry			controllers.Application.submitMacroEntry
 POST	/submitDateFilter			controllers.Application.submitDateFilter

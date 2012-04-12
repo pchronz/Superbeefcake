@@ -31,25 +31,32 @@ object Application extends Controller {
     }
   }
 
-  def index(day: Option[Int], month: Option[Int], year: Option[Int]) = Action { request =>
-    println(request.session)
+  def index = Action { request =>
     // in case the user is already logged in
     getUserFromSession(request.session) match {
+      case None => Redirect(routes.Application.login)
+      case Some(user) => Redirect(routes.Application.eat(None, None, None))    
+    }
+  }
+
+  def eat(day: Option[Int], month: Option[Int], year: Option[Int]) = Action{implicit request =>
+    getUserFromSession(session) match {
       case None => Redirect(routes.Application.login)
       case Some(user) => {
         (day, month, year) match {
           case (Some(d), Some(m), Some(y)) => {
             val macroEntries = MacroEntry.findByDate(Date(d, m, y), user)
-            Ok(views.html.index(day, month, year, macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm)).withSession(Map("day" -> d.toString, "month" -> m.toString, "year" -> y.toString).foldRight(request.session)((a,b) => b+a))
+            Ok(views.html.eat(day, month, year, macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm)).withSession(Map("day" -> d.toString, "month" -> m.toString, "year" -> y.toString).foldRight(request.session)((a,b) => b+a))
           }
           case _ => {
             val date = sessionToDate(request.session)
             val macroEntries = MacroEntry.findByDate(date, user)
-            Ok(views.html.index(Some(date.day), Some(date.month), Some(date.year), macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm))
+            Ok(views.html.eat(Some(date.day), Some(date.month), Some(date.year), macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm))
           }
         }
       }
     }
+
   }
   
   val macroEntryForm = Form(
@@ -67,13 +74,13 @@ object Application extends Controller {
 
   def submitMacroEntry = Action { implicit request =>
     getUserFromSession(request.session) match {
-      case None => Ok("Not logged in")
+      case None => Ok(views.html.index())
       case Some(user) =>{
         macroEntryForm.bindFromRequest.fold(
           {form => 
             Logger.error("binding errors for new macro entry")
             Logger.error(form.errors.mkString(", ")) 
-            Redirect(routes.Application.index(None, None, None))
+            Redirect(routes.Application.eat(None, None, None))
           },
           {fields => 
             val food = fields._1
@@ -86,7 +93,7 @@ object Application extends Controller {
             val carbs = fields._8
             Logger.info(fields.toString)
             MacroEntry.create(MacroEntry(None, time=Some(Date(day, month, year)), name=food, kCal=kCal, protein=protein, fat=fat, carbs=carbs), user)
-            Redirect(routes.Application.index(Some(day), Some(month), Some(year)))
+            Redirect(routes.Application.eat(Some(day), Some(month), Some(year)))
           }
         )
       }
@@ -104,22 +111,22 @@ object Application extends Controller {
   def submitDateFilter = Action { implicit request =>
     dateFilterForm.bindFromRequest.fold(
       {errors => Logger.error("binding errors"); Date()
-        Redirect(routes.Application.index(None, None, None))
+        Redirect(routes.Application.eat(None, None, None))
       },
       {values =>
         Logger.info("Filter date bound successfully")
-        Redirect(routes.Application.index(Some(values._1), Some(values._2), Some(values._3)))
+        Redirect(routes.Application.eat(Some(values._1), Some(values._2), Some(values._3)))
       }
     )
   }
 
   def deleteEntry(id: Int) = Action { implicit request =>
     getUserFromSession(session) match {
-      case None => Ok("Not logged in")
+      case None => Ok(views.html.index())
       case Some(user) => {
         Logger.info("Going to delete macroEntry with id == " + id)
         MacroEntry.deleteById(id, user)
-        Redirect(routes.Application.index(None, None, None)).withSession(session + ("beefcake"->user.username))
+        Redirect(routes.Application.eat(None, None, None)).withSession(session + ("beefcake"->user.username))
       }
     }
   }
@@ -136,13 +143,13 @@ object Application extends Controller {
 
   def submitMacroEntryByFood = Action { implicit request =>
     getUserFromSession(session) match {
-      case None => Ok("Not logged in")
+      case None => Ok(views.html.index())
       case Some(user) => {
         macroEntryByFoodForm.bindFromRequest.fold (
           {form => 
             Logger.error("Could not bind the form in the request")
             Logger.error(form.toString)
-            Redirect(routes.Application.index(None, None, None))
+            Redirect(routes.Application.eat(None, None, None))
           },
           {fields =>
             val (foodName, amount, day, month, year) = fields
@@ -150,7 +157,7 @@ object Application extends Controller {
               case None =>
               case Some(macroEntry) => MacroEntry.create(macroEntry, user)
             }
-            Redirect(routes.Application.index(Some(day), Some(month), Some(year)))
+            Redirect(routes.Application.eat(Some(day), Some(month), Some(year)))
           }
         )
       }
@@ -200,7 +207,7 @@ object Application extends Controller {
 
   private def redirectWithDateFromSession(session: Session): SimpleResult[Results.EmptyContent] = {
       val date = sessionToDate(session)
-      Redirect(routes.Application.index(Some(date.day), Some(date.month), Some(date.year)))
+      Redirect(routes.Application.eat(Some(date.day), Some(date.month), Some(date.year)))
   }
   
   def deauth() = Action { implicit request =>

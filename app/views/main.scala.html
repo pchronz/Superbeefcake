@@ -11,6 +11,7 @@
         <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
 		<script src="@routes.Assets.at("javascripts/bootstrap.js")" type="text/javascript"></script>
 		<script src="@routes.Assets.at("javascripts/bootstrap-typeahead.js")" type="text/javascript"></script>
+		<script src="@routes.Assets.at("javascripts/flot/jquery.flot.js")" type="text/javascript"></script>
     </head>
     <body>
 
@@ -20,8 +21,8 @@
 					<a class="brand" href="#">Superbeefcake!</a>
 					<div class="nav-collapse">
 						<ul class="nav">
-							<li><a href="#">Capture</a></li>
-							<li><a href="#">Analyze</a></li>
+							<li><a href="#" id="eat-nav-link">Eat</a></li>
+							<li><a href="#" id="workout-nav-link">Workout</a></li>
 						</ul>
 						<ul class="nav pull-right">
 							<li><a href="@{routes.Application.deauth}">Logout</a></li>
