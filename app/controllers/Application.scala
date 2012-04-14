@@ -56,7 +56,6 @@ object Application extends Controller {
         }
       }
     }
-
   }
   
   val macroEntryForm = Form(
@@ -219,11 +218,21 @@ object Application extends Controller {
     val foodSuggestions = Food.suggestFor(query)
 
     val foodNames = foodSuggestions.map { suggestion =>
-      suggestion.name
+      // using the name and replacing quotation marks to sanitize the JSON-based response to the client
+      suggestion.name.replace("\"", "\\\"")
     }
 
     val response = "{\"items\": [\"" + foodNames.mkString("\", \"") + "\"]}"
     Ok(response)
+  }
+
+  def analyze() = Action { implicit request =>
+    getUserFromSession(session) match {
+      case None => Redirect(routes.Application.login)
+      case Some(user) => {
+        Ok(views.html.analyze())
+      }
+    }
   }
 }
 

@@ -5,6 +5,7 @@
 # Home page
 GET     /                           controllers.Application.index
 GET		/eat						controllers.Application.eat(day: Option[Int], month: Option[Int], year: Option[Int])
+GET		/analyze					controllers.Application.analyze
 GET		/login						controllers.Application.login
 POST	/submitMacroEntry			controllers.Application.submitMacroEntry
 POST	/submitDateFilter			controllers.Application.submitDateFilter

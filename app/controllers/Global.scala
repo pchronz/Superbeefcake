@@ -16,6 +16,33 @@ object Global extends GlobalSettings {
     // Bootstrap foods
     if(Food.all().isEmpty) {
       Logger.info("Bootstrapping foods")
+      // loadManualEntries()
+      parseFoods()
+    }
+    Logger.info("Following foods are in the DB...")
+    Logger.info("There are " + Food.all().length + " food entries in the database.")
+
+  }  
+
+  def parseFoods() {
+    // USDA ARS
+    val nutrientsFile = io.Source.fromFile(play.api.Play.current.classloader.getResource("foods/ABBREV.txt").getFile)
+    println(nutrientsFile.toString)
+    val MacroEntryRegex = """~.*~\^~(.*)~\^[^\^]*\^([^\^]*)\^([^\^]*)\^([^\^]*)\^[^\^]*\^([^\^]*)\^.*""".r
+    nutrientsFile.getLines().foreach{line =>
+      val MacroEntryRegex(name, energy, protein, fat, carbs) = line
+      try {
+        val foodItem = Food(name, energy.toDouble, protein.toDouble, fat.toDouble, carbs.toDouble)
+        println("Inserting food... " + foodItem.toString)
+        Food.create(foodItem)
+      }
+      catch { 
+        case e: Exception => e.printStackTrace()
+      }
+    }
+  }
+
+  def loadManualEntries() {
       // Paula's collection
       Food.create(Food("Haehnchenbrustfilet", 87, 18.1, 1, 1.5))
       Food.create(Food("Burgi Bratkartoffeln", 81, 2.1, 1.4, 15.1))
@@ -112,63 +139,9 @@ object Global extends GlobalSettings {
       Food.create(Food("Frosta Thai Green Curry", 115, 4, 3.8, 15.3))
       Food.create(Food("Landliebe Joghurt", 100, 3.5, 2.8, 15))
       Food.create(Food("Roast Beef", 130, 22.4, 4.5, 0))
-
-      parseFoods()
-    }
-    Logger.info("Following foods are in the DB...")
-    Food.all().foreach { food =>
-      Logger.info(food.toString)
-    }
-
-  }  
-
-  def parseFoods() {
-    val macros = xml.XML.loadFile("/Users/pchronz/Desktop/macros.xml")
-    val trs = macros \\ "tr"
-    val macroTrs = for(tr <- trs if ((tr \ "@class").toString.trim == "row-style0")) yield tr
-    macroTrs.foreach{macroRow =>
-      val ms = macroRow \ "td"
-      if(!(ms(0) \ "@class").toString().contains("tablelink")) {
-        // name
-        val name = ms(0).text.trim
-        // kCal
-        val kCal = if(ms(2).text.contains(".")) {
-          ms(2).text.split("\\.")(0).toInt
-        }
-        else {
-          ms(2).text.toInt
-        }
-        // protein
-        val protein = if(ms(3).text.contains(",")) {
-          ms(3).text.split(",")(0).toInt
-        }
-        else {
-          ms(3).text.toInt
-        }
-        // fat
-        val fat = if(ms(4).text.contains(",")) {
-          ms(4).text.split(",")(0).toInt
-        }
-        else {
-          ms(4).text.toInt
-        }
-        // carbs
-        val carbs = if(ms(5).text.contains(","))
-            ms(5).text.split(",")(0).toInt
-          else
-            ms(5).text.toInt
-        // only insert the food if it is not yet in the db
-        Food.findByName(name) match {
-          case None => Logger.info("Inserting new food == " + name); Food.create(Food(name, kCal, protein, fat, carbs))
-          case Some(entry) => Logger.warn("Foudn an existing entry for food ==" + entry.name)
-        }
-      }
-    }
   }
   
   override def onStop(app: Application) {
-    // delete all food entries
-    Food.deleteAll()
     Logger.info("Application is done for")
   }  
     

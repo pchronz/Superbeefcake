@@ -1,0 +1,36 @@
+@()
+
+@import helper._
+@import helper.twitterBootstrap2._
+@import helper.twitterBootstrap2.Bootstrap2Helpers._
+@import models.Date
+
+@main(Html("Superbeefcake!")) {
+	<div class="row">
+		<div class="span8 offset1">
+			<h3>Check out your stats</h3>
+			<div id="placeholder" style="width: 600px; height: 500px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; position: relative; "></div>
+			<script type="text/javascript" charset="utf-8">
+				$(function () {
+					var d1 = [];
+					for (var i = 0; i < 14; i += 0.5)
+						d1.push([i, Math.sin(i)]);
+
+					var d2 = [[0, 3], [4, 8], [8, 5], [9, 13]];
+
+					// a null signifies separate line segments
+					var d3 = [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]];
+					
+					$.plot($("#placeholder"), [ d1, d2, d3 ]);
+				});
+			</script>
+		</div>
+	</div>
+
+	<script type="text/javascript" charset="utf-8">
+		$(function(){
+			// select the navbar link for this view as active
+			$("#analyze-nav-link").closest("li").addClass("active");
+		});
+	</script>
+}

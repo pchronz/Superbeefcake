@@ -18,6 +18,7 @@ object Food {
     }
   }
 
+  // DB
   def create(food: Food) {
     DB.withConnection { implicit c =>
         SQL("INSERT INTO food (name, kCal, protein, fat, carbs) VALUES ({name}, {kCal}, {protein}, {fat}, {carbs})").on("name"->food.name, "kCal"->food.kCal, "protein"->food.protein, "fat"->food.fat, "carbs"->food.carbs).executeUpdate()
@@ -48,9 +49,20 @@ object Food {
   }
 
   def suggestFor(query: String): List[Food] = {
-    DB.withConnection { implicit c =>
-        SQL("SELECT * FROM food WHERE name LIKE {query}").on("query"->(query+"%")).as(food *)
+    val upperQuery = query.toUpperCase
+    // split by whitespace
+    val keywords = upperQuery.split(" ")
+    // prepare the query
+    var intersectQuery = keywords.map{keyword =>
+      "SELECT * FROM food WHERE name LIKE '%" + keyword + "%'"
+    }.mkString("\nINTERSECT\n")
+    intersectQuery += "\nLIMIT 8"
+    val results = DB.withConnection { implicit c =>
+        //SQL("SELECT * FROM food WHERE name LIKE {query} LIMIT 8").on("query"->("%"+upperQuery+"%")).as(food *)
+        SQL(intersectQuery).as(food *)
     }
+    println("#results: " + results.length)
+    results
   }
 }
 
