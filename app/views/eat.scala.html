@@ -6,9 +6,9 @@
 @import models.Date
 
 @main(Html("Superbeefcake!")) {
-	<div class="row">
-		<div class="span8 offset1">
-			@form(routes.Application.submitDateFilter, ('class, "form-vertical")) {
+	@bs2Row() {
+		@form(routes.Application.submitDateFilter, ('class, "form-vertical")) {
+			@bs2Span(3, Some(1)) {
 				<fieldset>
 					<legend>Choose your date</legend>
 					<div class="control-group">
@@ -42,39 +42,29 @@
 					</div>
 				</fieldset>
 			}
-		</div>
-	</div>
-
-	@bs2Row() {
-		@bs2Span(8, Some(1)) {
-			<ul class="nav nav-tabs">
-				<li class="active">
-					<a href="#" id="track-link">Track</a>
-					<script type="text/javascript" charset="utf-8">
-						$(function() {
-								$("#track-link").click(function() {
-									$("#analyze-row").hide();
-									$("#track-row").show();
-									$(this).closest("li").addClass("active");
-									$("#analyze-link").closest("li").removeClass("active");
-								});
-						});
-					</script>
-				</li>
-				<li>
-					<a href="#" id="analyze-link">Battle Analysis</a>
-					<script type="text/javascript" charset="utf-8">
-						$(function() {
-								$("#analyze-link").click(function() {
-									$("#track-row").hide();
-									$("#analyze-row").show();
-									$(this).closest("li").addClass("active");
-									$("#track-link").closest("li").removeClass("active");
-								});
-						});
-					</script>
-				</li>
-			</ul>
+			@bs2Span(3, Some(1)) {
+				<div id="placeholder" style="width: 250px; height: 150px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; position: relative; "></div>
+				<script type="text/javascript" charset="utf-8">
+					$(function () {
+						var protein = @macroEntries.map(_.protein).foldLeft(0.0)((a,b) => a+b);
+						var fat = @macroEntries.map(_.fat).foldLeft(0.0)((a,b) => a+b);
+						var carbs = @macroEntries.map(_.carbs).foldLeft(0.0)((a,b) => a+b);
+						if(protein + fat + carbs > 0) {
+							$.plot($("#placeholder"), [{label: "Protein", color: "green", data: protein}, {label: "Fat", color: "red", data:  fat}, {label: "Carbs", color: "blue", data: carbs}], {
+							series: {
+								pie: {
+									show: true,
+									tilt: 0.5
+									}
+							},
+							legend: {
+								show: false
+							}
+							});
+						}
+					});
+				</script>
+			}
 		}
 	}
 
@@ -83,24 +73,12 @@
 	@bs2Row('id->"track-row") {
 		@bs2Span(8, Some(1)) {
 			@bs2Table(List(Html(""),Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
-				@macroEntries.map{macroEntry => 
-					<tr>
-						<td>@{macroEntry.food match {case None => ""; case Some(food) => food}}</td>
-						<td>@macroEntry.kCal.toString</td>
-						<td>@macroEntry.protein.toString</td>
-						<td>@macroEntry.fat.toString</td>
-						<td>@macroEntry.carbs.toString</td>
-						<td>
-							<a href="@{routes.Application.deleteEntry(macroEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
-						</td>
-					</tr>
-				}
 				<tr>
-					<td>Sum</td>
-					<td>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_)</td>
-					<td>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_)</td>
-					<td>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_)</td>
-					<td>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_)</td>
+					<td><strong>Total</strong></td>
+					<td>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_).toInt</td>
+					<td>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</td>
+					<td>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</td>
+					<td>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</td>
 					<td></td>
 				</tr>
 				@form(routes.Application.submitMacroEntry, ('class -> "form-horizontal")) {
@@ -129,6 +107,18 @@
 						<td><input type="submit" value="Add" class="btn" /></td>
 					</tr>
 				}
+				@macroEntries.map{macroEntry => 
+					<tr>
+						<td>@{macroEntry.food match {case None => ""; case Some(food) => food}}</td>
+						<td>@macroEntry.kCal.toInt.toString</td>
+						<td>@macroEntry.protein.toInt.toString</td>
+						<td>@macroEntry.fat.toInt.toString</td>
+						<td>@macroEntry.carbs.toInt.toString</td>
+						<td>
+							<a href="@{routes.Application.deleteEntry(macroEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
+						</td>
+					</tr>
+				}
 			}
 		}
 	}
@@ -136,49 +126,10 @@
 	@{/* TODO create a template for this */}
 	@{/* Analyze pane */}
 	@bs2Row('id->"analyze-row") {
-		@bs2Span(8, Some(1)) {
-		<h3>Your stats for this day</h3>
-			<div id="placeholder" style="width: 600px; height: 500px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; position: relative; "></div>
-			<div id="stats-placeholder-novalues" class="hide">
-				<div class="alert alert-info alert-block">
-					<h4>There is nothing to show here right now.</h4>
-					Please first enter a few stats in the "Track" section.
-				</div>
-			</div>
-			<script type="text/javascript" charset="utf-8">
-				$(function () {
-						var protein = @macroEntries.map(_.protein).foldLeft(0.0)((a,b) => a+b);
-						var fat = @macroEntries.map(_.fat).foldLeft(0.0)((a,b) => a+b);
-						var carbs = @macroEntries.map(_.carbs).foldLeft(0.0)((a,b) => a+b);
-						if(protein + fat + carbs > 0) {
-							$.plot($("#placeholder"), [{label: "Protein", data: protein}, {label: "Fat", data:  fat}, {label: "Carbs", data: carbs}], {
-							series: {
-								pie: {
-									show: true
-									}
-							},
-							legend: {
-								show: false
-							}
-							});
-						}
-						else {
-							$("#placeholder").hide();
-							$("#stats-placeholder-novalues").show();
-						}
-				});
-			</script>
-		}
 	}
 
 	<script type="text/javascript" charset="utf-8">
 		$(function(){
-			// initialize the tabbed views properly
-			$("#track-row").show();
-			$("#analyze-row").hide();
-			$("#track-link").closest("li").addClass("active");
-			$("#analyze-link").closest("li").removeClass("active");
-			
 			// select the navbar link for this view as active
 			$("#eat-nav-link").closest("li").addClass("active");
 

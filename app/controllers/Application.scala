@@ -230,7 +230,11 @@ object Application extends Controller {
     getUserFromSession(session) match {
       case None => Redirect(routes.Application.login)
       case Some(user) => {
-        Ok(views.html.analyze())
+        val energySeries = MacroEntry.getTimeSeries("kCal", user)
+        val proteinSeries = MacroEntry.getTimeSeries("protein", user)
+        val fatSeries = MacroEntry.getTimeSeries("fat", user)
+        val carbsSeries = MacroEntry.getTimeSeries("carbs", user)
+        Ok(views.html.analyze(energySeries=energySeries, proteinSeries=proteinSeries, fatSeries=fatSeries, carbsSeries=carbsSeries))
       }
     }
   }

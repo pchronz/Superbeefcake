@@ -1,4 +1,4 @@
-@()
+@(energySeries: List[(Date, Double)], proteinSeries: List[(Date, Double)], fatSeries: List[(Date, Double)], carbsSeries: List[(Date, Double)])
 
 @import helper._
 @import helper.twitterBootstrap2._
@@ -6,26 +6,54 @@
 @import models.Date
 
 @main(Html("Superbeefcake!")) {
-	<div class="row">
-		<div class="span8 offset1">
-			<h3>Check out your stats</h3>
-			<div id="placeholder" style="width: 600px; height: 500px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; position: relative; "></div>
+	@bs2Row() {
+		@bs2Span(3, Some(1)) {
+			<h4>Energy (Average: @{(energySeries.map{entry => entry._2}.foldLeft(0.0){_+_} / energySeries.length).toInt} kCal/day)</h4>
+			<div id="energy-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				$(function () {
-					var d1 = [];
-					for (var i = 0; i < 14; i += 0.5)
-						d1.push([i, Math.sin(i)]);
-
-					var d2 = [[0, 3], [4, 8], [8, 5], [9, 13]];
-
-					// a null signifies separate line segments
-					var d3 = [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]];
+						var energy = [@{energySeries.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					
-					$.plot($("#placeholder"), [ d1, d2, d3 ]);
+						$.plot($("#energy-placeholder"), [ energy ], {xaxis: {mode: "time", show: true, position: "bottom"}});
 				});
 			</script>
-		</div>
-	</div>
+		}
+		@bs2Span(3, Some(1)) {
+			<h4>Protein (Average: @{(proteinSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / proteinSeries.length).toInt} g/day)</h4>
+			<div id="protein-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
+			<script type="text/javascript" charset="utf-8">
+				$(function () {
+						var protein = [@{proteinSeries.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+					
+						$.plot($("#protein-placeholder"), [ protein ], {xaxis: {mode: "time", show: true, position: "bottom"}});
+				});
+			</script>
+		}
+	}
+	@bs2Row() {
+		@bs2Span(3, Some(1)) {
+			<h4>Fat (Average: @{(fatSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / fatSeries.length).toInt} g/day)</h4>
+			<div id="fat-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
+			<script type="text/javascript" charset="utf-8">
+				$(function () {
+						var fat = [@{fatSeries.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+					
+						$.plot($("#fat-placeholder"), [ fat ], {xaxis: {mode: "time", show: true, position: "bottom"}});
+				});
+			</script>
+		}
+		@bs2Span(3, Some(1)) {
+			<h4>Carbs (Average: @{(carbsSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / carbsSeries.length).toInt} g/day)</h4>
+			<div id="carbs-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
+			<script type="text/javascript" charset="utf-8">
+				$(function () {
+						var carbs = [@{carbsSeries.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+					
+						$.plot($("#carbs-placeholder"), [ carbs ], {xaxis: {mode: "time", show: true, position: "bottom"}});
+				});
+			</script>
+		}
+	}
 
 	<script type="text/javascript" charset="utf-8">
 		$(function(){

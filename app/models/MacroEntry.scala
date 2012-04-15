@@ -5,7 +5,15 @@ import anorm.SqlParser._
 import play.api.db._
 import play.api.Play.current
 
-case class Date(day: Int, month: Int, year: Int)
+case class Date(day: Int, month: Int, year: Int) {
+  def toLong(): Long = {
+    val cal = java.util.Calendar.getInstance
+    // +1 for all retarded Oracle engineers make the month 0-based although everything else is 1-based
+    cal.set(year, month+1, day, 0, 0)
+    cal.getTimeInMillis
+  }
+}
+
 object Date {
   def apply():Date = {
       // set to today
@@ -113,6 +121,17 @@ object MacroEntry {
   def deleteById(id: Int, beefcake: Beefcake) {
     DB.withConnection{ implicit c =>
         SQL("DELETE FROM macroEntry WHERE id = {id} AND username = {username}").on("username"->beefcake.username, "id" -> id).executeUpdate()
+    }
+  }
+
+  def getTimeSeries(field: String, beefcake: Beefcake): List[(Date, Double)] = {
+    DB.withConnection{ implicit c =>
+        // anorm's on-function is simply incapable. total crap. who wrote this?
+        val groupField = SQL("SELECT SUM(" + field + "), day, month, year FROM macroEntry WHERE username = {username} GROUP BY day, month, year").on("username"->beefcake.username)
+        groupField().map{ row => 
+            val date = Date(row[Int]("day"), row[Int]("month"), row[Int]("year"))
+            date -> row[Double]("SUM(" + field + ")")
+        }.toList
     }
   }
 }
