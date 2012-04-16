@@ -25,7 +25,7 @@
 	@bs2Row() {
 		@bs2Span(8, Some(1)) {
 			<h3>Registration</h3>
-			<form class="">
+			@form(routes.Application.registerUser){
 				<div class="control-group">
 					@bs2TextField(name="username", size=3, placeholder=Some("Username"))
 					@bs2TextField(name="email", size=3, placeholder=Some("Email"))
@@ -82,7 +82,7 @@
 						</script>
 					</div>
 				</div>
-			</form>
+			}
 		}
 	}
 }

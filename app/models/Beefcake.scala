@@ -43,6 +43,13 @@ object Beefcake {
         SQL("DELETE FROM beefcake WHERE username = {username}").on("username"->beefcake.username).executeUpdate()
     }
   }
+
+  def exists(username: String, email: String): Boolean = {
+    DB.withConnection{ implicit c =>
+        val user = SQL("SELECT * FROM beefcake WHERE username = {username} OR email = {email}").on("username"->username, "email"->email)
+        user().length > 0
+    }
+  }
 }
 
 

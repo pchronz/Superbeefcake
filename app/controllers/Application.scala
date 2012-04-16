@@ -239,8 +239,51 @@ object Application extends Controller {
     }
   }
 
-  def register() = Action  { implicit request =>
+  def register() = Action { implicit request =>
     Ok(views.html.register()).withNewSession
+  }
+
+  val registrationForm = Form(
+    tuple(
+      "username"->nonEmptyText,
+      "password"->nonEmptyText,
+      "passwordRepeat"->nonEmptyText,
+      "email"->nonEmptyText
+    )
+  )
+
+  def registerUser() = Action{implicit request =>
+    getUserFromSession(session) match {
+      case Some(user) => Ok(views.html.index())
+      case None => {
+        registrationForm.bindFromRequest.fold(
+          {form => Redirect(routes.Application.register)
+          },
+          {fields => 
+            val username = fields._1
+            val password = fields._2
+            val passwordRepeat = fields._3
+            val email = fields._4
+            // TODO error messages
+            if(password != password) Redirect(routes.Application.register)
+            if(password.length < 4) Redirect(routes.Application.register)
+            val Email = """\w+@\w+\.[a-zA-Z]+""".r
+            Email.findFirstIn(email) match {
+              case None => Redirect(routes.Application.register)
+              case Some(_) => {
+                if(Beefcake.exists(username, email)) {
+                  Redirect(routes.Application.index)
+                }
+                else {
+                  Beefcake.create(Beefcake(username=username, password=password, email=email))
+                  Redirect(routes.Application.login)
+                }
+              }
+            }
+          }
+        )
+      }
+    }
   }
 }
 

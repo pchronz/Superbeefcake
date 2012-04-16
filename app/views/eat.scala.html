@@ -113,10 +113,10 @@
 				}
 				<tr>
 					<td><strong>Total</strong></td>
-					<td>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_).toInt</td>
-					<td>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</td>
-					<td>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</td>
-					<td>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</td>
+					<td><strong>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_).toInt</strong></td>
+					<td><strong>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</strong></td>
+					<td><strong>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</strong></td>
+					<td><strong>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</strong></td>
 					<td></td>
 				</tr>
 			}
