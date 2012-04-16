@@ -238,5 +238,9 @@ object Application extends Controller {
       }
     }
   }
+
+  def register() = Action  { implicit request =>
+    Ok(views.html.register()).withNewSession
+  }
 }
 

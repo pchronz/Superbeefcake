@@ -1,0 +1,89 @@
+@()
+
+
+@import helper._
+@import helper.twitterBootstrap2._
+@import helper.twitterBootstrap2.Bootstrap2Helpers._
+
+@main(Html("Superbeefcake")) {
+	@bs2Row() {
+		@bs2Span(8, Some(1)) {
+			<div class="alert alert-error hide" id="alert-passwords-match">
+				The passwords need to match!
+			</div>
+			<div class="alert alert-error hide" id="alert-password-length">
+				The password needs to be at least 4 characters long!
+			</div>
+			<div class="alert alert-error hide" id="alert-username">
+				Please enter a username.
+			</div>
+			<div class="alert alert-error hide" id="alert-email">
+				Please enter a valid email address.
+			</div>
+		}
+	}
+	@bs2Row() {
+		@bs2Span(8, Some(1)) {
+			<h3>Registration</h3>
+			<form class="">
+				<div class="control-group">
+					@bs2TextField(name="username", size=3, placeholder=Some("Username"))
+					@bs2TextField(name="email", size=3, placeholder=Some("Email"))
+					@bs2PasswordField(name="password", size=3, placeholder=Some("Password"))
+					@bs2PasswordField(name="passwordRepeat", size=3, placeholder=Some("Password again"))
+					<div class="controls">
+						<input id="submit-button" type="submit" class="btn btn-primary" value="Register" />
+						<script type="text/javascript" charset="utf-8">
+							$(function() {
+								function validateEmail(email) {
+									var atpos=email.indexOf("@Html("@")");
+									var dotpos=email.lastIndexOf(".");
+									if (atpos<1 || dotpos<atpos+2 || dotpos+2>=email.length) {
+										return false;
+									}
+									return true;
+								}
+								$("#submit-button").click(function() {
+									var username = $("input[name='username']").val();
+									var email = $("input[name='email']").val();
+									var password = $("input[name='password']").val();
+									var passwordRepeat = $("input[name='passwordRepeat']").val();
+									if(username.length < 4) {
+										$("#alert-username").show();
+										return false;
+									}
+									else {
+										$("#alert-username").hide();
+									}
+									if(!validateEmail(email)) {
+										$("#alert-email").show();
+										return false;
+									}
+									else {
+										$("#alert-email").hide();
+									}
+									if(password != passwordRepeat) {
+										$("#alert-passwords-match").show();
+										return false;
+									}
+									else {
+										$("#alert-passwords-match").hide();
+									}
+									if(password.length < 4) {
+										$("#alert-password-length").show();
+										return false;
+									}
+									else {
+										$("#alert-password-match").hide();
+									}
+									return true;
+								});
+							});
+						</script>
+					</div>
+				</div>
+			</form>
+		}
+	}
+}
+

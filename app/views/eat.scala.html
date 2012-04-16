@@ -73,14 +73,6 @@
 	@bs2Row('id->"track-row") {
 		@bs2Span(8, Some(1)) {
 			@bs2Table(List(Html(""),Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
-				<tr>
-					<td><strong>Total</strong></td>
-					<td>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_).toInt</td>
-					<td>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</td>
-					<td>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</td>
-					<td>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</td>
-					<td></td>
-				</tr>
 				@form(routes.Application.submitMacroEntry, ('class -> "form-horizontal")) {
 					<tr>
 						@{/* TODO make sure the hidden field is synchronized with the other date field */}
@@ -119,6 +111,14 @@
 						</td>
 					</tr>
 				}
+				<tr>
+					<td><strong>Total</strong></td>
+					<td>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_).toInt</td>
+					<td>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</td>
+					<td>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</td>
+					<td>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</td>
+					<td></td>
+				</tr>
 			}
 		}
 	}

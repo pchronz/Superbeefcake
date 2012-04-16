@@ -13,6 +13,7 @@ GET		/deleteEntry/:id			controllers.Application.deleteEntry(id: Int)
 POST	/submitMacroEntryByFood		controllers.Application.submitMacroEntryByFood
 POST	/auth						controllers.Application.auth
 GET		/deauth						controllers.Application.deauth
+GET		/regsiter					controllers.Application.register
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

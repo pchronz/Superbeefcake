@@ -7,11 +7,14 @@ object Global extends GlobalSettings {
     // bootstrap users
     if(Beefcake.all().isEmpty) {
       Logger.info("Bootstrapping beefcakes")
-      Beefcake.create(Beefcake("peter", "secret"))
-      val michael = Beefcake("michael", "secret")
+      Beefcake.create(Beefcake("peter", "secret", "peter.chronz@gmail.com"))
+      val michael = Beefcake("michael", "secret", "m@localhost.net")
       Beefcake.create(michael)
       // Boostrap a few entries for Michael
-      (1 to 20).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(), 100, 30, 5, 30), michael)}
+      val date = Date()
+      (1 to 11).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(date.day - 1, date.month, date.year), 100, 30, 5, 30), michael)}
+      (1 to 9).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(), 100, 30, 5, 30), michael)}
+      (1 to 8).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(date.day + 1, date.month, date.year), 100, 30, 5, 30), michael)}
     }
     // Bootstrap foods
     if(Food.all().isEmpty) {

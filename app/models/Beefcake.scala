@@ -5,15 +5,16 @@ import anorm.SqlParser._
 import play.api.db._
 import play.api.Play.current
 
-case class Beefcake(username: String, password: String)
+case class Beefcake(username: String, password: String, email: String)
 
 object Beefcake {
   // Anorm parser
   val beefcake = {
     get[String]("username") ~
-    get[String]("password") map {
-      case username ~ password => {
-        Beefcake(username, password)
+    get[String]("password") ~ 
+    get[String]("email") map {
+      case username ~ password ~ email => {
+        Beefcake(username, password, email)
       }
     }
   }
@@ -24,7 +25,7 @@ object Beefcake {
 
   def create(beefcake: Beefcake) {
     DB.withConnection{ implicit c =>
-        SQL("INSERT INTO beefcake (username, password) VALUES ({username}, {password})").on("username"->beefcake.username, "password"->beefcake.password).executeUpdate()
+    SQL("INSERT INTO beefcake (username, password, email) VALUES ({username}, {password}, {email})").on("username"->beefcake.username, "password"->beefcake.password, "email"->beefcake.email).executeUpdate()
     }
   }
 

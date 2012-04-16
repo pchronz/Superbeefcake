@@ -12,7 +12,7 @@
 			<div id="energy-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				$(function () {
-						var energy = [@{energySeries.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+						var energy = [@{energySeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					
 						$.plot($("#energy-placeholder"), [ energy ], {xaxis: {mode: "time", show: true, position: "bottom"}});
 				});
@@ -23,7 +23,7 @@
 			<div id="protein-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				$(function () {
-						var protein = [@{proteinSeries.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+						var protein = [@{proteinSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					
 						$.plot($("#protein-placeholder"), [ protein ], {xaxis: {mode: "time", show: true, position: "bottom"}});
 				});
@@ -36,7 +36,7 @@
 			<div id="fat-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				$(function () {
-						var fat = [@{fatSeries.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+						var fat = [@{fatSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					
 						$.plot($("#fat-placeholder"), [ fat ], {xaxis: {mode: "time", show: true, position: "bottom"}});
 				});
@@ -47,7 +47,7 @@
 			<div id="carbs-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				$(function () {
-						var carbs = [@{carbsSeries.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+						var carbs = [@{carbsSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					
 						$.plot($("#carbs-placeholder"), [ carbs ], {xaxis: {mode: "time", show: true, position: "bottom"}});
 				});
