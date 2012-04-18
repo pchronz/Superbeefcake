@@ -1,4 +1,4 @@
-@(title: Html, nav: String = "")(content: Html)
+@(title: Html, nav: String = "", beefcake: Option[Beefcake])(content: Html)
 
 <!DOCTYPE html>
 
@@ -28,7 +28,12 @@
 							<li><a href="@{routes.Application.analyze}" id="analyze-nav-link">Analyze</a></li>
 						</ul>
 						<ul class="nav pull-right">
-							<li><a href="@{routes.Application.deauth}">Logout</a></li>
+							@{beefcake match {
+								case None | Some(Beefcake(_, _, _, true, _)) => Html("<li><a href=\"" + routes.Application.login + "\">Login</a></li>")
+								case Some(user) => Html("<li><a href=\"" + routes.Application.deauth + "\">Logout</a></li>")
+							}}
+
+							
 						</ul>
 					</div>
 				</div>

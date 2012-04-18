@@ -1,11 +1,11 @@
-@(day: Option[Int], month: Option[Int], year: Option[Int], macroEntries: List[MacroEntry], macroEntryForm: Form[(Option[String], Int, Int, Int, Int, Int, Int, Int)], macroEntryByFoodForm: Form[(String, Int, Int, Int, Int)], dateFilterForm: Form[(Int, Int, Int)])
+@(day: Option[Int], month: Option[Int], year: Option[Int], macroEntries: List[MacroEntry], macroEntryForm: Form[(Option[String], Int, Int, Int, Int, Int, Int, Int)], macroEntryByFoodForm: Form[(String, Int, Int, Int, Int)], dateFilterForm: Form[(Int, Int, Int)], beefcake: Beefcake)
 
 @import helper._
 @import helper.twitterBootstrap2._
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
-@main(Html("Superbeefcake!")) {
+@main(Html("Superbeefcake!"), "", Some(beefcake)) {
 	@bs2Row() {
 		@form(routes.Application.submitDateFilter, ('class, "form-vertical")) {
 			@bs2Span(3, Some(1)) {
@@ -68,64 +68,11 @@
 		}
 	}
 
-	@{/* TODO create a template for this */}
-	@{/* tracking pange */}
+	@{/* tracking pane */}
 	@bs2Row('id->"track-row") {
 		@bs2Span(8, Some(1)) {
-			@bs2Table(List(Html(""),Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
-				@form(routes.Application.submitMacroEntry, ('class -> "form-horizontal")) {
-					<tr>
-						@{/* TODO make sure the hidden field is synchronized with the other date field */}
-						<input type="hidden" name="day" value="@{day match { case None => Date().day; case Some(day) => day}}" />
-						<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
-						<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
-						<td>@bs2TextField("food", 3, Some("Label"))</td>
-						<td>@bs2TextField("kCal", 1, Some("kCal"))</td>
-						<td>@bs2TextField("protein", 1, Some("protein"))</td>
-						<td>@bs2TextField("fat", 1, Some("fat"))</td>
-						<td>@bs2TextField("carbs", 1, Some("carbs"))</td>
-						<td><input type="submit" value="Add" class="btn" /></td>
-					</tr>
-				}
-				@form(routes.Application.submitMacroEntryByFood, ('class->"form-horizontal")) {
-					<tr>
-						<input type="hidden" name="day" value="@{day match { case None => Date().day; case Some(day) => day}}" />
-						<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
-						<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
-						<td><input type="text" name="foodName" class="span3" placeholder="Food" data-provide="typeahead" autocomplete="off" /></td>
-						<td colspan="2">@bs2TextField("amount", 2, Some("Amount"))</td>
-						<td></td>
-						<td></td>
-						<td><input type="submit" value="Add" class="btn" /></td>
-					</tr>
-				}
-				@macroEntries.map{macroEntry => 
-					<tr>
-						<td>@{macroEntry.food match {case None => ""; case Some(food) => food}}</td>
-						<td>@macroEntry.kCal.toInt.toString</td>
-						<td>@macroEntry.protein.toInt.toString</td>
-						<td>@macroEntry.fat.toInt.toString</td>
-						<td>@macroEntry.carbs.toInt.toString</td>
-						<td>
-							<a href="@{routes.Application.deleteEntry(macroEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
-						</td>
-					</tr>
-				}
-				<tr>
-					<td><strong>Total</strong></td>
-					<td><strong>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_).toInt</strong></td>
-					<td><strong>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</strong></td>
-					<td><strong>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</strong></td>
-					<td><strong>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</strong></td>
-					<td></td>
-				</tr>
-			}
+			@eatEntry(day, month, year, macroEntries, macroEntryForm, macroEntryByFoodForm)
 		}
-	}
-
-	@{/* TODO create a template for this */}
-	@{/* Analyze pane */}
-	@bs2Row('id->"analyze-row") {
 	}
 
 	<script type="text/javascript" charset="utf-8">

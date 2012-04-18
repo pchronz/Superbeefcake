@@ -24,34 +24,43 @@ object Application extends Controller {
     }
   }
 
-  private def getUserFromSession(session: Session): Option[Beefcake] = {
+  private def getUserFromSession(session: Session): Beefcake = {
     session.get("beefcake") match {
-      case Some(username) => Logger.info("Got user from session: " + username); Beefcake.findByUsername(username)
-      case None => Logger.info("No user in session scope."); None
+      case Some(username) => Logger.info("Got user from session: " + username); Beefcake.findByUsername(username) match {
+        case None => Beefcake.createAdhoc()
+        case Some(user) => user
+      }
+      case None => {
+        Logger.info("No user in session scope.")
+        Beefcake.createAdhoc()
+      }
     }
   }
 
   def index = Action { request =>
     // in case the user is already logged in
     getUserFromSession(request.session) match {
-      case None => Redirect(routes.Application.login)
-      case Some(user) => Redirect(routes.Application.eat(None, None, None))    
+      case bc @ Beefcake(_, _, _, true, _) => {
+        val macroEntries = MacroEntry.all(bc)
+        Ok(views.html.index(macroEntries, macroEntryForm, macroEntryByFoodForm))
+      }
+      case user => Redirect(routes.Application.eat(None, None, None))    
     }
   }
 
   def eat(day: Option[Int], month: Option[Int], year: Option[Int]) = Action{implicit request =>
     getUserFromSession(session) match {
-      case None => Redirect(routes.Application.login)
-      case Some(user) => {
+      case Beefcake(_, _, _, true, _)=> Redirect(routes.Application.index)
+      case user => {
         (day, month, year) match {
           case (Some(d), Some(m), Some(y)) => {
             val macroEntries = MacroEntry.findByDate(Date(d, m, y), user)
-            Ok(views.html.eat(day, month, year, macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm)).withSession(Map("day" -> d.toString, "month" -> m.toString, "year" -> y.toString).foldRight(request.session)((a,b) => b+a))
+            Ok(views.html.eat(day, month, year, macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm, user)).withSession(Map("day" -> d.toString, "month" -> m.toString, "year" -> y.toString).foldRight(request.session)((a,b) => b+a))
           }
           case _ => {
             val date = sessionToDate(request.session)
             val macroEntries = MacroEntry.findByDate(date, user)
-            Ok(views.html.eat(Some(date.day), Some(date.month), Some(date.year), macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm))
+            Ok(views.html.eat(Some(date.day), Some(date.month), Some(date.year), macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm, user))
           }
         }
       }
@@ -72,31 +81,32 @@ object Application extends Controller {
   )
 
   def submitMacroEntry = Action { implicit request =>
-    getUserFromSession(request.session) match {
-      case None => Ok(views.html.index())
-      case Some(user) =>{
-        macroEntryForm.bindFromRequest.fold(
-          {form => 
-            Logger.error("binding errors for new macro entry")
-            Logger.error(form.errors.mkString(", ")) 
-            Redirect(routes.Application.eat(None, None, None))
-          },
-          {fields => 
-            val food = fields._1
-            val day = fields._2
-            val month = fields._3
-            val year = fields._4
-            val kCal = fields._5
-            val protein = fields._6
-            val fat = fields._7
-            val carbs = fields._8
-            Logger.info(fields.toString)
-            MacroEntry.create(MacroEntry(None, time=Some(Date(day, month, year)), name=food, kCal=kCal, protein=protein, fat=fat, carbs=carbs), user)
-            Redirect(routes.Application.eat(Some(day), Some(month), Some(year)))
-          }
-        )
+    todo: implement for adhoc users
+    val macroEntry = macroEntryForm.bindFromRequest.fold(
+      {form => 
+        Logger.error("binding errors for new macro entry")
+        Logger.error(form.errors.mkString(", ")) 
+        None
+      },
+      {fields => 
+        val food = fields._1
+        val day = fields._2
+        val month = fields._3
+        val year = fields._4
+        val kCal = fields._5
+        val protein = fields._6
+        val fat = fields._7
+        val carbs = fields._8
+        Some(MacroEntry(None, time=Some(Date(day, month, year)), name=food, kCal=kCal, protein=protein, fat=fat, carbs=carbs))
       }
+    )
+    val date = sessionToDate(session)
+    val user = getUserFromSession(session) 
+    macroEntry match {
+      case Some(macroEntry) => MacroEntry.create(macroEntry, user)
+      case None =>
     }
+    Redirect(routes.Application.eat(Some(date.day), Some(date.month), Some(date.year)))
   }
 
   val dateFilterForm = Form (
@@ -121,8 +131,8 @@ object Application extends Controller {
 
   def deleteEntry(id: Int) = Action { implicit request =>
     getUserFromSession(session) match {
-      case None => Ok(views.html.index())
-      case Some(user) => {
+      case Beefcake(_, _, _, true, _)=> Redirect(routes.Application.login)
+      case user => {
         Logger.info("Going to delete macroEntry with id == " + id)
         MacroEntry.deleteById(id, user)
         Redirect(routes.Application.eat(None, None, None)).withSession(session + ("beefcake"->user.username))
@@ -141,26 +151,34 @@ object Application extends Controller {
   )
 
   def submitMacroEntryByFood = Action { implicit request =>
-    getUserFromSession(session) match {
-      case None => Ok(views.html.index())
-      case Some(user) => {
-        macroEntryByFoodForm.bindFromRequest.fold (
-          {form => 
-            Logger.error("Could not bind the form in the request")
-            Logger.error(form.toString)
-            Redirect(routes.Application.eat(None, None, None))
-          },
-          {fields =>
-            val (foodName, amount, day, month, year) = fields
-            MacroEntry(None, Some(Date(day, month, year)), foodName, amount) match {
-              case None =>
-              case Some(macroEntry) => MacroEntry.create(macroEntry, user)
-            }
-            Redirect(routes.Application.eat(Some(day), Some(month), Some(year)))
-          }
-        )
+    def redirectFailed(user: Beefcake) = {
+      user match {
+        case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index)
+        case _ => Redirect(routes.Application.eat(None, None, None))
       }
     }
+
+    val user = getUserFromSession(session)
+    macroEntryByFoodForm.bindFromRequest.fold (
+      {form => 
+        Logger.error("Could not bind the form in the request")
+        Logger.error(form.toString)
+        redirectFailed(user)
+      },
+      {fields =>
+        val (foodName, amount, day, month, year) = fields
+        MacroEntry(None, Some(Date(day, month, year)), foodName, amount) match {
+          case None => redirectFailed(user)
+          case Some(macroEntry) => {
+            MacroEntry.create(macroEntry, user)
+            user match {
+              case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index).withSession(session + ("beefcake"->user.username))
+              case _ => Redirect(routes.Application.eat(Some(macroEntry.time.day), Some(macroEntry.time.month), Some(macroEntry.time.year)))
+            }
+          }
+        }
+      }
+    )
   }
 
   val loginForm = Form(
@@ -228,13 +246,13 @@ object Application extends Controller {
 
   def analyze() = Action { implicit request =>
     getUserFromSession(session) match {
-      case None => Redirect(routes.Application.login)
-      case Some(user) => {
+      case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index)
+      case user => {
         val energySeries = MacroEntry.getTimeSeries("kCal", user)
         val proteinSeries = MacroEntry.getTimeSeries("protein", user)
         val fatSeries = MacroEntry.getTimeSeries("fat", user)
         val carbsSeries = MacroEntry.getTimeSeries("carbs", user)
-        Ok(views.html.analyze(energySeries=energySeries, proteinSeries=proteinSeries, fatSeries=fatSeries, carbsSeries=carbsSeries))
+        Ok(views.html.analyze(energySeries=energySeries, proteinSeries=proteinSeries, fatSeries=fatSeries, carbsSeries=carbsSeries, beefcake=user))
       }
     }
   }
@@ -254,8 +272,7 @@ object Application extends Controller {
 
   def registerUser() = Action{implicit request =>
     getUserFromSession(session) match {
-      case Some(user) => Ok(views.html.index())
-      case None => {
+      case Beefcake(_, _, _, true, _) => {
         registrationForm.bindFromRequest.fold(
           {form => Redirect(routes.Application.register)
           },
@@ -275,7 +292,7 @@ object Application extends Controller {
                   Redirect(routes.Application.index)
                 }
                 else {
-                  Beefcake.create(Beefcake(username=username, password=password, email=email))
+                  Beefcake.create(Beefcake(username=username, password=password, email=email, adhoc=false))
                   Redirect(routes.Application.login)
                 }
               }
@@ -283,6 +300,7 @@ object Application extends Controller {
           }
         )
       }
+      case user => Redirect(routes.Application.login)
     }
   }
 }

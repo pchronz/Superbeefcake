@@ -7,8 +7,8 @@ object Global extends GlobalSettings {
     // bootstrap users
     if(Beefcake.all().isEmpty) {
       Logger.info("Bootstrapping beefcakes")
-      Beefcake.create(Beefcake("peter", "secret", "peter.chronz@gmail.com"))
-      val michael = Beefcake("michael", "secret", "m@localhost.net")
+      Beefcake.create(Beefcake("peter", "secret", "peter.chronz@gmail.com", false))
+      val michael = Beefcake("michael", "secret", "m@localhost.net", false)
       Beefcake.create(michael)
       // Boostrap a few entries for Michael
       val date = Date()

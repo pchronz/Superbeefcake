@@ -1,9 +1,45 @@
-@()
+@(macroEntries: List[MacroEntry], macroEntryForm: Form[(Option[String], Int, Int, Int, Int, Int, Int, Int)], macroEntryByFoodForm: Form[(String, Int, Int, Int, Int)])
 
 @import helper._
 @import helper.twitterBootstrap2._
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
-@main(Html("Superbeefcake!")) {
+@main(Html("Superbeefcake!"), "", None) {
+	@bs2Row('id->"track-row") {
+		@bs2Span(8, Some(1)) {
+			@eatEntry(None, None, None, macroEntries, macroEntryForm, macroEntryByFoodForm)
+		}
+	}
+	<script type="text/javascript" charset="utf-8">
+		$(function(){
+			// select the navbar link for this view as active
+			$("#eat-nav-link").closest("li").addClass("active");
+
+			// typeahead
+			$("input[name='foodName']").typeahead({source: function(typeahead, query) {
+				var url = '@routes.Application.suggestFood("")';
+				console.log("Getting new suggestions...");
+				$.getJSON(url + query, function(response) {
+					console.log("New suggestions: " + response.items);
+					typeahead.process(response.items);
+				});
+			}
+			, matcher: function(item) {
+				// all of the words in the query need to appear in the item
+				var queryWords = this.query.split(" ");
+				var found = true;
+				for(word in queryWords) {
+					var itemUpper = item.toUpperCase();
+					var wordUpper = queryWords[word].toUpperCase();
+					if(itemUpper.indexOf(wordUpper) ==  -1) found = false;
+				}
+				return found;
+			}
+			});
+
+			// focus the food input field
+			$("input[name='foodName']").focus();
+		});
+	</script>
 }

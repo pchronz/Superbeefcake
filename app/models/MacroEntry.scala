@@ -23,6 +23,15 @@ object Date {
       val year = cal.get(java.util.Calendar.YEAR)
       Date(day, month, year)
   }
+
+  def apply(time: Long): Date = {
+      val cal = java.util.Calendar.getInstance
+      cal.setTimeInMillis(time)
+      val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
+      val month = cal.get(java.util.Calendar.MONTH) + 1
+      val year = cal.get(java.util.Calendar.YEAR)
+      Date(day, month, year)
+  }
 }
 
 case class MacroEntry(id: Option[Int], food: Option[String], time: Date, kCal: Double, protein: Double, fat: Double, carbs: Double)

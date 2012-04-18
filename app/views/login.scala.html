@@ -5,7 +5,7 @@
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
-@main(Html("Superbeefcake!")) {
+@main(Html("Superbeefcake!"), "", None) {
 	@bs2Row() {
 		@bs2Span(6, Some(3)) {
 			@form(routes.Application.auth, ('class, "form-horizontal")){
