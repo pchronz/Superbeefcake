@@ -38,7 +38,9 @@ object Beefcake {
 
   def createAdhoc():Beefcake = {
     val random = new Random()
-    val username = random.nextString(32)
+    val chars = List('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0')
+    val username = (1 to 16).map{i => val num = random.nextInt(chars.length); chars(num)}.mkString("")
+    println("username" + username)
     val email = random.nextString(8) + "@" + random.nextString(8) + ".com"
     DB.withConnection{ implicit c =>
         SQL("INSERT INTO beefcake (username, password, email, adhoc, lastUpdated) VALUES ({username}, 'password', {email}, {adhoc}, {lastUpdated})").on("username"->username, "email"->email, "adhoc"->true, "lastUpdated"->new java.util.Date().getTime()).executeUpdate()

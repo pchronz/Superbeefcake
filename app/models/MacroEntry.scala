@@ -119,8 +119,14 @@ object MacroEntry {
 
   def deleteAll(beefcake: Beefcake) {
     DB.withConnection{ implicit c =>
-        SQL("DELETE FROM macroEntry * WHERE username = {username}").on("username"->beefcake.username).executeUpdate()
+        SQL("DELETE FROM macroentry WHERE username = {username}").on("username"->beefcake.username).executeUpdate()
     }
+  }
+
+  def deleteByDate(date: Date, beefcake: Beefcake) {
+      DB.withConnection {implicit c =>
+      SQL("DELETE FROM macroentry WHERE day = {day} AND month = {month} AND year = {year} AND username = {username}").on("username"->beefcake.username, "day"->date.day, "month"->date.month, "year"->date.year).executeUpdate()
+      }
   }
 
   def findByDate(date: Date, beefcake: Beefcake): List[MacroEntry] = DB.withConnection { implicit c =>

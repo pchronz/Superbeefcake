@@ -25,14 +25,40 @@ object Application extends Controller {
   }
 
   private def getUserFromSession(session: Session): Beefcake = {
-    session.get("beefcake") match {
-      case Some(username) => Logger.info("Got user from session: " + username); Beefcake.findByUsername(username) match {
-        case None => Beefcake.createAdhoc()
-        case Some(user) => user
+    def createAdhocUser(): Beefcake = {
+      val user = Beefcake.createAdhoc()
+      // give the Ad Hoc user a standard menu
+      val date = Date()
+      (1 to 11).foreach{i => MacroEntry.create(MacroEntry(None, None, Date(date.day - 1, date.month, date.year), 100, 30, 5, 30), user)}
+      user
+    }
+
+    // look for a registered user
+    val regUser = session.get("beefcake") match {
+      case Some(username) => {
+          Logger.info("Got user from session: " + username)
+          Beefcake.findByUsername(username) match {
+            case None => None
+            case user @ Some(_) => user
+          }
       }
+      case None => None
+    }
+
+    // return user, registered, adhoc from session or new adhoc
+    regUser match {
+      case Some(user) => user
       case None => {
-        Logger.info("No user in session scope.")
-        Beefcake.createAdhoc()
+        Logger.info("Could find registered user. Looking for Adhoc user...")
+        session.get("beefcakeadhoc") match {
+          case None => createAdhocUser()
+          case Some(username) => {
+            Beefcake.findByUsername(username) match {
+              case None => createAdhocUser()
+              case Some(user) => user
+            }
+          }
+        }
       }
     }
   }
@@ -81,12 +107,12 @@ object Application extends Controller {
   )
 
   def submitMacroEntry = Action { implicit request =>
-    todo: implement for adhoc users
-    val macroEntry = macroEntryForm.bindFromRequest.fold(
+    val user = getUserFromSession(session)
+    macroEntryForm.bindFromRequest.fold(
       {form => 
         Logger.error("binding errors for new macro entry")
         Logger.error(form.errors.mkString(", ")) 
-        None
+        redirectFailed(user)
       },
       {fields => 
         val food = fields._1
@@ -97,16 +123,15 @@ object Application extends Controller {
         val protein = fields._6
         val fat = fields._7
         val carbs = fields._8
-        Some(MacroEntry(None, time=Some(Date(day, month, year)), name=food, kCal=kCal, protein=protein, fat=fat, carbs=carbs))
+        val macroEntry = MacroEntry(None, time=None, name=food, kCal=kCal, protein=protein, fat=fat, carbs=carbs)
+        MacroEntry.create(macroEntry, user)
+        val date = sessionToDate(session)
+        user match {
+          case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
+          case _ => Redirect(routes.Application.eat(Some(date.day), Some(date.month), Some(date.year)))
+        }
       }
     )
-    val date = sessionToDate(session)
-    val user = getUserFromSession(session) 
-    macroEntry match {
-      case Some(macroEntry) => MacroEntry.create(macroEntry, user)
-      case None =>
-    }
-    Redirect(routes.Application.eat(Some(date.day), Some(date.month), Some(date.year)))
   }
 
   val dateFilterForm = Form (
@@ -130,11 +155,14 @@ object Application extends Controller {
   }
 
   def deleteEntry(id: Int) = Action { implicit request =>
-    getUserFromSession(session) match {
-      case Beefcake(_, _, _, true, _)=> Redirect(routes.Application.login)
+    val user = getUserFromSession(session)
+    Logger.info("Going to delete macroEntry with id == " + id)
+    MacroEntry.deleteById(id, user)
+    user match {
+      case Beefcake(_, _, _, true, _)=> {
+        Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
+      }
       case user => {
-        Logger.info("Going to delete macroEntry with id == " + id)
-        MacroEntry.deleteById(id, user)
         Redirect(routes.Application.eat(None, None, None)).withSession(session + ("beefcake"->user.username))
       }
     }
@@ -150,14 +178,15 @@ object Application extends Controller {
     )
   )
 
-  def submitMacroEntryByFood = Action { implicit request =>
-    def redirectFailed(user: Beefcake) = {
-      user match {
-        case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index)
-        case _ => Redirect(routes.Application.eat(None, None, None))
-      }
+  def redirectFailed(user: Beefcake) = {
+    user match {
+      case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index)
+      case _ => Redirect(routes.Application.eat(None, None, None))
     }
+  }
 
+
+  def submitMacroEntryByFood = Action { implicit request =>
     val user = getUserFromSession(session)
     macroEntryByFoodForm.bindFromRequest.fold (
       {form => 
@@ -172,7 +201,7 @@ object Application extends Controller {
           case Some(macroEntry) => {
             MacroEntry.create(macroEntry, user)
             user match {
-              case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index).withSession(session + ("beefcake"->user.username))
+              case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
               case _ => Redirect(routes.Application.eat(Some(macroEntry.time.day), Some(macroEntry.time.month), Some(macroEntry.time.year)))
             }
           }
@@ -228,7 +257,7 @@ object Application extends Controller {
   }
   
   def deauth() = Action { implicit request =>
-    redirectWithDateFromSession(session).withNewSession
+    redirectWithDateFromSession(session).withSession(session - "beefcake")
   }
 
   // AJAX 
@@ -301,6 +330,19 @@ object Application extends Controller {
         )
       }
       case user => Redirect(routes.Application.login)
+    }
+  }
+
+  def deleteAllEntries(day: Int, month: Int, year: Int) = Action { implicit request =>
+    getUserFromSession(session) match {
+      case user @ Beefcake(_, _, _, true, _) => {
+        MacroEntry.deleteAll(user)
+        Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
+      }
+      case user => {
+        MacroEntry.deleteByDate(Date(day, month, year), user)
+        Redirect(routes.Application.eat(Some(day), Some(month), Some(year)))
+      }
     }
   }
 }

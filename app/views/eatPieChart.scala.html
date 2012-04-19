@@ -1,0 +1,25 @@
+@(macroEntries: List[MacroEntry])
+
+@if(macroEntries.length > 0) {
+	<div id="placeholder" style="width: 250px; height: 150px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; position: relative; "></div>
+}
+<script type="text/javascript" charset="utf-8">
+	$(function () {
+		var protein = @macroEntries.map(_.protein).foldLeft(0.0)((a,b) => a+b);
+		var fat = @macroEntries.map(_.fat).foldLeft(0.0)((a,b) => a+b);
+		var carbs = @macroEntries.map(_.carbs).foldLeft(0.0)((a,b) => a+b);
+		if(protein + fat + carbs > 0) {
+			$.plot($("#placeholder"), [{label: "Protein", color: "green", data: protein}, {label: "Fat", color: "red", data:  fat}, {label: "Carbs", color: "blue", data: carbs}], {
+			series: {
+				pie: {
+					show: true,
+					tilt: 0.5
+					}
+			},
+			legend: {
+				show: false
+			}
+			});
+		}
+	});
+</script>

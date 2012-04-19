@@ -49,7 +49,9 @@
 		<td><strong>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</strong></td>
 		<td><strong>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</strong></td>
 		<td><strong>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</strong></td>
-		<td></td>
+		<td>
+			<a href="@{routes.Application.deleteAllEntries(day match {case None=> Date().day; case Some(d)=>d}, month match{ case None => Date().month; case Some(m) => m}, year match {case None => Date().year; case Some(y) => y})}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
+		</td>
 	</tr>
 }
 

@@ -7,49 +7,40 @@
 
 @main(Html("Superbeefcake!"), "", Some(beefcake)) {
 	@bs2Row() {
-		@bs2Span(3, Some(1)) {
-			<h4>Energy (Average: @{(energySeries.map{entry => entry._2}.foldLeft(0.0){_+_} / energySeries.length).toInt} kCal/day)</h4>
-			<div id="energy-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
+		@bs2Span(7, Some(1)) {
+			<h4>Energy</h4>
+			<div id="energy-placeholder" style="width: 600px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				$(function () {
 						var energy = [@{energySeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+						var energyLabel = "Energy (Average: @{(energySeries.map{entry => entry._2}.foldLeft(0.0){_+_} / energySeries.length).toInt} kCal/day)";
 					
-						$.plot($("#energy-placeholder"), [ energy ], {xaxis: {mode: "time", show: true, position: "bottom"}});
-				});
-			</script>
-		}
-		@bs2Span(3, Some(1)) {
-			<h4>Protein (Average: @{(proteinSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / proteinSeries.length).toInt} g/day)</h4>
-			<div id="protein-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
-			<script type="text/javascript" charset="utf-8">
-				$(function () {
-						var protein = [@{proteinSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
-					
-						$.plot($("#protein-placeholder"), [ protein ], {xaxis: {mode: "time", show: true, position: "bottom"}});
+						$.plot($("#energy-placeholder"),
+							[{data: energy, lines: {show: true}, points: {show: true}, label: energyLabel}],
+							{xaxis: {mode: "time", show: true, position: "bottom"}}
+						);
 				});
 			</script>
 		}
 	}
 	@bs2Row() {
-		@bs2Span(3, Some(1)) {
-			<h4>Fat (Average: @{(fatSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / fatSeries.length).toInt} g/day)</h4>
-			<div id="fat-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
+		@bs2Span(7, Some(1)) {
+			<h4>Macro Nutrients</h4>
+			<div id="protein-placeholder" style="width: 600px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				$(function () {
-						var fat = [@{fatSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
-					
-						$.plot($("#fat-placeholder"), [ fat ], {xaxis: {mode: "time", show: true, position: "bottom"}});
-				});
-			</script>
-		}
-		@bs2Span(3, Some(1)) {
-			<h4>Carbs (Average: @{(carbsSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / carbsSeries.length).toInt} g/day)</h4>
-			<div id="carbs-placeholder" style="width: 300px; height: 250px; position: relative; "></div>
-			<script type="text/javascript" charset="utf-8">
-				$(function () {
-						var carbs = [@{carbsSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
-					
-						$.plot($("#carbs-placeholder"), [ carbs ], {xaxis: {mode: "time", show: true, position: "bottom"}});
+					var protein = [@{proteinSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+					var proteinLabel = "Protein (Average: @{(proteinSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / proteinSeries.length).toInt} g/day)";
+					var fat = [@{fatSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+					var fatLabel = "Fat (Average: @{(fatSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / fatSeries.length).toInt} g/day)";
+					var carbs = [@{carbsSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+					var carbsLabel = "Fat (Average: @{(carbsSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / carbsSeries.length).toInt} g/day)";
+					$.plot($("#protein-placeholder"), 
+						[{data: protein, points: {show: true}, lines: {show: true}, label: proteinLabel}, 
+						{data: fat, points: {show: true}, lines: {show: true}, label: fatLabel}, 
+						{data: carbs, points: {show: true}, lines: {show: true}, label: carbsLabel}],
+						{xaxis: {mode: "time", show: true, position: "bottom"}}
+					);
 				});
 			</script>
 		}

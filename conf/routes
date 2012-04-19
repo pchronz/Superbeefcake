@@ -16,6 +16,7 @@ GET		/deauth						controllers.Application.deauth
 GET		/register					controllers.Application.register
 POST	/registerUser				controllers.Application.registerUser
 GET		/index						controllers.Application.index
+GET		/deleteAllEntries/:day/:month/:year			controllers.Application.deleteAllEntries(day: Int, month: Int, year: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

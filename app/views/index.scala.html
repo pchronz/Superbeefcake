@@ -6,6 +6,11 @@
 @import models.Date
 
 @main(Html("Superbeefcake!"), "", None) {
+	@bs2Row() {
+		@bs2Span(3, Some(1)) {
+			@eatPieChart(macroEntries)
+		}
+	}
 	@bs2Row('id->"track-row") {
 		@bs2Span(8, Some(1)) {
 			@eatEntry(None, None, None, macroEntries, macroEntryForm, macroEntryByFoodForm)
