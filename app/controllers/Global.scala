@@ -12,22 +12,23 @@ object Global extends GlobalSettings {
       Beefcake.create(michael)
       // Boostrap a few entries for Michael
       val date = Date()
-      (1 to 11).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(date.day - 1, date.month, date.year), 100, 30, 5, 30), michael)}
-      (1 to 9).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(), 100, 30, 5, 30), michael)}
-      (1 to 8).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(date.day + 1, date.month, date.year), 100, 30, 5, 30), michael)}
+      (1 to 11).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(date.day - 1, date.month, date.year), 100, 100, 30, 5, 30), michael)}
+      (1 to 9).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(), 100, 100, 30, 5, 30), michael)}
+      (1 to 8).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(date.day + 1, date.month, date.year), 100, 100, 30, 5, 30), michael)}
     }
     // Bootstrap foods
     if(Food.all().isEmpty) {
       Logger.info("Bootstrapping foods")
-      // loadManualEntries()
-      parseFoods()
+      loadManualEntries()
+      //parseUsdaArsFoods()
+      parseGesAbFoods()
     }
     Logger.info("Following foods are in the DB...")
     Logger.info("There are " + Food.all().length + " food entries in the database.")
 
   }  
 
-  def parseFoods() {
+  def parseUsdaArsFoods() {
     // USDA ARS
     val nutrientsFile = io.Source.fromFile(play.api.Play.current.classloader.getResource("foods/ABBREV.txt").getFile)
     println(nutrientsFile.toString)
@@ -36,13 +37,44 @@ object Global extends GlobalSettings {
       val MacroEntryRegex(name, energy, protein, fat, carbs) = line
       try {
         val foodItem = Food(name, energy.toDouble, protein.toDouble, fat.toDouble, carbs.toDouble)
-        println("Inserting food... " + foodItem.toString)
         Food.create(foodItem)
       }
       catch { 
         case e: Exception => e.printStackTrace()
       }
     }
+  }
+
+  def parseGesAbFoods() {
+    // Ges Ab
+    val nutrientsFile = io.Source.fromFile(play.api.Play.current.classloader.getResource("foods/GesAb.txt").getFile)
+    println(nutrientsFile.toString)
+    // XXX too imperative
+    var successCounter = 0
+    var totalCounter = 0
+    val MacroEntryRegex = """([^@]+)@([^@]+)@([^@]+)@([^@]+)@([^@]+)@([^@]+)""".r
+    val lines = nutrientsFile.getLines()
+    lines.foreach{line =>
+      println(line)
+      try {
+        val MacroEntryRegex(name, amount, energy, protein, fat, carbs) = line
+        val AmountMatcher = """(\d+)\s*([^@]*)[^\w]*""".r
+        val AmountMatcher(quantity, unit) = amount
+        if(quantity == "100" && unit == "g") {
+          val foodItem = Food(name, energy.replaceAll(",", ".").toDouble, protein.replaceAll(",", ".").toDouble, fat.replaceAll(",", ".").toDouble, carbs.replaceAll(",", ".").toDouble)
+          Food.create(foodItem)
+          successCounter += 1
+        }
+        else {
+          println("Could not insert " + name + " with amount " + amount)
+        }
+        totalCounter += 1
+      }
+      catch { 
+        case e: Exception => e.printStackTrace()
+      }
+    }
+    println("Got " + successCounter + " entries out of " + totalCounter + " lines in the file")
   }
 
   def loadManualEntries() {
@@ -142,6 +174,7 @@ object Global extends GlobalSettings {
       Food.create(Food("Frosta Thai Green Curry", 115, 4, 3.8, 15.3))
       Food.create(Food("Landliebe Joghurt", 100, 3.5, 2.8, 15))
       Food.create(Food("Roast Beef", 130, 22.4, 4.5, 0))
+      Food.create(Food("Zuckerruebensirup", 299, 2.3, 0.1, 0.69))
   }
   
   override def onStop(app: Application) {

@@ -29,7 +29,7 @@ object Application extends Controller {
       val user = Beefcake.createAdhoc()
       // give the Ad Hoc user a standard menu
       val date = Date()
-      (1 to 11).foreach{i => MacroEntry.create(MacroEntry(None, None, Date(date.day - 1, date.month, date.year), 100, 30, 5, 30), user)}
+      (1 to 11).foreach{i => MacroEntry.create(MacroEntry(None, None, Date(date.day - 1, date.month, date.year), 100, 100, 30, 5, 30), user)}
       user
     }
 
@@ -99,6 +99,7 @@ object Application extends Controller {
       "day" -> number,
       "month" -> number,
       "year" -> number,
+      "amount" -> number,
       "kCal" -> number,
       "protein" -> number,
       "fat" -> number,
@@ -119,13 +120,14 @@ object Application extends Controller {
         val day = fields._2
         val month = fields._3
         val year = fields._4
-        val kCal = fields._5
-        val protein = fields._6
-        val fat = fields._7
-        val carbs = fields._8
-        val macroEntry = MacroEntry(None, time=None, name=food, kCal=kCal, protein=protein, fat=fat, carbs=carbs)
-        MacroEntry.create(macroEntry, user)
+        val amount= fields._5
+        val kCal = fields._6
+        val protein = fields._7
+        val fat = fields._8
+        val carbs = fields._9
         val date = sessionToDate(session)
+        val macroEntry = MacroEntry(None, time=Some(date), name=food, amount=amount, kCal=kCal, protein=protein, fat=fat, carbs=carbs)
+        MacroEntry.create(macroEntry, user)
         user match {
           case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
           case _ => Redirect(routes.Application.eat(Some(date.day), Some(date.month), Some(date.year)))
@@ -262,7 +264,11 @@ object Application extends Controller {
 
   // AJAX 
   def suggestFood(query: String) = Action {implicit request =>
-    val foodSuggestions = Food.suggestFor(query)
+    def replaceUmlauts(in: String): String = {
+      in.replaceAll("ä", "&auml;").replaceAll("Ä", "&Auml;").replaceAll("Ü", "&Uuml;").replaceAll("ü", "&uuml;").replaceAll("Ö", "&Ouml;").replaceAll("ö", "&ouml;").replaceAll("ß", "&szlig;")
+    }
+    val foodSuggestions = Food.suggestFor(replaceUmlauts(query))
+    println(query.replace("ü", "&uuml;"))
 
     val foodNames = foodSuggestions.map { suggestion =>
       // using the name and replacing quotation marks to sanitize the JSON-based response to the client
@@ -342,6 +348,38 @@ object Application extends Controller {
       case user => {
         MacroEntry.deleteByDate(Date(day, month, year), user)
         Redirect(routes.Application.eat(Some(day), Some(month), Some(year)))
+      }
+    }
+  }
+
+  def updateMacroEntry(id: Int, amount: Int) = Action { implicit request =>
+    val user = getUserFromSession(session)
+    // get the entry
+    MacroEntry.findById(id, user) match {
+      // TODO how to return a 404?
+      case None => Ok("")
+      case Some(macroEntry) => {
+        // udpate the fields
+        try {
+          val ratio = amount.toDouble / macroEntry.amount.toDouble
+          val newAmount = amount
+          val newEnergy = macroEntry.kCal * ratio
+          val newProtein = macroEntry.fat * ratio
+          val newFat = macroEntry.fat * ratio
+          val newCarbs = macroEntry.carbs * ratio
+          // update the entry
+          MacroEntry.update(MacroEntry(macroEntry.id, macroEntry.food, macroEntry.time, newAmount, newEnergy, newProtein, newFat, newCarbs), user)
+          val jsonCoreString = Map("energy"->newEnergy, "protein"->newProtein, "fat"->newFat, "carbs"->newCarbs).map{(value) => 
+            "\"" + value._1 + "\"" + ": " + value._2.toInt.toString
+          }.mkString(", ")
+          Ok("[{" + jsonCoreString + "}]")
+        }
+        catch {
+          case e =>
+            Logger.error(e.toString)
+            // TODO 404
+            Ok("")
+        }
       }
     }
   }

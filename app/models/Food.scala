@@ -54,7 +54,7 @@ object Food {
     val keywords = upperQuery.split(" ")
     // prepare the query
     var intersectQuery = keywords.map{keyword =>
-      "SELECT * FROM food WHERE name LIKE '%" + keyword + "%'"
+      "SELECT * FROM food WHERE UCASE(name) LIKE '%" + keyword + "%'"
     }.mkString("\nINTERSECT\n")
     intersectQuery += "\nLIMIT 8"
     val results = DB.withConnection { implicit c =>
@@ -62,6 +62,7 @@ object Food {
         SQL(intersectQuery).as(food *)
     }
     println("#results: " + results.length)
+    println(results.mkString(", "))
     results
   }
 }

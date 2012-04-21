@@ -1,0 +1,14 @@
+@(modalId: Option[String], title: Option[String])(bodyContent: Html)(footerContent: Html)
+
+<div class="modal hide" id="@modalId">
+	<div class="modal-header">
+		<a class="close" data-dismiss="modal">x</a>
+		<h3>@title</h3>
+	</div>
+	<div class="modal-body">
+		@bodyContent
+	</div>
+	<div class="modal-footer">
+		@footerContent 
+	</div>
+</div>

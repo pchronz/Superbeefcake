@@ -1,57 +1,115 @@
-@(day: Option[Int], month: Option[Int], year: Option[Int], macroEntries: List[MacroEntry], macroEntryForm: Form[(Option[String], Int, Int, Int, Int, Int, Int, Int)], macroEntryByFoodForm: Form[(String, Int, Int, Int, Int)])
+@(day: Option[Int], month: Option[Int], year: Option[Int], macroEntries: List[MacroEntry], macroEntryForm: Form[(Option[String], Int, Int, Int, Int, Int, Int, Int, Int)], macroEntryByFoodForm: Form[(String, Int, Int, Int, Int)])
 
 @import helper._
 @import helper.twitterBootstrap2._
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
-@bs2Table(List(Html(""),Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
+
+@bs2Row() {
+	@bs2Span(8, Some(1)) {
+		@form(routes.Application.submitMacroEntryByFood, ('class->"form-inline")) {
+			<fieldset>
+				<legend>Track your meals</legend>
+				<div class="control-group">
+					<input type="hidden" name="day" value="@{day match { case None => Date().day; case Some(day) => day}}" />
+					<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
+					<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
+					<input type="text" name="foodName" class="span3" placeholder="Food" data-provide="typeahead" autocomplete="off" />
+					@bs2TextField("amount", 2, Some("Amount"))
+					<input type="submit" value="Add" class="btn btn-primary" />
+					<a href="#" id="link-manual-macro">Manual Entry</a>
+					<script type="text/javascript" charset="utf-8">
+						$(function(){
+							$("#link-manual-macro").click(function() {
+								$("#modal-macro-manual").modal("show");
+							});
+						});
+					</script>
+				</div>
+			</fieldset>
+		}
+	}
+}
+
+
+@bs2Row() {
+	@bs2Span(8, Some(1)) {
+		@bs2Table(List(Html(""),Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
+			@macroEntries.map{macroEntry => 
+				<tr>
+					<td>@{macroEntry.food match {case None => ""; case Some(food) => food}}</td>
+					<td>
+						<input type="text" name="amount" id="amount-@macroEntry.id.get" value="@macroEntry.amount.toInt.toString" class="span1" style="margin-bottom: 0px;" rel="tooltip" title="Press Enter to udpate" />
+						<script type="text/javascript" charset="utf-8">
+							$("#amount-@macroEntry.id.get").tooltip({trigger: "focus"});
+							$("#amount-@macroEntry.id.get").change(function() {
+								var newAmount = $(this).val();
+								$.get("@routes.Application.updateMacroEntry(macroEntry.id.get, 0)" + newAmount, function(data) {
+									var resp = eval(data)[0];
+									$("#td-energy-@macroEntry.id.get").html(resp.energy);
+									$("#td-protein-@macroEntry.id.get").html(resp.protein);
+									$("#td-fat-@macroEntry.id.get").html(resp.fat);
+									$("#td-carbs-@macroEntry.id.get").html(resp.carbs);
+								});
+							});
+						</script>
+					</td>
+					<td id="td-energy-@macroEntry.id.get">@macroEntry.kCal.toInt.toString</td>
+					<td id="td-protein-@macroEntry.id.get">@macroEntry.protein.toInt.toString</td>
+					<td id="td-fat-@macroEntry.id.get">@macroEntry.fat.toInt.toString</td>
+					<td id="td-carbs-@macroEntry.id.get">@macroEntry.carbs.toInt.toString</td>
+					<td>
+						<a href="@{routes.Application.deleteEntry(macroEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
+					</td>
+				</tr>
+			}
+			<tr>
+				<td><strong>Total</strong></td>
+				<td><strong>@macroEntries.map(_.amount).foldLeft[Double](0)(_+_).toInt</strong></td>
+				<td><strong>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_).toInt</strong></td>
+				<td><strong>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</strong></td>
+				<td><strong>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</strong></td>
+				<td><strong>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</strong></td>
+				<td>
+					<a id="link-clear-date" href="#" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
+					<script type="text/javascript" charset="utf-8">
+						$(function() {
+							$("#link-clear-date").click(function() {
+								$("#modal-clear-sheet-warning").modal("show");
+							});
+						});
+					</script>
+				</td>
+			</tr>
+		}
+	}
+}
+
+@{/* Manual entry modal */}
+@bs2Modal(Some("modal-macro-manual"), Some("Please enter your values manually")) {
 	@form(routes.Application.submitMacroEntry, ('class -> "form-horizontal")) {
 		<tr>
 			<input type="hidden" name="day" value="@{day match { case None => Date().day; case Some(day) => day}}" />
 			<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
 			<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
-			<td>@bs2TextField("food", 3, Some("Label"))</td>
-			<td>@bs2TextField("kCal", 1, Some("kCal"))</td>
-			<td>@bs2TextField("protein", 1, Some("protein"))</td>
-			<td>@bs2TextField("fat", 1, Some("fat"))</td>
-			<td>@bs2TextField("carbs", 1, Some("carbs"))</td>
-			<td><input type="submit" value="Add" class="btn" /></td>
+			<td>@bs2TextField("food", 2, Some("Label"))</td>
+			<td>@bs2TextField("amount", 1, Some("Amount"))</td>
+			<td>@bs2TextField("kCal", 1, Some("Energy"))</td>
+			<td>@bs2TextField("protein", 1, Some("Protein"))</td>
+			<td>@bs2TextField("fat", 1, Some("Fat"))</td>
+			<td>@bs2TextField("carbs", 1, Some("Carbs"))</td>
+			<td><input type="submit" value="Add" class="btn btn-primary" /></td>
 		</tr>
 	}
-	@form(routes.Application.submitMacroEntryByFood, ('class->"form-horizontal")) {
-		<tr>
-			<input type="hidden" name="day" value="@{day match { case None => Date().day; case Some(day) => day}}" />
-			<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
-			<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
-			<td><input type="text" name="foodName" class="span3" placeholder="Food" data-provide="typeahead" autocomplete="off" /></td>
-			<td colspan="2">@bs2TextField("amount", 2, Some("Amount"))</td>
-			<td></td>
-			<td></td>
-			<td><input type="submit" value="Add" class="btn" /></td>
-		</tr>
-	}
-	@macroEntries.map{macroEntry => 
-		<tr>
-			<td>@{macroEntry.food match {case None => ""; case Some(food) => food}}</td>
-			<td>@macroEntry.kCal.toInt.toString</td>
-			<td>@macroEntry.protein.toInt.toString</td>
-			<td>@macroEntry.fat.toInt.toString</td>
-			<td>@macroEntry.carbs.toInt.toString</td>
-			<td>
-				<a href="@{routes.Application.deleteEntry(macroEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
-			</td>
-		</tr>
-	}
-	<tr>
-		<td><strong>Total</strong></td>
-		<td><strong>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_).toInt</strong></td>
-		<td><strong>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</strong></td>
-		<td><strong>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</strong></td>
-		<td><strong>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</strong></td>
-		<td>
-			<a href="@{routes.Application.deleteAllEntries(day match {case None=> Date().day; case Some(d)=>d}, month match{ case None => Date().month; case Some(m) => m}, year match {case None => Date().year; case Some(y) => y})}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
-		</td>
-	</tr>
+}{@Html("")}
+
+@{/* Delete sheet warning modal */}
+@bs2Modal(Some("modal-clear-sheet-warning"), Some("Are you sure?")) {
+	All of the entries for this day will be deleted!
+} {
+	<a class="btn btn-primary" href="@{routes.Application.deleteAllEntries(day match {case None=> Date().day; case Some(d)=>d}, month match{ case None => Date().month; case Some(m) => m}, year match {case None => Date().year; case Some(y) => y})}">Yeah, I know!</a>
+	<a class="btn" href="#" data-dismiss="modal">Nope</a>
 }
+
 

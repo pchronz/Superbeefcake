@@ -1,4 +1,4 @@
-@(macroEntries: List[MacroEntry], macroEntryForm: Form[(Option[String], Int, Int, Int, Int, Int, Int, Int)], macroEntryByFoodForm: Form[(String, Int, Int, Int, Int)])
+@(macroEntries: List[MacroEntry], macroEntryForm: Form[(Option[String], Int, Int, Int, Int, Int, Int, Int, Int)], macroEntryByFoodForm: Form[(String, Int, Int, Int, Int)])
 
 @import helper._
 @import helper.twitterBootstrap2._
@@ -11,11 +11,7 @@
 			@eatPieChart(macroEntries)
 		}
 	}
-	@bs2Row('id->"track-row") {
-		@bs2Span(8, Some(1)) {
-			@eatEntry(None, None, None, macroEntries, macroEntryForm, macroEntryByFoodForm)
-		}
-	}
+	@eatEntry(None, None, None, macroEntries, macroEntryForm, macroEntryByFoodForm)
 	<script type="text/javascript" charset="utf-8">
 		$(function(){
 			// select the navbar link for this view as active
