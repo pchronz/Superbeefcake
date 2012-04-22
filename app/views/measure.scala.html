@@ -1,0 +1,33 @@
+@(beefcake: Beefcake, date: Option[Date], measureEntryForm: Form[(String, Int, Int, Int, Int)], measureEntries: List[MeasureEntry])
+
+@import helper._
+@import helper.twitterBootstrap2._
+@import helper.twitterBootstrap2.Bootstrap2Helpers._
+@import models.Date
+
+@main(Html("Superbeefcake!"), "", Some(beefcake)) {
+	TODO: Date selection, weight entry, pictogram, other fields, ...
+	@bs2Row() {
+		@form(routes.Application.submitMeasureEntry, ('class->"form-inline")) {
+			<fieldset>
+				<legend>Measure your progress</legend>
+				<div class="control-group">
+					<input type="hidden" name="day" value="@{date match { case None => Date().day; case Some(date) => date.day}}" />
+					<input type="hidden" name="month" value="@{date match { case None => Date().month; case Some(date) => date.month}}" />
+					<input type="hidden" name="year" value="@{date match { case None => Date().year; case Some(date) => date.year}}" />
+					<input type="hidden" name="field" value="weight" />
+					<input type="text" name="value" value="10" />
+					<input type="submit" class="btn" />
+				</div>
+			</fieldset>
+		}
+	}
+	@measureEntries.mkString(", ")
+
+	<script type="text/javascript" charset="utf-8">
+		$(function(){
+			// select the navbar link for this view as active
+			$("#measure-nav-link").closest("li").addClass("active");
+		});
+	</script>
+}

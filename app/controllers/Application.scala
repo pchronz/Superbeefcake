@@ -279,17 +279,56 @@ object Application extends Controller {
     Ok(response)
   }
 
-  def analyze() = Action { implicit request =>
+  def analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int]) = Action { implicit request =>
     getUserFromSession(session) match {
       case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index)
       case user => {
-        val energySeries = MacroEntry.getTimeSeries("kCal", user)
-        val proteinSeries = MacroEntry.getTimeSeries("protein", user)
-        val fatSeries = MacroEntry.getTimeSeries("fat", user)
-        val carbsSeries = MacroEntry.getTimeSeries("carbs", user)
-        Ok(views.html.analyze(energySeries=energySeries, proteinSeries=proteinSeries, fatSeries=fatSeries, carbsSeries=carbsSeries, beefcake=user))
+        // get the period
+        val sDate = (sDay, sMonth, sYear) match {
+          case (Some(d), Some(m), Some(y)) => Date(d, m, y)
+          case _ => MacroEntry.getMinDate(user) match {
+            case None => Date()
+            case Some(d) => d
+          }
+        }
+        val eDate = (eDay, eMonth, eYear) match {
+          case (Some(d), Some(m), Some(y)) => Date(d, m, y)
+          case _ => MacroEntry.getMaxDate(user) match {
+            case None => Date()
+            case Some(d) => d
+          }
+        }
+        // query the database
+        val energySeries = MacroEntry.getTimeSeries("kCal", Some(sDate), Some(eDate), user)
+        val proteinSeries = MacroEntry.getTimeSeries("protein", Some(sDate), Some(eDate), user)
+        val fatSeries = MacroEntry.getTimeSeries("fat", Some(sDate), Some(eDate), user)
+        val carbsSeries = MacroEntry.getTimeSeries("carbs", Some(sDate), Some(eDate), user)
+        Ok(views.html.analyze(energySeries=energySeries, proteinSeries=proteinSeries, fatSeries=fatSeries, carbsSeries=carbsSeries, beefcake=user, sDate.day, sDate.month, sDate.year, eDate.day, eDate.month, eDate.year))
       }
     }
+  }
+
+
+  val analyzeDateForm = Form(
+    tuple(
+      "startday"->number,
+      "startmonth"->number,
+      "startyear"->number,
+      "endday"->number,
+      "endmonth"->number,
+      "endyear"->number
+    )
+  )
+  def analyzePost() = Action { implicit request =>
+    analyzeDateForm.bindFromRequest.fold (
+      {form =>  
+        Logger.error("Could not bind analyze date from request")
+        Redirect(routes.Application.analyze(None, None, None, None, None, None))
+      }
+      ,{fields => 
+        Redirect(routes.Application.analyze(Some(fields._1), Some(fields._2), Some(fields._3), Some(fields._4), Some(fields._5), Some(fields._6)))
+      }
+    )
   }
 
   def register() = Action { implicit request =>
@@ -382,6 +421,41 @@ object Application extends Controller {
         }
       }
     }
+  }
+
+  def measure() = Action { implicit request =>
+    getUserFromSession(session) match {
+      case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index)
+      case user => 
+        val measureEntries = MeasureEntry.all(user)
+        Ok(views.html.measure(user, None, measureEntryForm, measureEntries))
+    }
+  }
+
+  val measureEntryForm = Form(
+    tuple(
+      "field"->nonEmptyText,
+      "value"->number,
+      "day"->number,
+      "month"->number,
+      "year"->number
+    )
+  )
+
+  def submitMeasureEntry() = Action {implicit request =>
+    measureEntryForm.bindFromRequest.fold( {
+        form => 
+          Logger.warn("Binding error for measure entry")
+      }, {
+        fields => 
+          getUserFromSession(session) match {
+            case user @ Beefcake(_, _, _, false, _) =>
+              Logger.info("Adding " + fields)
+              MeasureEntry.create(MeasureEntry(id=None, time=Some(Date(fields._3, fields._4, fields._5)), field=fields._1, value=fields._2), user)
+          }
+      }
+    )
+    Redirect(routes.Application.measure())
   }
 }
 

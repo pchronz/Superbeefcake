@@ -55,18 +55,23 @@ object Global extends GlobalSettings {
     val MacroEntryRegex = """([^@]+)@([^@]+)@([^@]+)@([^@]+)@([^@]+)@([^@]+)""".r
     val lines = nutrientsFile.getLines()
     lines.foreach{line =>
-      println(line)
       try {
         val MacroEntryRegex(name, amount, energy, protein, fat, carbs) = line
         val AmountMatcher = """(\d+)\s*([^@]*)[^\w]*""".r
         val AmountMatcher(quantity, unit) = amount
-        if(quantity == "100" && unit == "g") {
-          val foodItem = Food(name, energy.replaceAll(",", ".").toDouble, protein.replaceAll(",", ".").toDouble, fat.replaceAll(",", ".").toDouble, carbs.replaceAll(",", ".").toDouble)
+        // adjust field to other standard weights
+        val energyNum = energy.replaceAll(",", ".").toDouble
+        val proteinNum = protein.replaceAll(",", ".").toDouble
+        val fatNum = fat.replaceAll(",", ".").toDouble
+        val carbsNum = carbs.replaceAll(",", ".").toDouble
+        if(unit == "g") {
+          val ratio = 1.0/quantity.toDouble
+          val foodItem = Food(name, ratio*energyNum, ratio*proteinNum, ratio*fatNum, ratio*carbsNum)
           Food.create(foodItem)
           successCounter += 1
         }
         else {
-          println("Could not insert " + name + " with amount " + amount)
+          println("Could not inser item " + name + " because of an unknown unit: " + unit)
         }
         totalCounter += 1
       }

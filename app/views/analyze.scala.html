@@ -1,4 +1,4 @@
-@(energySeries: List[(Date, Double)], proteinSeries: List[(Date, Double)], fatSeries: List[(Date, Double)], carbsSeries: List[(Date, Double)], beefcake: Beefcake)
+@(energySeries: List[(Date, Double)], proteinSeries: List[(Date, Double)], fatSeries: List[(Date, Double)], carbsSeries: List[(Date, Double)], beefcake: Beefcake, startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int)
 
 @import helper._
 @import helper.twitterBootstrap2._
@@ -6,6 +6,78 @@
 @import models.Date
 
 @main(Html("Superbeefcake!"), "", Some(beefcake)) {
+	@bs2Row() {
+		@form(routes.Application.analyzePost, ('class, "form-vertical")) {
+			@bs2Span(3, Some(1)) {
+				<fieldset>
+					<legend>Start</legend>
+					<div class="control-group">
+						<div class="controls">
+							<select class="span1" name="startday">
+								@{for(i <- 1 to 31) yield 
+									if(i == startDay) Html("<option selected='selected'>" + i.toString + "</option>")
+									else Html("<option>" + i.toString + "</option>")
+								}
+							</select>
+							<select class="span1" name="startmonth">
+								@{for(i <- 1 to 12) yield
+									if(i == startMonth) Html("<option selected='selected'>" + i.toString + "</option>")
+									else Html("<option>" + i.toString + "</option>")
+								}
+							</select>
+							<select class="span1" name="startyear">
+								@{for(i <- 2012 to 2012) yield
+									if(i == startYear) Html("<option selected='selected'>" + i.toString + "</option>")
+									else Html("<option>" + i.toString + "</option>")
+								}
+							</select>
+							<script type="text/javascript" charset="utf-8">
+								$(function() {
+									$("select[name='startday'], select[name='startmonth'], select[name='startyear']").change(function(){
+										$(this).closest("form").submit();
+									});
+								});
+							</script>
+						</div>
+					</div>
+				</fieldset>
+			}
+			@bs2Span(3, Some(1)) {
+				<fieldset>
+					<legend>End</legend>
+					<div class="control-group">
+						<div class="controls">
+							<select class="span1" name="endday">
+								@{for(i <- 1 to 31) yield 
+									if(i == endDay) Html("<option selected='selected'>" + i.toString + "</option>")
+									else Html("<option>" + i.toString + "</option>")
+								}
+							</select>
+							<select class="span1" name="endmonth">
+								@{for(i <- 1 to 12) yield
+									if(i == endMonth) Html("<option selected='selected'>" + i.toString + "</option>")
+									else Html("<option>" + i.toString + "</option>")
+								}
+							</select>
+							<select class="span1" name="endyear">
+								@{for(i <- 2012 to 2012) yield
+									if(i == endYear) Html("<option selected='selected'>" + i.toString + "</option>")
+									else Html("<option>" + i.toString + "</option>")
+								}
+							</select>
+							<script type="text/javascript" charset="utf-8">
+								$(function() {
+									$("select[name='endday'], select[name='endmonth'], select[name='endyear']").change(function(){
+										$(this).closest("form").submit();
+									});
+								});
+							</script>
+						</div>
+					</div>
+				</fieldset>
+			}
+		}
+	}
 	@bs2Row() {
 		@bs2Span(7, Some(1)) {
 			<h4>Energy</h4>

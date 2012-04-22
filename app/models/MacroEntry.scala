@@ -5,39 +5,9 @@ import anorm.SqlParser._
 import play.api.db._
 import play.api.Play.current
 
-case class Date(day: Int, month: Int, year: Int) {
-  def toLong(): Long = {
-    val cal = java.util.Calendar.getInstance
-    // +1 for all retarded Oracle engineers make the month 0-based although everything else is 1-based
-    cal.set(year, month+1, day, 0, 0)
-    cal.getTimeInMillis
-  }
-}
-
-object Date {
-  def apply():Date = {
-      // set to today
-      val cal = java.util.Calendar.getInstance
-      val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
-      val month = cal.get(java.util.Calendar.MONTH) + 1
-      val year = cal.get(java.util.Calendar.YEAR)
-      Date(day, month, year)
-  }
-
-  def apply(time: Long): Date = {
-      val cal = java.util.Calendar.getInstance
-      cal.setTimeInMillis(time)
-      val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
-      val month = cal.get(java.util.Calendar.MONTH) + 1
-      val year = cal.get(java.util.Calendar.YEAR)
-      Date(day, month, year)
-  }
-}
-
 case class MacroEntry(id: Option[Int], food: Option[String], time: Date, amount: Int, kCal: Double, protein: Double, fat: Double, carbs: Double)
 
 object MacroEntry {
-
   def apply(id: Option[Int], time: Option[Date], foodName: String, amount: Int): Option[MacroEntry] = {
     val timeConcrete: Date = time match {
       case None => Date()
@@ -57,7 +27,7 @@ object MacroEntry {
     }
   }
 
-  def apply(id: Option[Int], time: Option[Date], name: Option[String], amount: Integer, kCal: Double, protein: Double, fat: Double, carbs: Double): MacroEntry = {
+  def apply(id: Option[Int], time: Option[Date], name: Option[String], amount: Int, kCal: Double, protein: Double, fat: Double, carbs: Double): MacroEntry = {
     val timeConcrete = time match {
       case None => Date()
       case Some(t) => t
@@ -140,14 +110,23 @@ object MacroEntry {
     }
   }
 
-  def getTimeSeries(field: String, beefcake: Beefcake): List[(Date, Double)] = {
+  def getTimeSeries(field: String, start: Option[Date], end: Option[Date], beefcake: Beefcake): List[(Date, Double)] = {
     DB.withConnection{ implicit c =>
         // anorm's on-function is simply incapable. total crap. who wrote this?
         val groupField = SQL("SELECT SUM(" + field + "), day, month, year FROM macroEntry WHERE username = {username} GROUP BY day, month, year").on("username"->beefcake.username)
-        groupField().map{ row => 
+        val allEntries = groupField().map{ row => 
             val date = Date(row[Int]("day"), row[Int]("month"), row[Int]("year"))
             date -> row[Double]("SUM(" + field + ")")
         }.toList
+        (start, end) match {
+            case (Some(start), Some(end)) => 
+              for(entry<-allEntries if entry._1 >= start; if entry._1 <= end) yield entry
+            case (Some(start), None) =>
+              for(entry<-allEntries if entry._1 >= start) yield entry
+            case (None, Some(end)) =>
+              for(entry<-allEntries if entry._1 <= end) yield entry
+            case _ => allEntries
+        }
     }
   }
 
@@ -168,6 +147,32 @@ object MacroEntry {
       DB.withConnection{ implicit c =>
           SQL("UPDATE macroEntry SET amount={amount}, kCal={kCal}, protein={protein}, fat={fat}, carbs={carbs} WHERE username={username} AND id={id}").on("amount"->macroEntry.amount, "kCal"->macroEntry.kCal, "protein"->macroEntry.protein, "fat"->macroEntry.fat, "carbs"->macroEntry.carbs, "username"->beefcake.username, "id"-> macroEntry.id).executeUpdate()
       }
+  }
+
+  def getMaxDate(beefcake: Beefcake): Option[Date] = {
+    DB.withConnection{ implicit c =>
+      val dates = SQL("SELECT day, month, year FROM macroEntry WHERE username = {username}").on("username"->beefcake.username)
+      val allDates = dates().map{ row =>
+        Date(row[Int]("day"), row[Int]("month"), row[Int]("year"))
+      }
+      allDates.length match {
+        case 0 => None
+        case _ =>  Some(allDates.max(Date))
+      }
+    }
+  }
+
+  def getMinDate(beefcake: Beefcake): Option[Date] = {
+    DB.withConnection{ implicit c =>
+      val dates = SQL("SELECT day, month, year FROM macroEntry WHERE username = {username}").on("username"->beefcake.username)
+      val allDates = dates().map{ row =>
+        Date(row[Int]("day"), row[Int]("month"), row[Int]("year"))
+      }
+      allDates.length match {
+        case 0 => None
+        case _ =>  Some(allDates.min(Date))
+      }
+    }
   }
 }
 

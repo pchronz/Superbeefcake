@@ -33,6 +33,17 @@ CREATE TABLE macroEntry (
 	carbs FLOAT NOT NULL 
 );
 
+CREATE SEQUENCE measure_id_seq;
+CREATE TABLE measure (
+	id INTEGER NOT NULL DEFAULT nextval('measure_id_seq') PRIMARY KEY,
+	username VARCHAR(32) NOT NULL REFERENCES beefcake(username),
+	day INTEGER NOT NULL,
+	month INTEGER NOT NULL,
+	year INTEGER NOT NULL,
+	field VARCHAR(32) NOT NULL,
+	value FLOAT NOT NULL
+);
+
 # --- !Downs
 DROP TABLE macroEntry;
 

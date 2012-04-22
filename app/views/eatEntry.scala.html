@@ -38,7 +38,13 @@
 		@bs2Table(List(Html(""),Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
 			@macroEntries.map{macroEntry => 
 				<tr>
-					<td>@{macroEntry.food match {case None => ""; case Some(food) => food}}</td>
+					<td>
+						@{macroEntry.food match {
+							case None => ""
+							case Some(food) => 
+							food.replace("&szlig;", "ß").replace("&Uuml;", "Ü").replace("&Ouml;", "Ö").replace("&Auml;", "Ä").replace("&uuml;", "ü").replace("&ouml;", "ö").replace("&auml;", "ä")
+						}}
+					</td>
 					<td>
 						<input type="text" name="amount" id="amount-@macroEntry.id.get" value="@macroEntry.amount.toInt.toString" class="span1" style="margin-bottom: 0px;" rel="tooltip" title="Press Enter to udpate" />
 						<script type="text/javascript" charset="utf-8">
