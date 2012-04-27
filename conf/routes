@@ -10,7 +10,7 @@ POST	/analyzePost				controllers.Application.analyzePost
 GET		/login						controllers.Application.login
 POST	/submitMacroEntry			controllers.Application.submitMacroEntry
 POST	/submitDateFilter			controllers.Application.submitDateFilter
-GET		/deleteEntry/:id			controllers.Application.deleteEntry(id: Int)
+GET		/deleteMacroEntry/:id		controllers.Application.deleteMacroEntry(id: Int)
 POST	/submitMacroEntryByFood		controllers.Application.submitMacroEntryByFood
 POST	/auth						controllers.Application.auth
 GET		/deauth						controllers.Application.deauth
@@ -20,6 +20,7 @@ GET		/index						controllers.Application.index
 GET		/deleteAllEntries/:day/:month/:year		controllers.Application.deleteAllEntries(day: Int, month: Int, year: Int)
 GET		/measure					controllers.Application.measure
 POST	/submitMeasureEntry			controllers.Application.submitMeasureEntry
+GET		/deleteMeasureEntry/:id		controllers.Application.deleteMeasureEntry(id: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               	controllers.Assets.at(path="/public", file)
@@ -27,3 +28,4 @@ GET     /assets/*file               	controllers.Assets.at(path="/public", file)
 # AJAX requests
 GET		/suggestFood					controllers.Application.suggestFood(query: String)
 GET		/updateMacroEntry/:id/:amount	controllers.Application.updateMacroEntry(id: Int, amount:Int) 
+GET		/updateMeasureEntry/:id/:field/:value	controllers.Application.updateMeasureEntry(id: Int, field:String, value: String)

@@ -156,7 +156,7 @@ object Application extends Controller {
     )
   }
 
-  def deleteEntry(id: Int) = Action { implicit request =>
+  def deleteMacroEntry(id: Int) = Action { implicit request =>
     val user = getUserFromSession(session)
     Logger.info("Going to delete macroEntry with id == " + id)
     MacroEntry.deleteById(id, user)
@@ -303,7 +303,8 @@ object Application extends Controller {
         val proteinSeries = MacroEntry.getTimeSeries("protein", Some(sDate), Some(eDate), user)
         val fatSeries = MacroEntry.getTimeSeries("fat", Some(sDate), Some(eDate), user)
         val carbsSeries = MacroEntry.getTimeSeries("carbs", Some(sDate), Some(eDate), user)
-        Ok(views.html.analyze(energySeries=energySeries, proteinSeries=proteinSeries, fatSeries=fatSeries, carbsSeries=carbsSeries, beefcake=user, sDate.day, sDate.month, sDate.year, eDate.day, eDate.month, eDate.year))
+        val weightSeries = MeasureEntry.getTimeSeries("weight", Some(sDate), Some(eDate), user)
+        Ok(views.html.analyze(energySeries=energySeries, proteinSeries=proteinSeries, fatSeries=fatSeries, carbsSeries=carbsSeries, beefcake=user, startDay=sDate.day, startMonth=sDate.month, startYear=sDate.year, endDay=eDate.day, endMonth=eDate.month, endYear=eDate.year, weightSeries=weightSeries))
       }
     }
   }
@@ -456,6 +457,43 @@ object Application extends Controller {
       }
     )
     Redirect(routes.Application.measure())
+  }
+
+  def deleteMeasureEntry(id: Int) = Action {implicit request =>
+    val user = getUserFromSession(session)
+    Logger.info("Going to delete measureEntry with id == " + id)
+    MeasureEntry.deleteById(id.toInt, user)
+    user match {
+      case Beefcake(_, _, _, true, _)=> {
+        Logger.warn("Adhoc user just tried to delete a MeasureEntry!")
+        Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
+      }
+      case user => {
+        Redirect(routes.Application.measure()).withSession(session + ("beefcake"->user.username))
+      }
+    }
+  }
+
+  def updateMeasureEntry(id: Int, field: String, value: String) = Action {implicit request =>
+    val user = getUserFromSession(session)
+    // get the entry
+    MeasureEntry.findById(id, user) match {
+      // TODO how to return a 404?
+      case None => Ok("")
+      case Some(measureEntry) => 
+        try {
+          val numValue = value.replaceAll(",", ".").toDouble
+          MeasureEntry.update(MeasureEntry(id=Some(id), time=measureEntry.time, field="weight", value=numValue), user)
+          Ok("")
+        }
+        catch {
+          case e =>
+            Logger.error("Error while trying to update measureEntry.id == " + id + " with value == " + value)
+            Logger.error(e.toString)
+          // TODO 404
+          Ok("")
+        }
+    }
   }
 }
 

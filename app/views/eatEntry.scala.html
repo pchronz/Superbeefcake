@@ -66,7 +66,7 @@
 					<td id="td-fat-@macroEntry.id.get">@macroEntry.fat.toInt.toString</td>
 					<td id="td-carbs-@macroEntry.id.get">@macroEntry.carbs.toInt.toString</td>
 					<td>
-						<a href="@{routes.Application.deleteEntry(macroEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
+						<a href="@{routes.Application.deleteMacroEntry(macroEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
 					</td>
 				</tr>
 			}

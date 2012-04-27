@@ -41,7 +41,8 @@ CREATE TABLE measure (
 	month INTEGER NOT NULL,
 	year INTEGER NOT NULL,
 	field VARCHAR(32) NOT NULL,
-	value FLOAT NOT NULL
+	value FLOAT NOT NULL,
+	CONSTRAINT one_entry UNIQUE (day, month, year, field, username)
 );
 
 # --- !Downs
