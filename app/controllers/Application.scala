@@ -424,12 +424,23 @@ object Application extends Controller {
     }
   }
 
-  def measure() = Action { implicit request =>
+  def measure(startDay: Option[Int], startMonth: Option[Int], startYear: Option[Int], endDay: Option[Int], endMonth: Option[Int], endYear: Option[Int]) = Action { implicit request =>
+    val startDate = (startDay, startMonth, startYear) match {
+      case (Some(d), Some(m), Some(y)) => Some(Date(d, m, y))
+      case _ => None
+    }
+    val endDate = (endDay, endMonth, endYear) match {
+      case (Some(d), Some(m), Some(y)) => Some(Date(d, m, y))
+      case _ => None
+    }
     getUserFromSession(session) match {
       case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index)
       case user => 
-        val measureEntries = MeasureEntry.all(user)
-        Ok(views.html.measure(user, None, measureEntryForm, measureEntries))
+        val measureEntries = (startDate, endDate) match {
+          case (Some(s), Some(e)) => MeasureEntry.findByDates(s, e)
+          case _ => MeasureEntry.all(user)
+        }
+        Ok(views.html.measure(user, startDate, endDate, measureEntryForm, measureEntries))
     }
   }
 
@@ -456,7 +467,7 @@ object Application extends Controller {
           }
       }
     )
-    Redirect(routes.Application.measure())
+    Redirect(routes.Application.measure(None, None, None, None, None, None))
   }
 
   def deleteMeasureEntry(id: Int) = Action {implicit request =>
@@ -469,7 +480,7 @@ object Application extends Controller {
         Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
       }
       case user => {
-        Redirect(routes.Application.measure()).withSession(session + ("beefcake"->user.username))
+        Redirect(routes.Application.measure(None, None, None, None, None, None)).withSession(session + ("beefcake"->user.username))
       }
     }
   }
@@ -495,5 +506,30 @@ object Application extends Controller {
         }
     }
   }
+
+  val measureDateFilterForm = Form(
+    tuple(
+      "start-day"->number,
+      "start-month"->number,
+      "start-year"->number,
+      "end-day"->number,
+      "end-month"->number,
+      "end-year"->number
+    )
+  )
+
+  def submitMeasureDateFilter() = Action{ implicit request =>
+    val user = getUserFromSession(session)
+    measureDateFilterForm.bindFromRequest.fold(
+      {form => 
+        Logger.error("Could not bind measure date fields on post")
+        Redirect(routes.Application.measure(None, None, None, None, None, None))
+      },
+      {fields =>
+        Redirect(routes.Application.measure(Some(fields._1), Some(fields._2), Some(fields._3), Some(fields._4), Some(fields._5), Some(fields._6)))
+      }
+    ) 
+  }
+
 }
 

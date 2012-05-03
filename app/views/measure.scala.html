@@ -1,4 +1,4 @@
-@(beefcake: Beefcake, date: Option[Date], measureEntryForm: Form[(String, Int, Int, Int, Int)], measureEntries: List[MeasureEntry])
+@(beefcake: Beefcake, startDate: Option[Date], endDate: Option[Date], measureEntryForm: Form[(String, Int, Int, Int, Int)], measureEntries: List[MeasureEntry])
 
 @import helper._
 @import helper.twitterBootstrap2._
@@ -6,71 +6,26 @@
 @import models.Date
 
 @main(Html("Superbeefcake!"), "", Some(beefcake)) {
-	@bs2Row() {
-		@bs2Span(6, Some(1)) {
-			<select class="span1" name="day">
-				@{1.to(31).map{d =>
-					val dat = date match {
-						case None => Date()
-						case Some(dat) => dat
-					}
-					if(dat.day == d)
-						Html("<option selected=\"selected\">" + d + "</option>")
-					else 
-						Html("<option>" + d + "</option>")
-				}}
-			</select>
+	@form(routes.Application.submitMeasureDateFilter){
+		<fieldset>
+		@bs2Row() {
+			@bs2Span(9, Some(1)) {
+				<legend>Pick a period</legend>
+			}
+		}
+		@bs2Row() {
+			@bs2Span(3, Some(1)) {
+				<label class="control-label">Start date</label>
+				@datePicker(startDate, Some("start"))
+			}
+			@bs2Span(3, None) {
+				<label class="control-label">End date</label>
+				@datePicker(endDate, Some("end"))
+			}
 			<script type="text/javascript" charset="utf-8">
 				$(function() {
-					updateField("day");
-					$("select[name='day']").change(function() {
-						updateField("day");
-					});
-				});
-			</script>
-			<select class="span1" name="month">
-				@{1.to(12).map{d =>
-					val dat = date match {
-						case None => Date()
-						case Some(dat) => dat
-					}
-					if(dat.month == d)
-						Html("<option selected=\"selected\">" + d + "</option>")
-					else 
-						Html("<option>" + d + "</option>")
-				}}
-			</select>
-			<script type="text/javascript" charset="utf-8">
-				$(function() {
-					updateField("month");
-					$("select[name='month']").change(function() {
-						updateField("month");
-					});
-				});
-			</script>
-			<select class="span1" name="year">
-				@{2012.to(2015).map{d =>
-					val dat = date match {
-						case None => Date()
-						case Some(dat) => dat
-					}
-					if(dat.year == d)
-						Html("<option selected=\"selected\">" + d + "</option>")
-					else 
-						Html("<option>" + d + "</option>")
-				}}
-			</select>
-			<script type="text/javascript" charset="utf-8">
-				function updateField(scale) {
-					var value = $("select[name='" + scale + "'] option:selected").val();
-					console.log("updating" + value);
-					$("input[type='hidden'][name='" + scale + "']").val(value);
-					return true;
-				};
-				$(function() {
-					updateField("year");
-					$("select[name='year']").change(function() {
-						updateField("year");
+					$("select[name^='start'], select[name^='end']").change(function() {
+						$(this).closest("form").submit();
 					});
 				});
 			</script>
@@ -79,24 +34,23 @@
 
 	@bs2Row() {
 		@bs2Span(6, Some(1)) {
-			<img src="@routes.Assets.at("images/scale.jpg")" />
-			@bs2Table(List(Html("Date"), Html("Value"), Html(""))){
+			@bs2Table(List(Html("Date"), Html("Weight"), Html(""))){
 				<tr>
 					@form(routes.Application.submitMeasureEntry, ('class->"form-inline")) {
 						<td>
-							<input type="text" title="1..31" class="span1" name="day" placeholder="Day" value="@{date match {case Some(d)=>d.day.toString; case None=>Date().day.toString}}" />
+							<input type="text" title="1..31" class="span1" name="day" placeholder="Day" value="@{Date().day.toString}" />
 							<script type="text/javascript" charset="utf-8">
 								$(function(){
 									$("input[name='day']").tooltip({trigger: 'focus'});
 								});
 							</script>
-							<input type="text" title="1..12" class="span1" name="month" placeholder="Month" value="@{date match {case Some(d)=>d.month.toString; case None=>Date().month.toString}}" />
+							<input type="text" title="1..12" class="span1" name="month" placeholder="Month" value="@{Date().month.toString}" />
 							<script type="text/javascript" charset="utf-8">
 								$(function(){
 									$("input[name='month']").tooltip({trigger: 'focus'});
 								});
 							</script>
-							<input type="text" title="2012..2014" class="span1" name="year" placeholder="Year" value="@{date match {case Some(d)=>d.year.toString; case None=>Date().year.toString}}" />
+							<input type="text" title="2012..2014" class="span1" name="year" placeholder="Year" value="@{Date().year.toString}" />
 							<script type="text/javascript" charset="utf-8">
 								$(function(){
 									$("input[name='year']").tooltip({trigger: 'focus'});
@@ -116,10 +70,16 @@
 					<tr>
 						<td>@measureEntry.time</td>
 						<td>
-							<input type="text" class="span1" name="value" id="measure-entry-@measureEntry.id" value="@measureEntry.value">
+							<input type="text" class="span1" name="value" id="measure-entry-@measureEntry.id" value="@measureEntry.value" title="Hit Enter to save">
 							<script type="text/javascript" charset="utf-8">
 								$(function() {
-									$("#measure-entry-@measureEntry.id").change(function(){
+									var tooltipQuery = "#measure-entry-@measureEntry.id";
+
+									// tooltip
+									$(tooltipQuery).tooltip({trigger: "focus"});
+
+									// ajax call
+									$(tooltipQuery).change(function(){
 										var newVal = $(this).val();
 										$.get("@routes.Application.updateMeasureEntry(measureEntry.id.get, "weight", "")" + newVal, function(date) {
 											console.log("All fine!");

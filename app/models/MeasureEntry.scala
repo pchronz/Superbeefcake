@@ -89,6 +89,11 @@ object MeasureEntry {
     }
   }
 
+  def findByDates(startDate: Date, endDate: Date) = {
+    // TODO
+    Nil
+  }
+
   def update(measureEntry: MeasureEntry, user: Beefcake) {
     DB.withConnection{ implicit c =>
         SQL("UPDATE measure SET value={value}, field={field} WHERE username={username} AND id={id}").on("value"-> measureEntry.value, "field"->measureEntry.field, "value"->measureEntry.value, "username"->user.username, "id"->measureEntry.id).executeUpdate()
