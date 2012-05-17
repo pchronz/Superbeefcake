@@ -1,0 +1,46 @@
+@(date: Option[Date], name: Option[String])
+
+@import models.Date
+
+
+<select class="span1" name="@{name match {case None=>""; case Some(n)=>n+"-"}}day">
+	@{1.to(31).map{d =>
+		val dat = date match {
+			case None => Date()
+			case Some(dat) => dat
+		}
+		if(dat.day == d)
+			Html("<option selected=\"selected\">" + d + "</option>")
+		else 
+			Html("<option>" + d + "</option>")
+	}}
+</select>
+
+<select class="span1" name="@{name match {case None=>""; case Some(n)=>n+"-"}}month">
+	@{1.to(12).map{d =>
+		val dat = date match {
+			case None => Date()
+			case Some(dat) => dat
+		}
+		if(dat.month == d)
+			Html("<option selected=\"selected\">" + d + "</option>")
+		else 
+			Html("<option>" + d + "</option>")
+	}}
+</select>
+
+
+<select class="span1" name="@{name match {case None=>""; case Some(n)=>n+"-"}}year">
+	@{2012.to(2015).map{d =>
+		val dat = date match {
+			case None => Date()
+			case Some(dat) => dat
+		}
+		if(dat.year == d)
+			Html("<option selected=\"selected\">" + d + "</option>")
+		else 
+			Html("<option>" + d + "</option>")
+	}}
+</select>
+
+

@@ -1,11 +1,15 @@
 package models
 
-case class Date(day: Int, month: Int, year: Int) {
+case class Date(day: Int, month: Int, year: Int) extends Ordered[Date] {
   def toLong(): Long = {
     val cal = java.util.Calendar.getInstance
     // +1 for all retarded Oracle engineers make the month 0-based although everything else is 1-based
     cal.set(year, month+1, day, 0, 0)
     cal.getTimeInMillis
+  }
+
+  def compare(that: Date) = {
+    (this.toLong - that.toLong).toInt
   }
 
   override def toString(): String = {

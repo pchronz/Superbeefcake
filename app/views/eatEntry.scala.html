@@ -53,10 +53,19 @@
 								var newAmount = $(this).val();
 								$.get("@routes.Application.updateMacroEntry(macroEntry.id.get, 0)" + newAmount, function(data) {
 									var resp = eval(data)[0];
+									// update the entry in the view
 									$("#td-energy-@macroEntry.id.get").html(resp.energy);
 									$("#td-protein-@macroEntry.id.get").html(resp.protein);
 									$("#td-fat-@macroEntry.id.get").html(resp.fat);
 									$("#td-carbs-@macroEntry.id.get").html(resp.carbs);
+
+									// update the total in the view as well
+									var totalAmount = 0;
+									$("input[id^='amount-']").each(function(){
+										totalAmount += Number($(this).val());
+									});
+									$("#amount-total").html(totalAmount);
+									// TODO implement energy, protein, carbs, fat as well!
 								});
 							});
 						</script>
@@ -72,11 +81,11 @@
 			}
 			<tr>
 				<td><strong>Total</strong></td>
-				<td><strong>@macroEntries.map(_.amount).foldLeft[Double](0)(_+_).toInt</strong></td>
-				<td><strong>@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_).toInt</strong></td>
-				<td><strong>@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</strong></td>
-				<td><strong>@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</strong></td>
-				<td><strong>@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</strong></td>
+				<td><strong id="amount-total">@macroEntries.map(_.amount).foldLeft[Double](0)(_+_).toInt</strong></td>
+				<td><strong id="energy-total">@macroEntries.map(_.kCal).foldLeft[Double](0)(_+_).toInt</strong></td>
+				<td><strong id="protein-total">@macroEntries.map(_.protein).foldLeft[Double](0)(_+_).toInt</strong></td>
+				<td><strong id="fat-total">@macroEntries.map(_.fat).foldLeft[Double](0)(_+_).toInt</strong></td>
+				<td><strong id="carbs-total">@macroEntries.map(_.carbs).foldLeft[Double](0)(_+_).toInt</strong></td>
 				<td>
 					<a id="link-clear-date" href="#" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
 					<script type="text/javascript" charset="utf-8">

@@ -89,9 +89,11 @@ object MeasureEntry {
     }
   }
 
-  def findByDates(startDate: Date, endDate: Date) = {
-    // TODO
-    Nil
+  def findByDates(startDate: Date, endDate: Date, user: Beefcake) = {
+    DB.withConnection{ implicit c =>
+        val measureEntries = SQL("SELECT * FROM measure WHERE year>={startYear} AND year<={endYear} AND username={username}").on("username"->user.username, "startYear"->startDate.year, "endYear"->endDate.year).as(measureEntry *)
+        measureEntries.filter(measureEntry => measureEntry.time.get >= startDate && measureEntry.time.get <= endDate)
+    }
   }
 
   def update(measureEntry: MeasureEntry, user: Beefcake) {

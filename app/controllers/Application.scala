@@ -404,7 +404,7 @@ object Application extends Controller {
           val ratio = amount.toDouble / macroEntry.amount.toDouble
           val newAmount = amount
           val newEnergy = macroEntry.kCal * ratio
-          val newProtein = macroEntry.fat * ratio
+          val newProtein = macroEntry.protein * ratio
           val newFat = macroEntry.fat * ratio
           val newCarbs = macroEntry.carbs * ratio
           // update the entry
@@ -436,11 +436,21 @@ object Application extends Controller {
     getUserFromSession(session) match {
       case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index)
       case user => 
-        val measureEntries = (startDate, endDate) match {
-          case (Some(s), Some(e)) => MeasureEntry.findByDates(s, e)
-          case _ => MeasureEntry.all(user)
+        (startDate, endDate) match {
+          case (Some(s), Some(e)) => 
+            val measureEntries = MeasureEntry.findByDates(s, e, user)
+            Ok(views.html.measure(user, startDate, endDate, measureEntryForm, measureEntries))
+          case _ => 
+            val measureEntries = MeasureEntry.all(user)
+            def compareMeasureEntries(a: MeasureEntry, b: MeasureEntry): Boolean = {
+              (a.time, b.time) match {
+                case (Some(tA), Some(tB)) => tA < tB
+                case _ => true
+              }
+            }
+            val sortedEntries = measureEntries.sortWith(compareMeasureEntries)
+            Ok(views.html.measure(user, sortedEntries.head.time, sortedEntries.last.time, measureEntryForm, measureEntries))
         }
-        Ok(views.html.measure(user, startDate, endDate, measureEntryForm, measureEntries))
     }
   }
 
