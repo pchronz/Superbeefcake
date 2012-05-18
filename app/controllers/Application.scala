@@ -449,7 +449,10 @@ object Application extends Controller {
               }
             }
             val sortedEntries = measureEntries.sortWith(compareMeasureEntries)
-            Ok(views.html.measure(user, sortedEntries.head.time, sortedEntries.last.time, measureEntryForm, measureEntries))
+            sortedEntries match {
+              case Nil => Ok(views.html.measure(user, None, None, measureEntryForm, measureEntries))
+              case _ => Ok(views.html.measure(user, sortedEntries.head.time, sortedEntries.last.time, measureEntryForm, measureEntries))
+            }
         }
     }
   }
@@ -457,7 +460,7 @@ object Application extends Controller {
   val measureEntryForm = Form(
     tuple(
       "field"->nonEmptyText,
-      "value"->number,
+      "value"->nonEmptyText,
       "day"->number,
       "month"->number,
       "year"->number
@@ -465,17 +468,18 @@ object Application extends Controller {
   )
 
   def submitMeasureEntry() = Action {implicit request =>
-    measureEntryForm.bindFromRequest.fold( {
-        form => 
-          Logger.warn("Binding error for measure entry")
-      }, {
-        fields => 
-          getUserFromSession(session) match {
+    Logger.info(request.body.toString)
+    measureEntryForm.bindFromRequest.fold( 
+        form => Logger.warn("Binding error for measure entry: " + form.errors.map{_.message}.mkString(",")), 
+        fields => getUserFromSession(session) match {
             case user @ Beefcake(_, _, _, false, _) =>
               Logger.info("Adding " + fields)
-              MeasureEntry.create(MeasureEntry(id=None, time=Some(Date(fields._3, fields._4, fields._5)), field=fields._1, value=fields._2), user)
+              // convert the value to a double... why is there no proper decimal type for forms?
+              val valueDouble = fields._2.replace(",", ".").toDouble
+
+              MeasureEntry.create(MeasureEntry(id=None, time=Some(Date(fields._3, fields._4, fields._5)), field=fields._1, value=valueDouble), user)
           }
-      }
+      
     )
     Redirect(routes.Application.measure(None, None, None, None, None, None))
   }

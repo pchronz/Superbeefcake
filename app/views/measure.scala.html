@@ -1,4 +1,4 @@
-@(beefcake: Beefcake, startDate: Option[Date], endDate: Option[Date], measureEntryForm: Form[(String, Int, Int, Int, Int)], measureEntries: List[MeasureEntry])
+@(beefcake: Beefcake, startDate: Option[Date], endDate: Option[Date], measureEntryForm: Form[(String, String, Int, Int, Int)], measureEntries: List[MeasureEntry])
 
 @import helper._
 @import helper.twitterBootstrap2._
@@ -80,6 +80,10 @@
 
 									// ajax call
 									$(tooltipQuery).change(function(){
+										// TODO change the tooltip to "done"
+										$(this).tooltip({title: "done"})
+
+										// read the value and send the AJAX request
 										var newVal = $(this).val();
 										$.get("@routes.Application.updateMeasureEntry(measureEntry.id.get, "weight", "")" + newVal, function(date) {
 											console.log("All fine!");
