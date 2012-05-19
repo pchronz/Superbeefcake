@@ -60,12 +60,23 @@
 									$("#td-carbs-@macroEntry.id.get").html(resp.carbs);
 
 									// update the total in the view as well
+									// amount
 									var totalAmount = 0;
 									$("input[id^='amount-']").each(function(){
 										totalAmount += Number($(this).val());
 									});
 									$("#amount-total").html(totalAmount);
-									// TODO implement energy, protein, carbs, fat as well!
+
+									// energy, protein, fat, carbs
+									var fields = ["energy", "protein", "fat", "carbs"];
+									for(i in fields) {
+										var field = fields[i]j
+										var total= 0;
+										$("td[id^='td-" + field + "-']").each(function(){
+											total+= Number($(this).html());
+										});
+										$("#" + field + "-total").html(total);
+									}
 								});
 							});
 						</script>

@@ -66,37 +66,61 @@
 						</td>
 					}
 				</tr>
-				@measureEntries.filter(entry => entry.field.toLowerCase == "weight").sortBy(a=>a.time.get)(Date).reverse.map{ measureEntry =>
-					<tr>
-						<td>@measureEntry.time</td>
-						<td>
-							<input type="text" class="span1" name="value" id="measure-entry-@measureEntry.id" value="@measureEntry.value" title="Hit Enter to save">
-							<script type="text/javascript" charset="utf-8">
-								$(function() {
-									var tooltipQuery = "#measure-entry-@measureEntry.id";
+				@{/* the form and function are there so there is no page reload when you hit enter when there is only one entry to update */}
+				<form id="form-update">
+					<script type="text/javascript" charset="utf-8">
+						$(function() {
+							$("#form-update").submit(function() {
+								return false;
+							});
+						});
+					</script>
+					@measureEntries.filter(entry => entry.field.toLowerCase == "weight").sortBy(a=>a.time.get)(Date).reverse.map{ measureEntry =>
+						<tr>
+							<td>@measureEntry.time</td>
+							<td>
+								<input type="text" class="span1" name="value" id="measure-entry-@measureEntry.id" value="@measureEntry.value">
+								<script type="text/javascript" charset="utf-8">
+									$(function() {
+										var tooltipQuery = "#measure-entry-@measureEntry.id";
 
-									// tooltip
-									$(tooltipQuery).tooltip({trigger: "focus"});
+										// tooltip
+										$(tooltipQuery).tooltip({trigger: "focus", title: "Press Enter to save"});
 
-									// ajax call
-									$(tooltipQuery).change(function(){
-										// TODO change the tooltip to "done"
-										$(this).tooltip({title: "done"})
+										$(tooltipQuery).focus(function() {
+											$("#label-saving-@measureEntry.id.get").addClass('hide');
+											$("#label-saved-@measureEntry.id.get").addClass('hide');
+										});
+										$(tooltipQuery).blur(function() {
+											$("#label-saving-@measureEntry.id.get").addClass('hide');
+											$("#label-saved-@measureEntry.id.get").addClass('hide');
+										});
 
-										// read the value and send the AJAX request
-										var newVal = $(this).val();
-										$.get("@routes.Application.updateMeasureEntry(measureEntry.id.get, "weight", "")" + newVal, function(date) {
-											console.log("All fine!");
+										// ajax call
+										$(tooltipQuery).change(function(){
+											$("#label-saved-@measureEntry.id.get").addClass('hide');
+											$("#label-saving-@measureEntry.id.get").removeClass('hide');
+											// read the value and send the AJAX request
+											var newVal = $(this).val();
+											console.log(newVal);
+											$.get("@routes.Application.updateMeasureEntry(measureEntry.id.get, "weight", "")" + newVal, function(date) {
+												$("#label-saving-@measureEntry.id.get").addClass('hide');
+												$("#label-saved-@measureEntry.id.get").removeClass('hide');
+												$(tooltipQuery).tooltip('hide');
+												console.log("All fine!");
+											});
 										});
 									});
-								});
-							</script>
-						</td>
-						<td>
-							<a href="@{routes.Application.deleteMeasureEntry(measureEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
-						</td>
-					</tr>
-				}
+								</script>
+								<span class="label label-warning hide" id="label-saving-@measureEntry.id.get" style="position: relative; top: -5px;">Saving...</span>
+								<span class="label label-success hide" id="label-saved-@measureEntry.id.get" style="position: relative; top: -5px;">Saved</span>
+							</td>
+							<td>
+								<a href="@{routes.Application.deleteMeasureEntry(measureEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
+							</td>
+						</tr>
+					}
+				</form>
 			}
 		}
 	}
