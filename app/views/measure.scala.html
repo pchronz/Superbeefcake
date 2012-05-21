@@ -88,25 +88,28 @@
 										$(tooltipQuery).tooltip({trigger: "focus", title: "Press Enter to save"});
 
 										$(tooltipQuery).focus(function() {
+											// status label
 											$("#label-saving-@measureEntry.id.get").addClass('hide');
 											$("#label-saved-@measureEntry.id.get").addClass('hide');
 										});
 										$(tooltipQuery).blur(function() {
+											// status label
 											$("#label-saving-@measureEntry.id.get").addClass('hide');
 											$("#label-saved-@measureEntry.id.get").addClass('hide');
 										});
 
 										// ajax call
 										$(tooltipQuery).change(function(){
+											// status label
 											$("#label-saved-@measureEntry.id.get").addClass('hide');
 											$("#label-saving-@measureEntry.id.get").removeClass('hide');
+											$(this).tooltip('hide');
 											// read the value and send the AJAX request
 											var newVal = $(this).val();
-											console.log(newVal);
 											$.get("@routes.Application.updateMeasureEntry(measureEntry.id.get, "weight", "")" + newVal, function(date) {
+												// status label
 												$("#label-saving-@measureEntry.id.get").addClass('hide');
 												$("#label-saved-@measureEntry.id.get").removeClass('hide');
-												$(tooltipQuery).tooltip('hide');
 												console.log("All fine!");
 											});
 										});

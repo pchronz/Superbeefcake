@@ -4,7 +4,7 @@
 
 <html>
     <head>
-        <title>Superbeefcake!</title>
+        <title>Kampfkoloss!</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
@@ -19,11 +19,10 @@
 		<div class="navbar navbar-fixed-top">
 			<div class="navbar-inner">
 				<div class="container">
-					<a class="brand" href="#">Superbeefcake!</a>
+					<a class="brand" href="#">Kampfkoloss!</a>
 					<div class="nav-collapse">
 						<ul class="nav">
 							<li><a href="@{routes.Application.eat(None, None, None)}" id="eat-nav-link">Eat</a></li>
-							@{<li><a href="#" id="workout-nav-link">Workout</a></li>}
 							<li><a href="@{routes.Application.measure(None, None, None, None, None, None)}" id="measure-nav-link">Measure</a></li>
 							<li><a href="@{routes.Application.analyze(None, None, None, None, None, None)}" id="analyze-nav-link">Analyze</a></li>
 						</ul>
