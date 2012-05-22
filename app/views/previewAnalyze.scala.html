@@ -1,0 +1,9 @@
+@(energySeries: List[(Date, Double)], proteinSeries: List[(Date, Double)], fatSeries: List[(Date, Double)], carbsSeries: List[(Date, Double)], startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: List[(Date, Double)])
+
+@import helper._
+@import helper.twitterBootstrap2._
+@import helper.twitterBootstrap2.Bootstrap2Helpers._
+@import models.Date
+
+@analyzeTemplate(energySeries, proteinSeries, fatSeries, carbsSeries, None, startDay, startMonth, startYear, endDay, endMonth, endYear, weightSeries, "foo")
+
