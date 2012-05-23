@@ -1,8 +1,8 @@
-@(energySeries: List[(Date, Double)], proteinSeries: List[(Date, Double)], fatSeries: List[(Date, Double)], carbsSeries: List[(Date, Double)], beefcake: Beefcake, startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: List[(Date, Double)])
+@(energySeries: Seq[(Date, Double)], proteinSeries: Seq[(Date, Double)], fatSeries: Seq[(Date, Double)], carbsSeries: Seq[(Date, Double)], beefcake: Beefcake, startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: Seq[(Date, Double)])
 
 @import helper._
 @import helper.twitterBootstrap2._
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
-@analyzeTemplate(energySeries, proteinSeries, fatSeries, carbsSeries, Some(beefcake), startDay, startMonth, startYear, endDay, endMonth, endYear, weightSeries, "foo")
+@analyzeTemplate(energySeries, proteinSeries, fatSeries, carbsSeries, Some(beefcake), startDay, startMonth, startYear, endDay, endMonth, endYear, weightSeries, routes.Application.analyzePost)

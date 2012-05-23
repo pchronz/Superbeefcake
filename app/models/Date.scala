@@ -4,7 +4,7 @@ case class Date(day: Int, month: Int, year: Int) extends Ordered[Date] {
   def toLong(): Long = {
     val cal = java.util.Calendar.getInstance
     // +1 for all retarded Oracle engineers make the month 0-based although everything else is 1-based
-    cal.set(year, month+1, day, 0, 0)
+    cal.set(year, month-1, day, 0, 0)
     cal.getTimeInMillis
   }
 
@@ -14,6 +14,10 @@ case class Date(day: Int, month: Int, year: Int) extends Ordered[Date] {
 
   override def toString(): String = {
     day + "." + month + "." + year
+  }
+
+  def +(days: Int) = {
+    Date(this.toLong + days.toLong * 24.toLong * 60.toLong * 60.toLong * 1000.toLong)
   }
 }
 

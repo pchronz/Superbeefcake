@@ -1,4 +1,4 @@
-@(energySeries: List[(Date, Double)], proteinSeries: List[(Date, Double)], fatSeries: List[(Date, Double)], carbsSeries: List[(Date, Double)], beefcake: Option[Beefcake], startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: List[(Date, Double)], updateTarget: String)
+@(energySeries: Seq[(Date, Double)], proteinSeries: Seq[(Date, Double)], fatSeries: Seq[(Date, Double)], carbsSeries: Seq[(Date, Double)], beefcake: Option[Beefcake], startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: Seq[(Date, Double)], postTarget: Call)
 
 @import helper._
 @import helper.twitterBootstrap2._
@@ -7,7 +7,7 @@
 
 @main(Html("Superbeefcake!"), "", beefcake) {
 	@bs2Row() {
-		@form(routes.Application.analyzePost, ('class, "form-vertical")) {
+		@form(postTarget, ('class, "form-vertical")) {
 			@bs2Span(3, Some(1)) {
 				<fieldset>
 					<legend>Start</legend>

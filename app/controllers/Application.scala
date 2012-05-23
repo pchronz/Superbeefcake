@@ -281,7 +281,7 @@ object Application extends Controller {
 
   def analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int]) = Action { implicit request =>
     getUserFromSession(session) match {
-      case Beefcake(_, _, _, true, _) => Redirect(routes.Preview.analyze)
+      case Beefcake(_, _, _, true, _) => Redirect(routes.Preview.analyze(sDay, sMonth, sYear, eDay, eMonth, eYear))
       case user => {
         // get the period
         val sDate = (sDay, sMonth, sYear) match {

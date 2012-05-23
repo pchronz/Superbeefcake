@@ -23,7 +23,8 @@ POST	/submitMeasureEntry			controllers.Application.submitMeasureEntry
 GET		/deleteMeasureEntry/:id		controllers.Application.deleteMeasureEntry(id: Int)
 POST	/submitMeasureDateFilter	controllers.Application.submitMeasureDateFilter
 # preview pages
-GET		/preview/analyze			controllers.Preview.analyze
+GET		/preview/analyze			controllers.Preview.analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int])
+POST	/preview/analyzePost		controllers.Preview.analyzePost
 GET		/preview/measure			controllers.Preview.measure
 
 # Map static resources from the /public folder to the /assets URL path
