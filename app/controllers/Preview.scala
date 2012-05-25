@@ -29,13 +29,17 @@ object Preview extends Controller {
       case (Some(eD), Some(eM), Some(eY)) => Date(eD, eM, eY)
       case _ => Date()
     }
-    //val energyFiltered = energySeries.filter((el: Tuple2[Date, Double]) => el._1 >= startDate && el._1 <= endDate)
     val energyFiltered = proteinSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
     val proteinFiltered = proteinSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
     val fatFiltered = fatSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
     val carbsFiltered = carbsSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
     val weightFiltered = weightSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
-    Ok(views.html.previewAnalyze(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, startDate.day, startDate.month, startDate.year, endDate.day, endDate.month, endDate.year, weightFiltered))
+    val minDataDate = List(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, weightFiltered).minBy(list => list.length match {
+      case 0 => Date()
+      case _ => list.minBy(_._1)._1
+    }).minBy(_._1)._1
+    val maxDataDate = Date()
+    Ok(views.html.previewAnalyze(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, minDataDate.day, minDataDate.month, minDataDate.year, maxDataDate.day, maxDataDate.month, maxDataDate.year, weightFiltered))
   }
 
   def analyzePost() = Action{ implicit request =>

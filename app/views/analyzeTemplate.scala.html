@@ -81,7 +81,7 @@
 	@bs2Row() {
 		@bs2Span(7, Some(1)) {
 			<h4>Energy</h4>
-			TODO: if there is no data, display a message in the graphs
+			TODO: automatic selection of min date, max date in controller
 			<div id="energy-placeholder" style="width: 600px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				$(function () {
@@ -99,9 +99,11 @@
 						minWeight = minWeight >= 1 ? minWeight - 0.5 : 0; // minWeight < 10??? unfortunate situation!
 						var maxWeight = @{weightSeries match {case Nil => 0; case _ => weightSeries.maxBy(a => a._2)._2}};
 						maxWeight += 0.5;
-						var weightLabel = "Weight (Average: @{(weightSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / weightSeries.length).toInt} kg/day)";
+						var weightLabel = "Weight (Average: @{weightSeries.length match { case 0 => 0; case _ => (weightSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / weightSeries.length).toInt}} kg/day)";
+						var showWeightPoints = @weightSeries.length == 1 ? true : false;
+						var showEnergyPoints = @energySeries.length == 1 ? true : false;
 						$.plot($("#energy-placeholder"),
-							[{data: energy, lines: {show: true}, points: {show: false}, label: energyLabel, yaxis: 1}, {data: weight, points: {show: false}, lines: {show: true}, label: weightLabel, yaxis: 2}],
+							[{data: energy, lines: {show: true}, points: {show: showEnergyPoints}, label: energyLabel, yaxis: 1}, {data: weight, points: {show: showWeightPoints}, lines: {show: true}, label: weightLabel, yaxis: 2}],
 							{xaxis: {mode: "time", position: "bottom"}, yaxes: [{show: true, position: "left", min: minEnergy, max: maxEnergy}, {position: "right", min: minWeight, max: maxWeight}]}
 						);
 				});
@@ -120,10 +122,14 @@
 					var fatLabel = "Fat (Average: @{(fatSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / fatSeries.length).toInt} g/day)";
 					var carbs = [@{carbsSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					var carbsLabel = "Fat (Average: @{(carbsSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / carbsSeries.length).toInt} g/day)";
+
+					var showProteinPoints = @proteinSeries.length == 1 ? true : false;
+					var showFatPoints = @fatSeries.length == 1 ? true : false;
+					var showCarbsPoints = @carbsSeries.length == 1 ? true : false;
 					$.plot($("#macros-placeholder"), 
-						[{data: protein, points: {show: false}, lines: {show: true}, label: proteinLabel}, 
-						{data: fat, points: {show: false}, lines: {show: true}, label: fatLabel}, 
-						{data: carbs, points: {show: false}, lines: {show: true}, label: carbsLabel}],
+						[{data: protein, points: {show: showProteinPoints}, lines: {show: true}, label: proteinLabel}, 
+						{data: fat, points: {show: showFatPoints}, lines: {show: true}, label: fatLabel}, 
+						{data: carbs, points: {show: showCarbsPoints}, lines: {show: true}, label: carbsLabel}],
 						{xaxis: {mode: "time", show: true, position: "bottom"}}
 					);
 				});
