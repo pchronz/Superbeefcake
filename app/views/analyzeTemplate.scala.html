@@ -81,16 +81,28 @@
 	@bs2Row() {
 		@bs2Span(7, Some(1)) {
 			<h4>Energy</h4>
+			TODO: if there is no data, display a message in the graphs
 			<div id="energy-placeholder" style="width: 600px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				$(function () {
+						// energy
 						var energy = [@{energySeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+						var minEnergy = @{energySeries.length match {case 0 => 0; case _ => energySeries.minBy(a => a._2)._2}};
+						minEnergy = minEnergy >= 200 ? minEnergy - 200 : 0;
+						var maxEnergy = @{energySeries.length match {case 0 => 0; case _ => energySeries.maxBy(a => a._2)._2}};
+						maxEnergy += 200;
 						var energyLabel = "Energy (Average: @{(energySeries.map{entry => entry._2}.foldLeft(0.0){_+_} / energySeries.length).toInt} kCal/day)";
+
+						// weight
 						var weight = [@{weightSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+						var minWeight = @{weightSeries match {case Nil => 0; case _ => weightSeries.minBy(a => a._2)._2}};
+						minWeight = minWeight >= 1 ? minWeight - 0.5 : 0; // minWeight < 10??? unfortunate situation!
+						var maxWeight = @{weightSeries match {case Nil => 0; case _ => weightSeries.maxBy(a => a._2)._2}};
+						maxWeight += 0.5;
 						var weightLabel = "Weight (Average: @{(weightSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / weightSeries.length).toInt} kg/day)";
 						$.plot($("#energy-placeholder"),
-							[{data: energy, lines: {show: true}, points: {show: true}, label: energyLabel, yaxis: 1}, {data: weight, points: {show: true}, lines: {show: true}, label: weightLabel, yaxis: 2}],
-							{xaxis: {mode: "time", position: "bottom"}, yaxes: [{show: true, position: "left"}, {position: "right"}]}
+							[{data: energy, lines: {show: true}, points: {show: false}, label: energyLabel, yaxis: 1}, {data: weight, points: {show: false}, lines: {show: true}, label: weightLabel, yaxis: 2}],
+							{xaxis: {mode: "time", position: "bottom"}, yaxes: [{show: true, position: "left", min: minEnergy, max: maxEnergy}, {position: "right", min: minWeight, max: maxWeight}]}
 						);
 				});
 			</script>
@@ -109,9 +121,9 @@
 					var carbs = [@{carbsSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					var carbsLabel = "Fat (Average: @{(carbsSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / carbsSeries.length).toInt} g/day)";
 					$.plot($("#macros-placeholder"), 
-						[{data: protein, points: {show: true}, lines: {show: true}, label: proteinLabel}, 
-						{data: fat, points: {show: true}, lines: {show: true}, label: fatLabel}, 
-						{data: carbs, points: {show: true}, lines: {show: true}, label: carbsLabel}],
+						[{data: protein, points: {show: false}, lines: {show: true}, label: proteinLabel}, 
+						{data: fat, points: {show: false}, lines: {show: true}, label: fatLabel}, 
+						{data: carbs, points: {show: false}, lines: {show: true}, label: carbsLabel}],
 						{xaxis: {mode: "time", show: true, position: "bottom"}}
 					);
 				});

@@ -19,6 +19,10 @@ case class Date(day: Int, month: Int, year: Int) extends Ordered[Date] {
   def +(days: Int) = {
     Date(this.toLong + days.toLong * 24.toLong * 60.toLong * 60.toLong * 1000.toLong)
   }
+
+  def -(days: Int) = {
+    Date(this.toLong - days.toLong * 24.toLong * 60.toLong * 60.toLong * 1000.toLong)
+  }
 }
 
 object Date extends Ordering[Date] {

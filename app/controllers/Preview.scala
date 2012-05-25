@@ -5,24 +5,37 @@ import play.api.mvc._
 import models._
 import play.api.data._
 import play.api.data.Forms._
+import scala.util.Random
 
 
 object Preview extends Controller {
 
   def analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int]) = Action { implicit request =>
     // TODO filter dates 
-    // TODO shift actual date by some between the past and today
-    // TODO generate values using a probabilistic model
     // mock the energy series
-    val iteratorList = 1 to 50
-    val energySeries = iteratorList.map(it => (Date() + it, 2300.0))
-    val proteinSeries = iteratorList.map(it => (Date() + it, 250.0))
-    val fatSeries = iteratorList.map(it => (Date() + it, 25.0))
-    val carbsSeries = iteratorList.map(it => (Date() + it, 150.0))
-    val weightSeries = iteratorList.map(it => (Date() + it, 98.0 - 0.025 * it.toDouble))
-    val startDate = Date()
-    val endDate = Date()
-    Ok(views.html.previewAnalyze(energySeries, proteinSeries, fatSeries, carbsSeries, startDate.day, startDate.month, startDate.year, endDate.day, endDate.month, endDate.year, weightSeries))
+    val r = new Random(42)
+    val recordDuration = 50
+    val iteratorList = (0 to recordDuration).reverse
+    val energySeries = iteratorList.map(it => (Date() - it, 2300.0 + r.nextGaussian * 50))
+    val proteinSeries = iteratorList.map(it => (Date() - it, 250.0 + r.nextGaussian * 15))
+    val fatSeries = iteratorList.map(it => (Date() - it, 25.0 + r.nextGaussian * 5))
+    val carbsSeries = iteratorList.map(it => (Date() - it, 150.0 + r.nextGaussian * 15))
+    val weightSeries = iteratorList.map(it => (Date() - it, 98.0 + 0.025 * it.toDouble + r.nextGaussian * 0.1))
+    val startDate = (sDay, sMonth, sYear) match {
+      case (Some(sD), Some(sM), Some(sY)) => Date(sD, sM, sY)
+      case _ => Date() - 7
+    }
+    val endDate = (eDay, eMonth, eYear) match {
+      case (Some(eD), Some(eM), Some(eY)) => Date(eD, eM, eY)
+      case _ => Date()
+    }
+    //val energyFiltered = energySeries.filter((el: Tuple2[Date, Double]) => el._1 >= startDate && el._1 <= endDate)
+    val energyFiltered = proteinSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
+    val proteinFiltered = proteinSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
+    val fatFiltered = fatSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
+    val carbsFiltered = carbsSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
+    val weightFiltered = weightSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
+    Ok(views.html.previewAnalyze(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, startDate.day, startDate.month, startDate.year, endDate.day, endDate.month, endDate.year, weightFiltered))
   }
 
   def analyzePost() = Action{ implicit request =>
