@@ -11,7 +11,6 @@ import scala.util.Random
 object Preview extends Controller {
 
   def analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int]) = Action { implicit request =>
-    // TODO filter dates 
     // mock the energy series
     val r = new Random(42)
     val recordDuration = 50
@@ -29,16 +28,15 @@ object Preview extends Controller {
       case (Some(eD), Some(eM), Some(eY)) => Date(eD, eM, eY)
       case _ => Date()
     }
-    val energyFiltered = proteinSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
+    val energyFiltered = energySeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
     val proteinFiltered = proteinSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
     val fatFiltered = fatSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
     val carbsFiltered = carbsSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
     val weightFiltered = weightSeries.filter((el: Tuple2[Date, Double]) => el._1.toLong >= startDate.toLong && el._1.toLong <= endDate.toLong)
-    val minDataDate = List(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, weightFiltered).minBy(list => list.length match {
-      case 0 => Date()
-      case _ => list.minBy(_._1)._1
-    }).minBy(_._1)._1
-    val maxDataDate = Date()
+    val (minDataDate, maxDataDate) = List(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, weightFiltered).foldLeft(List[Date]())((dates: List[Date], series) => series.map(_._1).toList ::: dates) match {
+      case List() => (Date(), Date())
+      case l => (l.minBy(_.toLong), l.maxBy(_.toLong))
+    }
     Ok(views.html.previewAnalyze(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, minDataDate.day, minDataDate.month, minDataDate.year, maxDataDate.day, maxDataDate.month, maxDataDate.year, weightFiltered))
   }
 
