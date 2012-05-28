@@ -52,7 +52,5 @@ object Preview extends Controller {
     )
   }
 
-  def measure() = TODO
-
 }
 

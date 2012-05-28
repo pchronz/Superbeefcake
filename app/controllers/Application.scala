@@ -129,7 +129,7 @@ object Application extends Controller {
         val macroEntry = MacroEntry(None, time=Some(date), name=food, amount=amount, kCal=kCal, protein=protein, fat=fat, carbs=carbs)
         MacroEntry.create(macroEntry, user)
         user match {
-          case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
+          case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index).withSession(addAdhocUserToSession(user, session))
           case _ => Redirect(routes.Application.eat(Some(date.day), Some(date.month), Some(date.year)))
         }
       }
@@ -162,7 +162,7 @@ object Application extends Controller {
     MacroEntry.deleteById(id, user)
     user match {
       case Beefcake(_, _, _, true, _)=> {
-        Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
+        Redirect(routes.Application.index).withSession(addAdhocUserToSession(user, session))
       }
       case user => {
         Redirect(routes.Application.eat(None, None, None)).withSession(session + ("beefcake"->user.username))
@@ -203,7 +203,7 @@ object Application extends Controller {
           case Some(macroEntry) => {
             MacroEntry.create(macroEntry, user)
             user match {
-              case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
+              case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index).withSession(addAdhocUserToSession(user, session))
               case _ => Redirect(routes.Application.eat(Some(macroEntry.time.day), Some(macroEntry.time.month), Some(macroEntry.time.year)))
             }
           }
@@ -383,7 +383,7 @@ object Application extends Controller {
     getUserFromSession(session) match {
       case user @ Beefcake(_, _, _, true, _) => {
         MacroEntry.deleteAll(user)
-        Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
+        Redirect(routes.Application.index).withSession(addAdhocUserToSession(user, session))
       }
       case user => {
         MacroEntry.deleteByDate(Date(day, month, year), user)
@@ -433,26 +433,23 @@ object Application extends Controller {
       case (Some(d), Some(m), Some(y)) => Some(Date(d, m, y))
       case _ => None
     }
-    getUserFromSession(session) match {
-      case Beefcake(_, _, _, true, _) => Redirect(routes.Preview.measure)
-      case user => 
-        (startDate, endDate) match {
-          case (Some(s), Some(e)) => 
-            val measureEntries = MeasureEntry.findByDates(s, e, user)
-            Ok(views.html.measure(user, startDate, endDate, measureEntryForm, measureEntries))
-          case _ => 
-            val measureEntries = MeasureEntry.all(user)
-            def compareMeasureEntries(a: MeasureEntry, b: MeasureEntry): Boolean = {
-              (a.time, b.time) match {
-                case (Some(tA), Some(tB)) => tA < tB
-                case _ => true
-              }
-            }
-            val sortedEntries = measureEntries.sortWith(compareMeasureEntries)
-            sortedEntries match {
-              case Nil => Ok(views.html.measure(user, None, None, measureEntryForm, measureEntries))
-              case _ => Ok(views.html.measure(user, sortedEntries.head.time, sortedEntries.last.time, measureEntryForm, measureEntries))
-            }
+    val user = getUserFromSession(session)
+    (startDate, endDate) match {
+      case (Some(s), Some(e)) => 
+        val measureEntries = MeasureEntry.findByDates(s, e, user)
+        Ok(views.html.measure(user, startDate, endDate, measureEntryForm, measureEntries))
+      case _ => 
+        val measureEntries = MeasureEntry.all(user)
+        def compareMeasureEntries(a: MeasureEntry, b: MeasureEntry): Boolean = {
+          (a.time, b.time) match {
+            case (Some(tA), Some(tB)) => tA < tB
+            case _ => true
+          }
+        }
+        val sortedEntries = measureEntries.sortWith(compareMeasureEntries)
+        sortedEntries match {
+          case Nil => Ok(views.html.measure(user, None, None, measureEntryForm, measureEntries))
+          case _ => Ok(views.html.measure(user, sortedEntries.head.time, sortedEntries.last.time, measureEntryForm, measureEntries))
         }
     }
   }
@@ -469,19 +466,22 @@ object Application extends Controller {
 
   def submitMeasureEntry() = Action {implicit request =>
     Logger.info(request.body.toString)
+    val user = getUserFromSession(session)
     measureEntryForm.bindFromRequest.fold( 
         form => Logger.warn("Binding error for measure entry: " + form.errors.map{_.message}.mkString(",")), 
-        fields => getUserFromSession(session) match {
-            case user @ Beefcake(_, _, _, false, _) =>
-              Logger.info("Adding " + fields)
-              // convert the value to a double... why is there no proper decimal type for forms?
-              val valueDouble = fields._2.replace(",", ".").toDouble
+        fields => {
+          Logger.info("Adding " + fields)
+          // convert the value to a double... why is there no proper decimal type for forms?
+          val valueDouble = fields._2.replace(",", ".").toDouble
 
-              MeasureEntry.create(MeasureEntry(id=None, time=Some(Date(fields._3, fields._4, fields._5)), field=fields._1, value=valueDouble), user)
-          }
+          MeasureEntry.create(MeasureEntry(id=None, time=Some(Date(fields._3, fields._4, fields._5)), field=fields._1, value=valueDouble), user)
+        }
       
     )
-    Redirect(routes.Application.measure(None, None, None, None, None, None))
+    user match {
+      case Beefcake(_, _, _, true, _) => Redirect(routes.Application.measure(None, None, None, None, None, None)).withSession(addAdhocUserToSession(user, session))
+      case _ => Redirect(routes.Application.measure(None, None, None, None, None, None))
+    }
   }
 
   def deleteMeasureEntry(id: Int) = Action {implicit request =>
@@ -491,7 +491,28 @@ object Application extends Controller {
     user match {
       case Beefcake(_, _, _, true, _)=> {
         Logger.warn("Adhoc user just tried to delete a MeasureEntry!")
-        Redirect(routes.Application.index).withSession(session + ("beefcakeadhoc"->user.username))
+        Redirect(routes.Application.index).withSession(addAdhocUserToSession(user, session))
+      }
+      case user => {
+        Redirect(routes.Application.measure(None, None, None, None, None, None)).withSession(session + ("beefcake"->user.username))
+      }
+    }
+  }
+  
+  def deleteMeasureEntries(jsonIds: String) = Action{implicit request =>
+    // TODO merge above and this function into one
+    // TODO parse json String
+    println("Ids to delete" + jsonIds)
+    implicit def jsonStringToIntList(json: String): List[Int] = {
+      List(1, 2, 3)
+    }
+    val user = getUserFromSession(session)
+    Logger.info("Going to delete measureEntry with ids == " + jsonIds)
+    jsonIds.foreach(MeasureEntry.deleteById(_, user))
+    user match {
+      case Beefcake(_, _, _, true, _)=> {
+        Logger.warn("Adhoc user just tried to delete a MeasureEntry!")
+        Redirect(routes.Application.index).withSession(addAdhocUserToSession(user, session))
       }
       case user => {
         Redirect(routes.Application.measure(None, None, None, None, None, None)).withSession(session + ("beefcake"->user.username))
@@ -543,6 +564,10 @@ object Application extends Controller {
         Redirect(routes.Application.measure(Some(fields._1), Some(fields._2), Some(fields._3), Some(fields._4), Some(fields._5), Some(fields._6)))
       }
     ) 
+  }
+
+  private def addAdhocUserToSession(user: Beefcake, session: Session): Session = {
+    session + ("beefcakeadhoc"->user.username)
   }
 
 }

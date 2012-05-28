@@ -5,7 +5,8 @@ import anorm.SqlParser._
 import play.api.db._
 import play.api.Play.current
 
-case class MeasureEntry(id: Option[Int], time: Option[Date], field: String, value: Double)
+case class MeasureEntry(id: Option[Int], time: Option[Date], field: String, value: Double) {
+}
 
 object MeasureEntry {
   def create(measureEntry: MeasureEntry, beefcake: Beefcake) {
@@ -100,6 +101,14 @@ object MeasureEntry {
     DB.withConnection{ implicit c =>
         SQL("UPDATE measure SET value={value}, field={field} WHERE username={username} AND id={id}").on("value"-> measureEntry.value, "field"->measureEntry.field, "value"->measureEntry.value, "username"->user.username, "id"->measureEntry.id).executeUpdate()
     }
+  }
+
+  def renderIdsAsJson(measureEntries: List[MeasureEntry]): String = {
+    measureEntries.length match {
+      case 0 => "{[]}"
+      case _ => measureEntries.init.foldLeft("{[")(_ + _.id.get.toString + ", ") + measureEntries.last.id.get + "]}"
+    }
+    
   }
 }
 
