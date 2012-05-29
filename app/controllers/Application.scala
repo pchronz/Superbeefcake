@@ -483,28 +483,12 @@ object Application extends Controller {
       case _ => Redirect(routes.Application.measure(None, None, None, None, None, None))
     }
   }
-
-  def deleteMeasureEntry(id: Int) = Action {implicit request =>
-    val user = getUserFromSession(session)
-    Logger.info("Going to delete measureEntry with id == " + id)
-    MeasureEntry.deleteById(id.toInt, user)
-    user match {
-      case Beefcake(_, _, _, true, _)=> {
-        Logger.warn("Adhoc user just tried to delete a MeasureEntry!")
-        Redirect(routes.Application.index).withSession(addAdhocUserToSession(user, session))
-      }
-      case user => {
-        Redirect(routes.Application.measure(None, None, None, None, None, None)).withSession(session + ("beefcake"->user.username))
-      }
-    }
-  }
   
   def deleteMeasureEntries(jsonIds: String) = Action{implicit request =>
-    // TODO merge above and this function into one
-    // TODO parse json String
-    println("Ids to delete" + jsonIds)
     implicit def jsonStringToIntList(json: String): List[Int] = {
-      List(1, 2, 3)
+      val NumberListParser = """\d+""".r
+      val numbers = NumberListParser findAllIn json
+      numbers.map(_.toInt).toList
     }
     val user = getUserFromSession(session)
     Logger.info("Going to delete measureEntry with ids == " + jsonIds)
@@ -512,7 +496,7 @@ object Application extends Controller {
     user match {
       case Beefcake(_, _, _, true, _)=> {
         Logger.warn("Adhoc user just tried to delete a MeasureEntry!")
-        Redirect(routes.Application.index).withSession(addAdhocUserToSession(user, session))
+        Redirect(routes.Application.measure(None, None, None, None, None, None)).withSession(addAdhocUserToSession(user, session))
       }
       case user => {
         Redirect(routes.Application.measure(None, None, None, None, None, None)).withSession(session + ("beefcake"->user.username))

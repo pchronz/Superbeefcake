@@ -20,7 +20,6 @@ GET		/index						controllers.Application.index
 GET		/deleteAllEntries/:day/:month/:year		controllers.Application.deleteAllEntries(day: Int, month: Int, year: Int)
 GET		/measure					controllers.Application.measure(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int])
 POST	/submitMeasureEntry			controllers.Application.submitMeasureEntry
-GET		/deleteMeasureEntry/:id		controllers.Application.deleteMeasureEntry(id: Int)
 POST	/submitMeasureDateFilter	controllers.Application.submitMeasureDateFilter
 GET		/deleteMeasureEntries		controllers.Application.deleteMeasureEntries(jsonIds : String)
 

@@ -6,21 +6,27 @@
 @import models.Date
 
 @main(Html("Superbeefcake!"), "", Some(beefcake)) {
-	@form(routes.Application.submitMeasureDateFilter){
-		<fieldset>
-		@bs2Row() {
-			@bs2Span(9, Some(1)) {
-				<legend>Pick a period</legend>
-			}
-		}
-		@bs2Row() {
+	@bs2Row() {
+		@form(routes.Application.submitMeasureDateFilter){
 			@bs2Span(3, Some(1)) {
-				<label class="control-label">Start date</label>
-				@datePicker(startDate, Some("start"))
+				<fieldset>
+					<legend class="control-label">Start date</legend>
+					<div class="control-group">
+						<div class="controls">
+							@datePicker(startDate, Some("start"))
+						</div>
+					</div>
+				</fieldset>
 			}
 			@bs2Span(3, None) {
-				<label class="control-label">End date</label>
-				@datePicker(endDate, Some("end"))
+				<fieldset>
+					<legend class="control-label">End date</legend>
+					<div class="control-group">
+						<div class="controls">
+							@datePicker(endDate, Some("end"))
+						</div>
+					</div>
+				</fieldset>
 			}
 			<script type="text/javascript" charset="utf-8">
 				$(function() {
@@ -119,7 +125,7 @@
 								<span class="label label-success hide" id="label-saved-@measureEntry.id.get" style="position: relative; top: -5px;">Saved</span>
 							</td>
 							<td>
-								<a href="@{routes.Application.deleteMeasureEntry(measureEntry.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
+								<a href="@{routes.Application.deleteMeasureEntries("{[" + measureEntry.id.get + "]}")}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
 							</td>
 						</tr>
 					}
