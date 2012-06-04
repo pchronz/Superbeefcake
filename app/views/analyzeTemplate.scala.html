@@ -83,30 +83,63 @@
 			<h4>Energy</h4>
 			<div id="energy-placeholder" style="width: 600px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
-				$(function () {
-						// energy
-						var energy = [@{energySeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
-						var minEnergy = @{energySeries.length match {case 0 => 0; case _ => energySeries.minBy(a => a._2)._2}};
-						minEnergy = minEnergy >= 200 ? minEnergy - 200 : 0;
-						var maxEnergy = @{energySeries.length match {case 0 => 0; case _ => energySeries.maxBy(a => a._2)._2}};
-						maxEnergy += 200;
-						var energyLabel = "Energy (Average: @{(energySeries.map{entry => entry._2}.foldLeft(0.0){_+_} / energySeries.length).toInt} kCal/day)";
+				function plotEnergyWeight() {
+					// energy goal
+					var energyGoal = parseInt($("#input-energy-goal").val());
+					console.log(energyGoal);
+					// energy
+					var energy = [@{energySeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+					var minEnergy = @{energySeries.length match {case 0 => 0; case _ => energySeries.minBy(a => a._2)._2}};
+					minEnergy = isNaN(energyGoal) || minEnergy < energyGoal ? minEnergy : energyGoal;
+					minEnergy -= minEnergy > 200 ? 200 : 0;
+					var maxEnergy = @{energySeries.length match {case 0 => 0; case _ => energySeries.maxBy(a => a._2)._2}};
+					maxEnergy = isNaN(energyGoal) || maxEnergy > energyGoal ? maxEnergy : energyGoal;
+					maxEnergy += 200;
+					var energyLabel = "Energy (Average: @{(energySeries.map{entry => entry._2}.foldLeft(0.0){_+_} / energySeries.length).toInt} kCal/day)";
 
-						// weight
-						var weight = [@{weightSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
-						var minWeight = @{weightSeries match {case Nil => 0; case _ => weightSeries.minBy(a => a._2)._2}};
-						minWeight = minWeight >= 1 ? minWeight - 0.5 : 0; // minWeight < 10??? unfortunate situation!
-						var maxWeight = @{weightSeries match {case Nil => 0; case _ => weightSeries.maxBy(a => a._2)._2}};
-						maxWeight += 0.5;
-						var weightLabel = "Weight (Average: @{weightSeries.length match { case 0 => 0; case _ => (weightSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / weightSeries.length).toInt}} kg/day)";
-						var showWeightPoints = @weightSeries.length == 1 ? true : false;
-						var showEnergyPoints = @energySeries.length == 1 ? true : false;
-						$.plot($("#energy-placeholder"),
-							[{data: energy, lines: {show: true}, points: {show: showEnergyPoints}, label: energyLabel, yaxis: 1}, {data: weight, points: {show: showWeightPoints}, lines: {show: true}, label: weightLabel, yaxis: 2}],
-							{xaxis: {mode: "time", position: "bottom"}, yaxes: [{show: true, position: "left", min: minEnergy, max: maxEnergy}, {position: "right", min: minWeight, max: maxWeight}]}
-						);
+					// weight
+					var weight = [@{weightSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
+					var minWeight = @{weightSeries match {case Nil => 0; case _ => weightSeries.minBy(a => a._2)._2}};
+					minWeight = minWeight >= 1 ? minWeight - 0.5 : 0; // minWeight < 10??? unfortunate situation!
+					var maxWeight = @{weightSeries match {case Nil => 0; case _ => weightSeries.maxBy(a => a._2)._2}};
+					maxWeight += 0.5;
+					var weightLabel = "Weight (Average: @{weightSeries.length match { case 0 => 0; case _ => (weightSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / weightSeries.length).toInt}} kg/day)";
+					var showWeightPoints = @weightSeries.length == 1 ? true : false;
+					var showEnergyPoints = @energySeries.length == 1 ? true : false;
+
+					$.plot($("#energy-placeholder"),
+						[{data: energy, lines: {show: true}, points: {show: showEnergyPoints}, label: energyLabel, yaxis: 1}, {data: weight, points: {show: showWeightPoints}, lines: {show: true}, label: weightLabel, yaxis: 2}],
+						{xaxis: {mode: "time", position: "bottom"}, yaxes: [{show: true, position: "left", min: minEnergy, max: maxEnergy}, {position: "right", min: minWeight, max: maxWeight}], grid: {show: true, markings: [{yaxis: {from: energyGoal, to: energyGoal}, color: 'red'}]}}
+					);
+				}
+				$(function () {
+					plotEnergyWeight();
 				});
 			</script>
+		}
+		@bs2Span(2, None) {
+			<form id="form-update">
+				<fieldset>
+					<div class="control-group">
+						<div class="controls">
+							<label for="input-energy-goal">Energy Goal</label>
+							<input class="span2" type="number" min="0" step="50" size="16" id="input-energy-goal" placeholder="None" />
+						</div>
+						<script type="text/javascript" charset="utf-8">
+							$(function() {
+								$("#input-energy-goal").change(function() {
+									plotEnergyWeight();
+								});
+
+								// make sure the page will not be reloaded when the user hits enter
+								$("#form-update").submit(function() {
+									return false;
+								});
+							});
+						</script>
+					</div>
+				</fieldset>
+			</form>
 		}
 	}
 	@bs2Row() {
