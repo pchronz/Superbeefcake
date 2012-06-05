@@ -37,7 +37,7 @@ object Preview extends Controller {
       case List() => (Date(), Date())
       case l => (l.minBy(_.toLong), l.maxBy(_.toLong))
     }
-    Ok(views.html.previewAnalyze(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, minDataDate.day, minDataDate.month, minDataDate.year, maxDataDate.day, maxDataDate.month, maxDataDate.year, weightFiltered))
+    Ok(views.html.previewAnalyze(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, minDataDate.day, minDataDate.month, minDataDate.year, maxDataDate.day, maxDataDate.month, maxDataDate.year, weightFiltered, Some(MeasureGoal("energy", 1800))))
   }
 
   def analyzePost() = Action{ implicit request =>

@@ -1,9 +1,9 @@
-@(energySeries: Seq[(Date, Double)], proteinSeries: Seq[(Date, Double)], fatSeries: Seq[(Date, Double)], carbsSeries: Seq[(Date, Double)], startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: Seq[(Date, Double)])
+@(energySeries: Seq[(Date, Double)], proteinSeries: Seq[(Date, Double)], fatSeries: Seq[(Date, Double)], carbsSeries: Seq[(Date, Double)], startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: Seq[(Date, Double)], energyGoal: Option[MeasureGoal])
 
 @import helper._
 @import helper.twitterBootstrap2._
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
-@analyzeTemplate(energySeries, proteinSeries, fatSeries, carbsSeries, None, startDay, startMonth, startYear, endDay, endMonth, endYear, weightSeries, routes.Preview.analyzePost)
+@analyzeTemplate(energySeries, proteinSeries, fatSeries, carbsSeries, None, startDay, startMonth, startYear, endDay, endMonth, endYear, weightSeries, routes.Preview.analyzePost, energyGoal)
 

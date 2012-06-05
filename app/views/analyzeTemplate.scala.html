@@ -1,4 +1,4 @@
-@(energySeries: Seq[(Date, Double)], proteinSeries: Seq[(Date, Double)], fatSeries: Seq[(Date, Double)], carbsSeries: Seq[(Date, Double)], beefcake: Option[Beefcake], startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: Seq[(Date, Double)], postTarget: Call)
+@(energySeries: Seq[(Date, Double)], proteinSeries: Seq[(Date, Double)], fatSeries: Seq[(Date, Double)], carbsSeries: Seq[(Date, Double)], beefcake: Option[Beefcake], startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: Seq[(Date, Double)], postTarget: Call, energyGoal: Option[MeasureGoal])
 
 @import helper._
 @import helper.twitterBootstrap2._
@@ -79,6 +79,32 @@
 		}
 	}
 	@bs2Row() {
+		@bs2Span(2, Some(1)) {
+			<form id="form-update">
+				<fieldset>
+					<div class="control-group">
+						<div class="controls">
+							<label for="input-energy-goal">Energy Goal</label>
+							<input class="span2" type="number" min="0" step="50" size="16" id="input-energy-goal" placeholder="@{energyGoal match {case Some(goal)=> goal.goalValue; case None=> "None"}}" />
+						</div>
+						<script type="text/javascript" charset="utf-8">
+							$(function() {
+								$("#input-energy-goal").change(function() {
+									plotEnergyWeight();
+								});
+
+								// make sure the page will not be reloaded when the user hits enter
+								$("#form-update").submit(function() {
+									return false;
+								});
+							});
+						</script>
+					</div>
+				</fieldset>
+			</form>
+		}
+	}
+	@bs2Row() {
 		@bs2Span(7, Some(1)) {
 			<h4>Energy</h4>
 			<div id="energy-placeholder" style="width: 600px; height: 250px; position: relative; "></div>
@@ -116,30 +142,6 @@
 					plotEnergyWeight();
 				});
 			</script>
-		}
-		@bs2Span(2, None) {
-			<form id="form-update">
-				<fieldset>
-					<div class="control-group">
-						<div class="controls">
-							<label for="input-energy-goal">Energy Goal</label>
-							<input class="span2" type="number" min="0" step="50" size="16" id="input-energy-goal" placeholder="None" />
-						</div>
-						<script type="text/javascript" charset="utf-8">
-							$(function() {
-								$("#input-energy-goal").change(function() {
-									plotEnergyWeight();
-								});
-
-								// make sure the page will not be reloaded when the user hits enter
-								$("#form-update").submit(function() {
-									return false;
-								});
-							});
-						</script>
-					</div>
-				</fieldset>
-			</form>
 		}
 	}
 	@bs2Row() {

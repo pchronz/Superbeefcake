@@ -304,7 +304,8 @@ object Application extends Controller {
         val fatSeries = MacroEntry.getTimeSeries("fat", Some(sDate), Some(eDate), user)
         val carbsSeries = MacroEntry.getTimeSeries("carbs", Some(sDate), Some(eDate), user)
         val weightSeries = MeasureEntry.getTimeSeries("weight", Some(sDate), Some(eDate), user)
-        Ok(views.html.analyze(energySeries=energySeries, proteinSeries=proteinSeries, fatSeries=fatSeries, carbsSeries=carbsSeries, beefcake=user, startDay=sDate.day, startMonth=sDate.month, startYear=sDate.year, endDay=eDate.day, endMonth=eDate.month, endYear=eDate.year, weightSeries=weightSeries))
+        val energyGoal = MeasureGoal.findByField("energy", user)
+        Ok(views.html.analyze(energySeries=energySeries, proteinSeries=proteinSeries, fatSeries=fatSeries, carbsSeries=carbsSeries, beefcake=user, startDay=sDate.day, startMonth=sDate.month, startYear=sDate.year, endDay=eDate.day, endMonth=eDate.month, endYear=eDate.year, weightSeries=weightSeries, energyGoal=energyGoal))
       }
     }
   }

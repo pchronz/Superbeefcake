@@ -45,6 +45,13 @@ CREATE TABLE measure (
 	CONSTRAINT one_entry UNIQUE (day, month, year, field, username)
 );
 
+CREATE TABLE measureGoal (
+	username VARCHAR(32) NOT NULL REFERENCES beefcake(username),
+	field VARCHAR(32) NOT NULL,
+	goalValue FLOAT NOT NULL,
+	CONSTRAINT one_goal UNIQUE (username, field)
+);
+
 # --- !Downs
 DROP TABLE macroEntry;
 
