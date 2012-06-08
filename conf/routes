@@ -34,4 +34,5 @@ GET     /assets/*file               	controllers.Assets.at(path="/public", file)
 GET		/suggestFood					controllers.Application.suggestFood(query: String)
 GET		/updateMacroEntry/:id/:amount	controllers.Application.updateMacroEntry(id: Int, amount:Int) 
 GET		/updateMeasureEntry/:id/:field/:value	controllers.Application.updateMeasureEntry(id: Int, field: String, value: String)
+GET		/updateGoal/:field/:value	controllers.Application.updateGoal(field: String, value: String)
 

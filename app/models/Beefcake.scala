@@ -6,7 +6,11 @@ import play.api.db._
 import play.api.Play.current
 import scala.util.Random
 
-case class Beefcake(username: String, password: String, email: String, adhoc: Boolean, lastUpdated: Date)
+case class Beefcake(username: String, password: String, email: String, adhoc: Boolean, lastUpdated: Date) {
+  override def toString() = {
+    username
+  }
+}
 
 object Beefcake {
   def apply(username: String, password: String, email: String, adhoc: Boolean):Beefcake = {

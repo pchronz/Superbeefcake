@@ -6,6 +6,9 @@ import play.api.db._
 import play.api.Play.current
 
 case class MeasureGoal(field: String, goalValue: Double) {
+  override def toString() = {
+    field + "->" + goalValue
+  }
 }
 
 object MeasureGoal {
@@ -36,7 +39,7 @@ object MeasureGoal {
     }
   }
 
-  def findByField(field: String, user: Beefcake) = {
+  def findByField(field: String, user: Beefcake): Option[MeasureGoal] = {
     DB.withConnection{ implicit c =>
       val goals = SQL("SELECT * FROM measureGoal WHERE username = {username} AND field = {field}").on("username"->user.username, "field"->field).as(measureGoal *)
       goals.length match {
@@ -46,7 +49,6 @@ object MeasureGoal {
           println("Found multiple goals for user " + user + " and field " + field)
           Some(goals(0))
       }
-
     }
   }
 
@@ -56,9 +58,17 @@ object MeasureGoal {
      }
   }
 
-  def update(measureGoal: MeasureGoal, user: Beefcake) {
+  def update(goal: MeasureGoal, user: Beefcake) {
+    def updateGoal (implicit c: java.sql.Connection){
+        SQL("UPDATE measureGoal SET goalValue = {goalValue} WHERE username = {username} AND field = {field}").on("goalValue"->goal.goalValue, "username"->user.username, "field"->goal.field).executeUpdate()
+    }
     DB.withConnection{ implicit c =>
-        SQL("UPDATE measureGoal SET goalValue={goalValue} WHERE username={username} AND field={field}").on("goalValue"-> measureGoal.goalValue, "field"->measureGoal.field, "username"->user.username).executeUpdate()
+      val goals = SQL("SELECT * FROM measureGoal WHERE username = {username} AND field = {field}").on("username"->user.username, "field"->goal.field).as(measureGoal *)
+      goals.length match {
+          case 0 => SQL("INSERT INTO measureGoal (username, field, goalValue) VALUES({username}, {field}, {goalValue})").on("username"->user.username, "field"->goal.field, "goalValue"->goal.goalValue).executeUpdate()
+          case 1 => updateGoal
+          case _ => println("More than one entry found for measureGoal: " + measureGoal + " during update on user " + user + "."); updateGoal
+      }
     }
   }
 }

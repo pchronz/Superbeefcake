@@ -91,6 +91,9 @@
 							$(function() {
 								$("#input-energy-goal").change(function() {
 									plotEnergyWeight();
+									var newGoal = $(this).val();
+									$.get("@routes.Application.updateGoal("energy", "")" + newGoal, function(){
+									});
 								});
 
 								// make sure the page will not be reloaded when the user hits enter

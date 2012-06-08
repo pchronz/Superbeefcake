@@ -24,7 +24,7 @@ object Application extends Controller {
     }
   }
 
-  private def getUserFromSession(session: Session): Beefcake = {
+  def getUserFromSession(session: Session): Beefcake = {
     def createAdhocUser(): Beefcake = {
       val user = Beefcake.createAdhoc()
       // give the Ad Hoc user a standard menu
@@ -473,7 +473,7 @@ object Application extends Controller {
         fields => {
           Logger.info("Adding " + fields)
           // convert the value to a double... why is there no proper decimal type for forms?
-          val valueDouble = fields._2.replace(",", ".").toDouble
+          val valueDouble = stringToDouble(fields._2)
 
           MeasureEntry.create(MeasureEntry(id=None, time=Some(Date(fields._3, fields._4, fields._5)), field=fields._1, value=valueDouble), user)
         }
@@ -553,6 +553,17 @@ object Application extends Controller {
 
   private def addAdhocUserToSession(user: Beefcake, session: Session): Session = {
     session + ("beefcakeadhoc"->user.username)
+  }
+
+  def updateGoal(field: String, value: String) = Action{implicit request =>
+    val user = getUserFromSession(session)
+    val newGoal = stringToDouble(value)
+    MeasureGoal.update(MeasureGoal(field, newGoal), user)
+    Ok("success")
+  }
+
+  private def stringToDouble(decimal: String) = {
+    decimal.replace(",", ".").toDouble
   }
 
 }
