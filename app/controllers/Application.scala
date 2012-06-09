@@ -25,7 +25,8 @@ object Application extends Controller {
   }
 
   def getUserFromSession(session: Session): Beefcake = {
-    def createAdhocUser(): Beefcake = {
+    def createAdhocUser(session: Session): Beefcake = {
+      Logger.info("Creating new adhoc user")
       val user = Beefcake.createAdhoc()
       // give the Ad Hoc user a standard menu
       val date = Date()
@@ -42,20 +43,22 @@ object Application extends Controller {
             case user @ Some(_) => user
           }
       }
-      case None => None
+      case None => 
+        Logger.info("Could not find registered user in session")
+        None
     }
 
     // return user, registered, adhoc from session or new adhoc
     regUser match {
       case Some(user) => user
       case None => {
-        Logger.info("Could find registered user. Looking for Adhoc user...")
+        Logger.info("Could not find registered user. Looking for Adhoc user...")
         session.get("beefcakeadhoc") match {
-          case None => createAdhocUser()
+          case None => createAdhocUser(session)
           case Some(username) => {
             Beefcake.findByUsername(username) match {
-              case None => createAdhocUser()
-              case Some(user) => user
+              case None => createAdhocUser(session)
+              case Some(user) => Logger.info("Found Adhoc user: " + user); user
             }
           }
         }
@@ -281,7 +284,7 @@ object Application extends Controller {
 
   def analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int]) = Action { implicit request =>
     getUserFromSession(session) match {
-      case Beefcake(_, _, _, true, _) => Redirect(routes.Preview.analyze(sDay, sMonth, sYear, eDay, eMonth, eYear))
+      case user @ Beefcake(_, _, _, true, _) => Logger.info("Redirecting with user : " + user); Redirect(routes.Preview.analyze(sDay, sMonth, sYear, eDay, eMonth, eYear)).withSession(addAdhocUserToSession(user, session))
       case user => {
         // get the period
         val sDate = (sDay, sMonth, sYear) match {
@@ -551,7 +554,7 @@ object Application extends Controller {
     ) 
   }
 
-  private def addAdhocUserToSession(user: Beefcake, session: Session): Session = {
+  def addAdhocUserToSession(user: Beefcake, session: Session): Session = {
     session + ("beefcakeadhoc"->user.username)
   }
 

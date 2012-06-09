@@ -71,7 +71,7 @@ object Global extends GlobalSettings {
           successCounter += 1
         }
         else {
-          println("Could not inser item " + name + " because of an unknown unit: " + unit)
+          println("Could not insert item " + name + " because of an unknown unit: " + unit)
         }
         totalCounter += 1
       }

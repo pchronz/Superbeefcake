@@ -62,10 +62,12 @@ object MeasureGoal {
     def updateGoal (implicit c: java.sql.Connection){
         SQL("UPDATE measureGoal SET goalValue = {goalValue} WHERE username = {username} AND field = {field}").on("goalValue"->goal.goalValue, "username"->user.username, "field"->goal.field).executeUpdate()
     }
+    println("Username" + user)
     DB.withConnection{ implicit c =>
       val goals = SQL("SELECT * FROM measureGoal WHERE username = {username} AND field = {field}").on("username"->user.username, "field"->goal.field).as(measureGoal *)
       goals.length match {
-          case 0 => SQL("INSERT INTO measureGoal (username, field, goalValue) VALUES({username}, {field}, {goalValue})").on("username"->user.username, "field"->goal.field, "goalValue"->goal.goalValue).executeUpdate()
+          case 0 => 
+              val res = SQL("INSERT INTO measureGoal (username, field, goalValue) VALUES({username}, {field}, {goalValue})").on("username"->user.username, "field"->goal.field, "goalValue"->goal.goalValue).executeUpdate()
           case 1 => updateGoal
           case _ => println("More than one entry found for measureGoal: " + measureGoal + " during update on user " + user + "."); updateGoal
       }

@@ -85,14 +85,24 @@
 					<div class="control-group">
 						<div class="controls">
 							<label for="input-energy-goal">Energy Goal</label>
-							<input class="span2" type="number" min="0" step="50" size="16" id="input-energy-goal" placeholder="@{energyGoal match {case Some(goal)=> goal.goalValue; case None=> "None"}}" />
+                            @{energyGoal match{
+                              case Some(goal) => Html("<input class='span2' type='number' min='0' size='16' id='input-energy-goal' value='" + goal.goalValue + "' rel='tooltip' title='Press Enter to update' />")
+                              case None => Html("<input class='span2' type='number' min='0' size='16' id='input-energy-goal' placeholder='None' rel='tooltip' title='Press Enter to update' />")
+                            }}
 						</div>
 						<script type="text/javascript" charset="utf-8">
 							$(function() {
+                                var tooltipQuery = "#input-energy-goal";
+                                $(tooltipQuery).tooltip({trigger: 'manual'});
+								$(tooltipQuery).bind("keydown mousedown",function(event) {
+                                  if(event.which != 13)
+                                    $(tooltipQuery).tooltip('show');
+                                });
 								$("#input-energy-goal").change(function() {
-									plotEnergyWeight();
 									var newGoal = $(this).val();
 									$.get("@routes.Application.updateGoal("energy", "")" + newGoal, function(){
+                                      $(tooltipQuery).tooltip('hide');
+									plotEnergyWeight();
 									});
 								});
 
@@ -115,7 +125,6 @@
 				function plotEnergyWeight() {
 					// energy goal
 					var energyGoal = parseInt($("#input-energy-goal").val());
-					console.log(energyGoal);
 					// energy
 					var energy = [@{energySeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					var minEnergy = @{energySeries.length match {case 0 => 0; case _ => energySeries.minBy(a => a._2)._2}};
