@@ -1,4 +1,4 @@
-@(energySeries: Seq[(Date, Double)], proteinSeries: Seq[(Date, Double)], fatSeries: Seq[(Date, Double)], carbsSeries: Seq[(Date, Double)], beefcake: Option[Beefcake], startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: Seq[(Date, Double)], postTarget: Call, energyGoal: Option[MeasureGoal])
+@(energySeries: Seq[(Date, Double)], proteinSeries: Seq[(Date, Double)], fatSeries: Seq[(Date, Double)], carbsSeries: Seq[(Date, Double)], beefcake: Option[Beefcake], startDay: Int, startMonth: Int, startYear: Int, endDay: Int, endMonth: Int, endYear: Int, weightSeries: Seq[(Date, Double)], postTarget: Call, goals: Map[String,MeasureGoal])
 
 @import helper._
 @import helper.twitterBootstrap2._
@@ -84,26 +84,32 @@
 				<fieldset>
 					<div class="control-group">
 						<div class="controls">
+                            @{/* energy */}
 							<label for="input-energy-goal">Energy Goal</label>
-                            @{energyGoal match{
-                              case Some(goal) => Html("<input class='span2' type='number' min='0' size='16' id='input-energy-goal' value='" + goal.goalValue + "' rel='tooltip' title='Press Enter to update' />")
-                              case None => Html("<input class='span2' type='number' min='0' size='16' id='input-energy-goal' placeholder='None' rel='tooltip' title='Press Enter to update' />")
+                            <input type="radio" name="radio-energy" value="energy" />
+                            @{goals.get("energy") match{
+                              case Some(goal) => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-energy-goal' value='" + goal.goalValue + "' rel='tooltip' title='Press Enter to update' />")
+                              case None => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-energy-goal' placeholder='None' rel='tooltip' title='Press Enter to update' />")
                             }}
 						</div>
 						<script type="text/javascript" charset="utf-8">
 							$(function() {
                                 var tooltipQuery = "#input-energy-goal";
                                 $(tooltipQuery).tooltip({trigger: 'manual'});
-								$(tooltipQuery).bind("keydown mousedown",function(event) {
-                                  if(event.which != 13)
-                                    $(tooltipQuery).tooltip('show');
+								$(tooltipQuery).bind("keypress mouseup",function(event) {
+                                  if(event.which != 13) {
+                                    setTimeout(function(){$(tooltipQuery).tooltip('show');}, 500);
+                                  }
                                 });
-								$("#input-energy-goal").change(function() {
+								$("#input-energy-goal").bind("keypress", function(event) {
+                                  if(event.which == 13) {
 									var newGoal = $(this).val();
 									$.get("@routes.Application.updateGoal("energy", "")" + newGoal, function(){
+                                      console.log("update success");
                                       $(tooltipQuery).tooltip('hide');
-									plotEnergyWeight();
+                                      plotEnergyWeight();
 									});
+                                  }
 								});
 
 								// make sure the page will not be reloaded when the user hits enter

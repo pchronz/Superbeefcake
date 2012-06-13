@@ -39,8 +39,9 @@ object Preview extends Controller {
     }
     val user = Application.getUserFromSession(session)
     val energyGoal = MeasureGoal.findByField("energy", user)
-    println("EnergyGoal: " + energyGoal)
-    Ok(views.html.previewAnalyze(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, minDataDate.day, minDataDate.month, minDataDate.year, maxDataDate.day, maxDataDate.month, maxDataDate.year, weightFiltered, energyGoal)).withSession(Application.addAdhocUserToSession(user, session))
+    val goals = new scala.collection.immutable.HashMap[String, MeasureGoal]()
+    // TODO add all separete goals into the above map
+    Ok(views.html.previewAnalyze(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, minDataDate.day, minDataDate.month, minDataDate.year, maxDataDate.day, maxDataDate.month, maxDataDate.year, weightFiltered, goals)).withSession(Application.addAdhocUserToSession(user, session))
   }
 
   def analyzePost() = Action{ implicit request =>
