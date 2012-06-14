@@ -39,8 +39,11 @@ object Preview extends Controller {
     }
     val user = Application.getUserFromSession(session)
     val energyGoal = MeasureGoal.findByField("energy", user)
-    val goals = new scala.collection.immutable.HashMap[String, MeasureGoal]()
-    // TODO add all separete goals into the above map
+    val goalStrings = List("energy")
+    // query goals and add them to the goals map if found
+    val goalList = for(goalString<-goalStrings; val goal = MeasureGoal.findByField(goalString, user); if(goal != None)) 
+      yield (goalString -> goal.get)
+    val goals = new scala.collection.immutable.HashMap[String, MeasureGoal]() ++ goalList
     Ok(views.html.previewAnalyze(energyFiltered, proteinFiltered, fatFiltered, carbsFiltered, minDataDate.day, minDataDate.month, minDataDate.year, maxDataDate.day, maxDataDate.month, maxDataDate.year, weightFiltered, goals)).withSession(Application.addAdhocUserToSession(user, session))
   }
 

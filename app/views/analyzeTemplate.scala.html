@@ -79,49 +79,70 @@
 		}
 	}
 	@bs2Row() {
-		@bs2Span(2, Some(1)) {
-			<form id="form-update">
-				<fieldset>
-					<div class="control-group">
-						<div class="controls">
-                            @{/* energy */}
-							<label for="input-energy-goal">Energy Goal</label>
-                            <input type="radio" name="radio-energy" value="energy" />
-                            @{goals.get("energy") match{
-                              case Some(goal) => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-energy-goal' value='" + goal.goalValue + "' rel='tooltip' title='Press Enter to update' />")
-                              case None => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-energy-goal' placeholder='None' rel='tooltip' title='Press Enter to update' />")
-                            }}
-						</div>
-						<script type="text/javascript" charset="utf-8">
-							$(function() {
-                                var tooltipQuery = "#input-energy-goal";
-                                $(tooltipQuery).tooltip({trigger: 'manual'});
-								$(tooltipQuery).bind("keypress mouseup",function(event) {
-                                  if(event.which != 13) {
-                                    setTimeout(function(){$(tooltipQuery).tooltip('show');}, 500);
-                                  }
-                                });
-								$("#input-energy-goal").bind("keypress", function(event) {
-                                  if(event.which == 13) {
-									var newGoal = $(this).val();
-									$.get("@routes.Application.updateGoal("energy", "")" + newGoal, function(){
-                                      console.log("update success");
-                                      $(tooltipQuery).tooltip('hide');
-                                      plotEnergyWeight();
-									});
-                                  }
-								});
+        <form id="form-update">
+          <fieldset>
+            @bs2Span(2, Some(1)) {
+              <div class="control-group">
+                  <div class="controls">
+                      @{/* energy */}
+                      <label for="input-energy-goal">Energy Goal</label>
+                      <input type="radio" name="radio-energy" value="energy" />
+                      @{goals.get("energy") match{
+                        case Some(goal) => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-energy-goal' value='" + goal.goalValue + "' rel='tooltip' title='Press Enter to update' />")
+                        case None => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-energy-goal' placeholder='None' rel='tooltip' title='Press Enter to update' />")
+                      }}
+                  </div>
+              </div>
+            }
+            @bs2Span(2, Some(1)) {
+              <div class="control-group">
+                  <div class="controls">
+                    @{/* weight */}
+                    <label for="input-weight-goal">Weight Goal</label>
+                    <input type="radio" name="radio-weight" value="weight" />
+                    @{goals.get("weight") match{
+                      case Some(goal) => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-weight-goal' value='" + goal.goalValue + "' rel='tooltip' title='Press Enter to update' />")
+                      case None => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-weight-goal' placeholder='None' rel='tooltip' title='Press Enter to update' />")
+                    }}
+                  </div>
+              </div>
+            }
+              <script type="text/javascript" charset="utf-8">
+                var activeQuery = "#input-energy-goal";
+                $(function() {
+                    $("#input-energy-goal").focus(function() {
+                      activeQuery = "#input-energy-goal";
+                    });
+                    $("#input-weight-goal").focus(function() {
+                      activeQuery = "#input-weight-goal";
+                    });
+                });
+                  $(function() {
+                      $(activeQuery).tooltip({trigger: 'manual'});
+                      $(activeQuery).bind("keypress mouseup", function(event) {
+                        if(event.which != 13) {
+                          setTimeout(function(){$(activeQuery).tooltip('show');}, 500);
+                        }
+                      });
+                      $("#input-energy-goal").bind("keypress", function(event) {
+                        if(event.which == 13) {
+                          var newGoal = $(this).val();
+                          $.get("@routes.Application.updateGoal("energy", "")" + newGoal, function(){
+                            console.log("update success");
+                            $(activeQuery).tooltip('hide');
+                            plotEnergyWeight();
+                          });
+                        }
+                      });
 
-								// make sure the page will not be reloaded when the user hits enter
-								$("#form-update").submit(function() {
-									return false;
-								});
-							});
-						</script>
-					</div>
-				</fieldset>
-			</form>
-		}
+                      // make sure the page will not be reloaded when the user hits enter
+                      $("#form-update").submit(function() {
+                          return false;
+                      });
+                  });
+              </script>
+            </fieldset>
+        </form>
 	}
 	@bs2Row() {
 		@bs2Span(7, Some(1)) {

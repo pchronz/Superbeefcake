@@ -307,10 +307,11 @@ object Application extends Controller {
         val fatSeries = MacroEntry.getTimeSeries("fat", Some(sDate), Some(eDate), user)
         val carbsSeries = MacroEntry.getTimeSeries("carbs", Some(sDate), Some(eDate), user)
         val weightSeries = MeasureEntry.getTimeSeries("weight", Some(sDate), Some(eDate), user)
-        val energyGoal = MeasureGoal.findByField("energy", user)
-        val goals = new scala.collection.immutable.HashMap[String, MeasureGoal]()
-        // TODO add all separete goals into the above map
-        //goals += ("energy"->energyGoal)
+        val goalStrings = List("energy")
+        // query goals and add them to the goals map if found
+        val goalList = for(goalString<-goalStrings; val goal = MeasureGoal.findByField(goalString, user); if(goal != None)) 
+          yield (goalString -> goal.get)
+        val goals = new scala.collection.immutable.HashMap[String, MeasureGoal]() ++ goalList
         Ok(views.html.analyze(energySeries=energySeries, proteinSeries=proteinSeries, fatSeries=fatSeries, carbsSeries=carbsSeries, beefcake=user, startDay=sDate.day, startMonth=sDate.month, startYear=sDate.year, endDay=eDate.day, endMonth=eDate.month, endYear=eDate.year, weightSeries=weightSeries, goals=goals))
       }
     }
