@@ -25,6 +25,12 @@ object Food {
     }
   }
 
+  def addUserFood(food: Food, user: Beefcake) {
+    DB.withConnection { implicit c =>
+        SQL("INSERT INTO food (name, kCal, protein, fat, carbs, username) VALUES ({name}, {kCal}, {protein}, {fat}, {carbs}, {username})").on("name"->food.name, "kCal"->food.kCal, "protein"->food.protein, "fat"->food.fat, "carbs"->food.carbs, "username"->user.username).executeUpdate()
+    }
+  }
+
   def all(): List[Food] = {
       DB.withConnection{ implicit c =>
         SQL("SELECT * FROM food").as(food *)
@@ -37,7 +43,7 @@ object Food {
     }
   }
 
-  def findByName(name: String): Option[Food] = {
+  def findByName(name: String, user: Option[Beefcake]): Option[Food] = {
     val foods = DB.withConnection { implicit c =>
         SQL("SELECT * FROM food WHERE name = {name}").on("name"->name).as(food *)
     }
@@ -48,7 +54,7 @@ object Food {
     }
   }
 
-  def suggestFor(query: String): List[Food] = {
+  def suggestFor(query: String, user: Option[Beefcake]): List[Food] = {
     val upperQuery = query.toUpperCase
     // split by whitespace
     val keywords = upperQuery.split(" ")

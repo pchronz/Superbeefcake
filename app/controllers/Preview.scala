@@ -38,8 +38,7 @@ object Preview extends Controller {
       case l => (l.minBy(_.toLong), l.maxBy(_.toLong))
     }
     val user = Application.getUserFromSession(session)
-    val energyGoal = MeasureGoal.findByField("energy", user)
-    val goalStrings = List("energy")
+    val goalStrings = List("energy", "weight")
     // query goals and add them to the goals map if found
     val goalList = for(goalString<-goalStrings; val goal = MeasureGoal.findByField(goalString, user); if(goal != None)) 
       yield (goalString -> goal.get)

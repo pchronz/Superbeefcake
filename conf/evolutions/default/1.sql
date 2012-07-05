@@ -1,14 +1,6 @@
 # MacroEntry schema
 
 # --- !Ups
-CREATE TABLE food (
-	name VARCHAR(256) NOT NULL PRIMARY KEY,
-	kCal FLOAT NOT NULL,
-	protein FLOAT NOT NULL,
-	fat FLOAT NOT NULL,
-	carbs FLOAT NOT NULL
-);
-
 CREATE TABLE beefcake (
 	username VARCHAR(32) NOT NULL PRIMARY KEY,
 	password VARCHAR(64) NOT NULL,
@@ -17,6 +9,14 @@ CREATE TABLE beefcake (
 	lastUpdated LONG NOT NULL
 );
 
+CREATE TABLE food (
+	name VARCHAR(256) NOT NULL PRIMARY KEY,
+	kCal FLOAT NOT NULL,
+	protein FLOAT NOT NULL,
+	fat FLOAT NOT NULL,
+	carbs FLOAT NOT NULL,
+    username VARCHAR(32) REFERENCES beefcake(username)
+);
 
 CREATE SEQUENCE macro_id_seq;
 CREATE TABLE macroEntry (

@@ -130,13 +130,13 @@
 }
 
 @{/* Manual entry modal */}
-@bs2Modal(Some("modal-macro-manual"), Some("Please enter your values manually")) {
-	@form(routes.Application.submitMacroEntry, ('class -> "form-horizontal")) {
+@bs2Modal(Some("modal-macro-manual"), Some("Please enter the values for your new food")) {
+	@form(routes.Application.submitUserFoodEntry, ('class -> "form-horizontal")) {
 		<tr>
 			<input type="hidden" name="day" value="@{day match { case None => Date().day; case Some(day) => day}}" />
 			<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
 			<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
-			<td>@bs2TextField("food", 2, Some("Label"))</td>
+			<td>@bs2TextField("name", 2, Some("Name"))</td>
 			<td>@bs2TextField("amount", 1, Some("Amount"))</td>
 			<td>@bs2TextField("kCal", 1, Some("Energy"))</td>
 			<td>@bs2TextField("protein", 1, Some("Protein"))</td>

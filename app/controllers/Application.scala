@@ -139,6 +139,48 @@ object Application extends Controller {
     )
   }
 
+  val userFoodEntryForm = Form (
+    tuple(
+      "name" -> text,
+      "amount" -> number,
+      "kCal" -> number,
+      "protein" -> number,
+      "fat" -> number,
+      "carbs" -> number
+    )
+  )
+
+  def submitUserFoodEntry = Action { implicit request =>
+    getUserFromSession(session) match {
+      case user @ Beefcake(_, _, _, true, _) => 
+        // adding new entries only works for registered users
+        Redirect(routes.Application.index).withSession(addAdhocUserToSession(user, session))
+      case user => 
+        userFoodEntryForm.bindFromRequest.fold(
+          {form =>
+            Logger.error("binding errors for new user food entry")
+            Logger.error(form.errors.mkString(", "))
+            redirectFailed(user)
+          }, 
+          {fields =>
+            val name = fields._1
+            val amount = fields._2
+            val kCal = fields._3
+            val protein = fields._4
+            val fat = fields._5
+            val carbs = fields._6
+            val date = sessionToDate(session)
+
+            // the new food
+            val food = Food(name=name, kCal=kCal, protein=protein, fat=fat, carbs=carbs)
+            Food.addUserFood(food, user)
+            Logger.info("Added new food (" + food.toString + ") for user " + user.toString)
+            Redirect(routes.Application.eat(Some(date.day), Some(date.month), Some(date.year)))
+          }
+      )
+    }
+  }
+
   val dateFilterForm = Form (
     tuple(
       "day" -> number,
@@ -201,7 +243,7 @@ object Application extends Controller {
       },
       {fields =>
         val (foodName, amount, day, month, year) = fields
-        MacroEntry(None, Some(Date(day, month, year)), foodName, amount) match {
+        MacroEntry(None, Some(Date(day, month, year)), foodName, amount, Some(user)) match {
           case None => redirectFailed(user)
           case Some(macroEntry) => {
             MacroEntry.create(macroEntry, user)
@@ -270,8 +312,8 @@ object Application extends Controller {
     def replaceUmlauts(in: String): String = {
       in.replaceAll("ä", "&auml;").replaceAll("Ä", "&Auml;").replaceAll("Ü", "&Uuml;").replaceAll("ü", "&uuml;").replaceAll("Ö", "&Ouml;").replaceAll("ö", "&ouml;").replaceAll("ß", "&szlig;")
     }
-    val foodSuggestions = Food.suggestFor(replaceUmlauts(query))
-    println(query.replace("ü", "&uuml;"))
+    val user = getUserFromSession(session)
+    val foodSuggestions = Food.suggestFor(replaceUmlauts(query), Some(user))
 
     val foodNames = foodSuggestions.map { suggestion =>
       // using the name and replacing quotation marks to sanitize the JSON-based response to the client
@@ -307,7 +349,7 @@ object Application extends Controller {
         val fatSeries = MacroEntry.getTimeSeries("fat", Some(sDate), Some(eDate), user)
         val carbsSeries = MacroEntry.getTimeSeries("carbs", Some(sDate), Some(eDate), user)
         val weightSeries = MeasureEntry.getTimeSeries("weight", Some(sDate), Some(eDate), user)
-        val goalStrings = List("energy")
+        val goalStrings = List("energy", "weight")
         // query goals and add them to the goals map if found
         val goalList = for(goalString<-goalStrings; val goal = MeasureGoal.findByField(goalString, user); if(goal != None)) 
           yield (goalString -> goal.get)

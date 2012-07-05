@@ -79,14 +79,14 @@
 		}
 	}
 	@bs2Row() {
-        <form id="form-update">
+        <form id="form-update" class="form-inline">
           <fieldset>
-            @bs2Span(2, Some(1)) {
+            @bs2Span(3, Some(1)) {
               <div class="control-group">
                   <div class="controls">
                       @{/* energy */}
+                      <input type="radio" name="radio-goals" value="energy" />
                       <label for="input-energy-goal">Energy Goal</label>
-                      <input type="radio" name="radio-energy" value="energy" />
                       @{goals.get("energy") match{
                         case Some(goal) => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-energy-goal' value='" + goal.goalValue + "' rel='tooltip' title='Press Enter to update' />")
                         case None => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-energy-goal' placeholder='None' rel='tooltip' title='Press Enter to update' />")
@@ -94,12 +94,12 @@
                   </div>
               </div>
             }
-            @bs2Span(2, Some(1)) {
+            @bs2Span(3, Some(1)) {
               <div class="control-group">
                   <div class="controls">
                     @{/* weight */}
+                    <input type="radio" name="radio-goals" value="weight" />
                     <label for="input-weight-goal">Weight Goal</label>
-                    <input type="radio" name="radio-weight" value="weight" />
                     @{goals.get("weight") match{
                       case Some(goal) => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-weight-goal' value='" + goal.goalValue + "' rel='tooltip' title='Press Enter to update' />")
                       case None => Html("<input class='span2' type='number' min='0' step='50' size='16' id='input-weight-goal' placeholder='None' rel='tooltip' title='Press Enter to update' />")
@@ -109,37 +109,65 @@
             }
               <script type="text/javascript" charset="utf-8">
                 var activeQuery = "#input-energy-goal";
-                $(function() {
-                    $("#input-energy-goal").focus(function() {
-                      activeQuery = "#input-energy-goal";
-                    });
-                    $("#input-weight-goal").focus(function() {
-                      activeQuery = "#input-weight-goal";
-                    });
-                });
-                  $(function() {
-                      $(activeQuery).tooltip({trigger: 'manual'});
-                      $(activeQuery).bind("keypress mouseup", function(event) {
-                        if(event.which != 13) {
-                          setTimeout(function(){$(activeQuery).tooltip('show');}, 500);
-                        }
-                      });
-                      $("#input-energy-goal").bind("keypress", function(event) {
-                        if(event.which == 13) {
-                          var newGoal = $(this).val();
-                          $.get("@routes.Application.updateGoal("energy", "")" + newGoal, function(){
-                            console.log("update success");
-                            $(activeQuery).tooltip('hide');
-                            plotEnergyWeight();
-                          });
-                        }
-                      });
+                var knownQueries = [];
+                function selectGoal(query) {
+                    $(activeQuery).siblings("input[type='radio']").attr('checked', 'checked');
+                }
+                function initQueries() {
+                  var inputs = $("input[id$='goal']");
+                  var i;
+                  for(i = 0; i < inputs.length; i++) {
+                    var query = "#" + $(inputs[i]).attr('id');
+                    knownQueries.push(query);
+                  }
+                  if(knownQueries.length > 0) activeQuery = knownQueries[0];
+                }
 
-                      // make sure the page will not be reloaded when the user hits enter
-                      $("#form-update").submit(function() {
-                          return false;
-                      });
-                  });
+                function initTooltips() {
+                  var i;
+                  for(i = 0; i < knownQueries.length; i++) {
+                    var query = knownQueries[i];
+                    $(query).tooltip({trigger: 'manual'});
+                    $(query).bind("keypress mouseup", function(event) {
+                      if(event.which != 13) {
+                        var el = $(this);
+                        setTimeout(function(){$(el).tooltip('show');}, 500);
+                      }
+                    });
+
+                    $(query).bind("keypress", function(event) {
+                      var goalName = $(this).attr('id').split("-")[1];
+                      if(event.which == 13) {
+                        var newGoal = $(this).val();
+                        var el = $(this);
+                        $.get("/updateGoal/" + goalName + "/" + newGoal, function(){
+                          el.tooltip('hide');
+                          plotEnergyWeight();
+                        });
+                      }
+                    });
+                  }
+                }
+                $(function() {
+                    $("input[id$='goal']").focus(function() {
+                      activeQuery = "#" + $(this).attr('id');
+                      selectGoal(activeQuery);
+                      plotEnergyWeight();
+                    });
+
+                    // make sure the page will not be reloaded when the user hits enter
+                    $("#form-update").submit(function() {
+                        return false;
+                    });
+
+                    // initially activate the selected radio button
+                    initQueries();
+
+                    // init all tooltips
+                    initTooltips();
+
+                    selectGoal(activeQuery);
+                });
               </script>
             </fieldset>
         </form>
@@ -152,6 +180,8 @@
 				function plotEnergyWeight() {
 					// energy goal
 					var energyGoal = parseInt($("#input-energy-goal").val());
+					var weightGoal = parseInt($("#input-weight-goal").val());
+
 					// energy
 					var energy = [@{energySeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					var minEnergy = @{energySeries.length match {case 0 => 0; case _ => energySeries.minBy(a => a._2)._2}};
@@ -165,16 +195,27 @@
 					// weight
 					var weight = [@{weightSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					var minWeight = @{weightSeries match {case Nil => 0; case _ => weightSeries.minBy(a => a._2)._2}};
+                    minWeight = isNaN(weightGoal) || minWeight < weightGoal ? minWeight : weightGoal;
 					minWeight = minWeight >= 1 ? minWeight - 0.5 : 0; // minWeight < 10??? unfortunate situation!
 					var maxWeight = @{weightSeries match {case Nil => 0; case _ => weightSeries.maxBy(a => a._2)._2}};
+                    maxWeight = isNaN(weightGoal) || maxWeight > weightGoal ? maxWeight : weightGoal;
 					maxWeight += 0.5;
 					var weightLabel = "Weight (Average: @{weightSeries.length match { case 0 => 0; case _ => (weightSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / weightSeries.length).toInt}} kg/day)";
 					var showWeightPoints = @weightSeries.length == 1 ? true : false;
 					var showEnergyPoints = @energySeries.length == 1 ? true : false;
 
+                    // only display the active goal on the display
+                    var markings = [];
+                    if(activeQuery.indexOf("energy") != -1) {
+                      markings.push({yaxis: {from: energyGoal, to: energyGoal}, color: 'red'});
+                    }
+                    else {
+                      markings.push({y2axis: {from: weightGoal, to: weightGoal}, color: 'blue'});
+                    }
+
 					$.plot($("#energy-placeholder"),
 						[{data: energy, lines: {show: true}, points: {show: showEnergyPoints}, label: energyLabel, yaxis: 1}, {data: weight, points: {show: showWeightPoints}, lines: {show: true}, label: weightLabel, yaxis: 2}],
-						{xaxis: {mode: "time", position: "bottom"}, yaxes: [{show: true, position: "left", min: minEnergy, max: maxEnergy}, {position: "right", min: minWeight, max: maxWeight}], grid: {show: true, markings: [{yaxis: {from: energyGoal, to: energyGoal}, color: 'red'}]}}
+						{xaxis: {mode: "time", position: "bottom"}, yaxes: [{show: true, position: "left", min: minEnergy, max: maxEnergy}, {position: "right", min: minWeight, max: maxWeight}], grid: {show: true, markings: markings}}
 					);
 				}
 				$(function () {

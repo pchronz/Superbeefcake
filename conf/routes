@@ -9,6 +9,7 @@ GET		/analyze					controllers.Application.analyze(sDay: Option[Int], sMonth: Opt
 POST	/analyzePost				controllers.Application.analyzePost
 GET		/login						controllers.Application.login
 POST	/submitMacroEntry			controllers.Application.submitMacroEntry
+POST    /submitUserFoodEntry        controllers.Application.submitUserFoodEntry
 POST	/submitDateFilter			controllers.Application.submitDateFilter
 GET		/deleteMacroEntry/:id		controllers.Application.deleteMacroEntry(id: Int)
 POST	/submitMacroEntryByFood		controllers.Application.submitMacroEntryByFood
