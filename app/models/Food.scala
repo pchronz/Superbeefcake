@@ -5,7 +5,11 @@ import anorm.SqlParser._
 import play.api.db._
 import play.api.Play.current
 
-case class Food(name: String, kCal: Double, protein: Double, fat: Double, carbs: Double)
+case class Food(name: String, kCal: Double, protein: Double, fat: Double, carbs: Double) {
+  override def toString() = {
+    this.name
+  }
+}
 
 object Food {
   val food = {
@@ -70,6 +74,12 @@ object Food {
     println("#results: " + results.length)
     println(results.mkString(", "))
     results
+  }
+
+  def listUserFood(user: Beefcake): List[Food] = {
+      DB.withConnection { implicit c =>
+          SQL("SELECT * FROM food WHERE username = {username}").on("username"->user.username).as(food *)
+      }
   }
 }
 

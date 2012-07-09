@@ -1,0 +1,32 @@
+@(ownFoods: List[Food])
+
+@import helper._
+@import helper.twitterBootstrap2._
+@import helper.twitterBootstrap2.Bootstrap2Helpers._
+@import models.Date
+
+
+@bs2Row() {
+	@bs2Span(8, Some(1)) {
+		@form(routes.Application.submitMacroEntryByFood, ('class->"form-inline")) {
+			<fieldset>
+				<legend>Your own food entries...</legend>
+                @bs2Table(List(Html("Name"), Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
+                  @ownFoods.map { ownFood => 
+                      <tr>
+                        <td> <input type="text" name="name" id="name-@ownFood.name" value="@ownFood.name" class="span2" /> </td>
+                        <td> <input type="text" name="amount" id="amount-@ownFood.name" value="100" class="span1" /> </td>
+                        <td> <input type="text" name="kCal" id="kCal-@ownFood.name" value="@ownFood.kCal" class="span1" /> </td>
+                        <td> <input type="text" name="protein" id="protein-@ownFood.name" value="@ownFood.protein" class="span1" /> </td>
+                        <td> <input type="text" name="fat" id="fat-@ownFood.name" value="@ownFood.fat" class="span1" /> </td>
+                        <td> <input type="text" name="carbs" id="carbs-@ownFood.name" value="@ownFood.carbs" class="span1" /> </td>
+                        <td> <a tabindex="-1" href="@{routes.Application.deleteOwnFood(ownFood.name)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a> </td>
+                      </tr>
+                    }
+                }
+			</fieldset>
+		}
+	}
+}
+
+

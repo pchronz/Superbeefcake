@@ -23,10 +23,12 @@ GET		/measure					controllers.Application.measure(sDay: Option[Int], sMonth: Opt
 POST	/submitMeasureEntry			controllers.Application.submitMeasureEntry
 POST	/submitMeasureDateFilter	controllers.Application.submitMeasureDateFilter
 GET		/deleteMeasureEntries		controllers.Application.deleteMeasureEntries(jsonIds : String)
+GET     /manageOwnFoods             controllers.Application.manageOwnFoodEntries
 
 # preview pages
 GET		/preview/analyze			controllers.Preview.analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int])
 POST	/preview/analyzePost		controllers.Preview.analyzePost
+GET     /deleteOwnFood              controllers.Application.deleteOwnFood(foodName: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               	controllers.Assets.at(path="/public", file)

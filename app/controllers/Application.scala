@@ -615,5 +615,13 @@ object Application extends Controller {
     decimal.replace(",", ".").toDouble
   }
 
+  def manageOwnFoodEntries = Action { implicit request =>
+    val user = getUserFromSession(session)
+    val ownFoods = Food.listUserFood(user)
+    Ok(views.html.ownFoods(ownFoods))
+  }
+
+  def deleteOwnFood(foodName: String) = TODO
+
 }
 
