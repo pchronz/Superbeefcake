@@ -621,7 +621,40 @@ object Application extends Controller {
     Ok(views.html.ownFoods(ownFoods))
   }
 
-  def deleteOwnFood(foodName: String) = TODO
+  def deleteOwnFood(foodName: String) = Action { implicit request =>
+    val user = getUserFromSession(session)
+    Food.deleteByName(foodName, user)
+    Redirect(routes.Application.manageOwnFoodEntries())
+  }
 
+  val updateFoodEntryForm = Form (
+    tuple(
+      "name"->text,
+      "amount"->number,
+      "energy"->number,
+      "protein"->text,
+      "fat"->text,
+      "carbs"->text
+    )
+  )
+
+  def updateOwnFoodEntry() = Action { implicit request =>
+    updateFoodEntryForm.bindFromRequest.fold(
+      {form =>
+        Logger.error("Error while binding updated food entry")
+      },
+      {fields =>
+        Logger.info("Updating food entry")
+        val name = fields._1
+        val amount = fields._2
+        val energy = fields._3
+        val protein = stringToDouble(fields._4)
+        val fat = stringToDouble(fields._5)
+        val carbs = stringToDouble(fields._6)
+        // TODO insert or update in *one* operation
+      }
+    )
+    Redirect(routes.Application.manageOwnFoodEntries())
+  }
 }
 

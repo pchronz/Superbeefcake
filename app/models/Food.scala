@@ -47,6 +47,12 @@ object Food {
     }
   }
 
+  def deleteByName(name: String, user: Beefcake) {
+    DB.withConnection { implicit c =>
+    SQL("DELETE FROM food WHERE name={name} AND username={username}").on("name"->name, "username"->user.username).executeUpdate()
+    }
+  }
+
   def findByName(name: String, user: Option[Beefcake]): Option[Food] = {
     val foods = DB.withConnection { implicit c =>
         SQL("SELECT * FROM food WHERE name = {name}").on("name"->name).as(food *)
@@ -81,6 +87,7 @@ object Food {
           SQL("SELECT * FROM food WHERE username = {username}").on("username"->user.username).as(food *)
       }
   }
+
 }
 
 // vim: set ts=4 sw=4 et:
