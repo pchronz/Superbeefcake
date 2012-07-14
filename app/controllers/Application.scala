@@ -656,5 +656,15 @@ object Application extends Controller {
     )
     Redirect(routes.Application.manageOwnFoodEntries())
   }
+
+  def updateFood(name: Option[String], amount: Option[Int], protein: Option[String], fat: Option[String], carbs: Option[String]) = Action { implicit request =>
+    (name, amount, protein, fat, carbs) match {
+      case (Some(name), Some(amount), Some(protein), Some(fat), Some(carbs)) =>
+        Logger.info("Updating food entry " + name)
+        // TODO really update the entry
+      case _ => Logger.warn("Update food could not be performed due to mising parameters")
+    }
+    Ok(name.getOrElse(""))
+  }
 }
 

@@ -38,4 +38,5 @@ GET		/suggestFood					controllers.Application.suggestFood(query: String)
 GET		/updateMacroEntry/:id/:amount	controllers.Application.updateMacroEntry(id: Int, amount:Int) 
 GET		/updateMeasureEntry/:id/:field/:value	controllers.Application.updateMeasureEntry(id: Int, field: String, value: String)
 GET		/updateGoal/:field/:value	controllers.Application.updateGoal(field: String, value: String)
+GET     /updateFood                 controllers.Application.updateFood(name: Option[String] ?= None, amount: Option[Int] ?= None, protein: Option[String] ?= None, fat: Option[String] ?= None, carbs: Option[String] ?= None)
 

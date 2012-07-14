@@ -6,27 +6,71 @@
 @import models.Date
 
 
-@bs2Row() {
-	@bs2Span(8, Some(1)) {
-		@form(routes.Application.submitMacroEntryByFood, ('class->"form-inline")) {
-			<fieldset>
-				<legend>Your own food entries...</legend>
-                @bs2Table(List(Html("Name"), Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
+@main(Html("Superbeefcake"), "", None) {
+  @bs2Row() {
+      @bs2Span(8, Some(1)) {
+            <fieldset>
+                <legend>Your own food entries...</legend>
+                @bs2Table(List(Html("Name"), Html(""), Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
                   @ownFoods.map { ownFood => 
                       <tr>
-                        <td> <input type="text" name="name" id="name-@ownFood.name" value="@ownFood.name" class="span2" /> </td>
-                        <td> <input type="text" name="amount" id="amount-@ownFood.name" value="100" class="span1" /> </td>
-                        <td> <input type="text" name="energy" id="kCal-@ownFood.name" value="@ownFood.kCal" class="span1" /> </td>
-                        <td> <input type="text" name="protein" id="protein-@ownFood.name" value="@ownFood.protein" class="span1" /> </td>
-                        <td> <input type="text" name="fat" id="fat-@ownFood.name" value="@ownFood.fat" class="span1" /> </td>
-                        <td> <input type="text" name="carbs" id="carbs-@ownFood.name" value="@ownFood.carbs" class="span1" /> </td>
+                        <td> <a href="#" id="save-@ownFood.name">Save</a></td>
+                        <td> <input type="text" name="name" id="name-@ownFood.name" value="@ownFood.name" class="span2 food-input" /> </td>
+                        <td> <input type="text" name="amount" id="amount-@ownFood.name" value="100" class="span1 food-input" /> </td>
+                        <td> <input type="text" name="energy" id="kCal-@ownFood.name" value="@ownFood.kCal" class="span1 food-input" /> </td>
+                        <td> <input type="text" name="protein" id="protein-@ownFood.name" value="@ownFood.protein" class="span1 food-input" /> </td>
+                        <td> <input type="text" name="fat" id="fat-@ownFood.name" value="@ownFood.fat" class="span1 food-input" /> </td>
+                        <td> <input type="text" name="carbs" id="carbs-@ownFood.name" value="@ownFood.carbs" class="span1 food-input" /> </td>
                         <td> <a tabindex="-1" href="@{routes.Application.deleteOwnFood(ownFood.name)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a> </td>
                       </tr>
                     }
+                    @{/* add a new food entry */}
+                    <tr>
+                      <td> <a href="#" id="save-new">Create</a></td>
+                      <td> <input type="text" name="name" id="name-new" value="" placeholder="New entry..." class="span2 food-input" /> </td>
+                      <td> <input type="text" name="amount" id="amount-new" value="" placeholder="100" class="span1 food-input" /> </td>
+                      <td> <input type="text" name="energy" id="kCal-new" value="" placeholder="0" class="span1 food-input" /> </td>
+                      <td> <input type="text" name="protein" id="protein-new" value="" placeholder="0.0" class="span1 food-input" /> </td>
+                      <td> <input type="text" name="fat" id="fat-new" value="" placeholder="0.0" class="span1 food-input" /> </td>
+                      <td> <input type="text" name="carbs" id="carbs-new" value="" placeholder="0.0" class="span1 food-input" /> </td>
+                      <td> </td>
+                    </tr>
+                    <script type="text/javascript" charset="utf-8">
+                      $(function(){
+                        // hide all save buttons at first
+                        $("a[id^='save-']").hide();
+                      });
+
+                      // perform AJAX call when save button is clicked
+                      $("a[id^='save-']").click(function() {
+                        var foodName = $(this).attr('id').split('-')[1];
+                        // XXX Play routing sucks because of the typeafe paradigm
+                        var url = "/updateFood";
+                        var data = {};
+                        data['name'] = $("#name-" + foodName).attr('value');
+                        data['amount'] = $("#amount-" + foodName).attr('value');
+                        data['energy'] = $("#energy-" + foodName).attr('value');
+                        data['protein'] = $("#protein-" + foodName).attr('value');
+                        data['fat'] = $("#fat-" + foodName).attr('value');
+                        data['carbs'] = $("#carbs-" + foodName).attr('value');
+                        $.get(url, data, function(data, textStatus, jqXHR) {
+                          // data contains the foodName
+                          $("a[id^='" + data + "']").hide();
+                          // TODO message that all is save now
+                        });
+                      });
+
+                      // show save button on value change
+                      $(".food-input").change(function() {
+                        var id = $(this).attr('id');
+                        var foodName = id.split('-')[1];
+                        $("#save-" + foodName).show();
+                      });
+                    </script>
                 }
-			</fieldset>
-		}
-	}
+            </fieldset>
+      }
+  }
 }
 
 
