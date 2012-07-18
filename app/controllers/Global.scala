@@ -36,7 +36,7 @@ object Global extends GlobalSettings {
     nutrientsFile.getLines().foreach{line =>
       val MacroEntryRegex(name, energy, protein, fat, carbs) = line
       try {
-        val foodItem = Food(name, energy.toDouble, protein.toDouble, fat.toDouble, carbs.toDouble)
+        val foodItem = Food(name, energy.toInt, protein.toDouble, fat.toDouble, carbs.toDouble)
         Food.create(foodItem)
       }
       catch { 
@@ -66,7 +66,7 @@ object Global extends GlobalSettings {
         val carbsNum = carbs.replaceAll(",", ".").toDouble
         if(unit == "g") {
           val ratio = 1.0/quantity.toDouble
-          val foodItem = Food(name, ratio*energyNum, ratio*proteinNum, ratio*fatNum, ratio*carbsNum)
+          val foodItem = Food(name, (ratio*energyNum).toInt, ratio*proteinNum, ratio*fatNum, ratio*carbsNum)
           Food.create(foodItem)
           successCounter += 1
         }
@@ -107,7 +107,7 @@ object Global extends GlobalSettings {
       Food.create(Food("Macadamia Crème", 671, 10.6, 57.8, 25.6))
       Food.create(Food("X-Treme Protein XXL Bar", 385, 31, 10, 42))
       Food.create(Food("Krakauer", 264, 13.8, 23.4, 0))
-      Food.create(Food("BCAA", 56.8, 98, 0, 1.5))
+      Food.create(Food("BCAA", 57, 98, 0, 1.5))
       Food.create(Food("Partytomate", 18, 0.9, 0, 2.5))
       Food.create(Food("Orange", 40, 0, 0, 8))
       Food.create(Food("Lammfilet", 186, 27.3, 8.5, 0))
@@ -119,7 +119,7 @@ object Global extends GlobalSettings {
       Food.create(Food("Weider Lemon Curd", 376, 83.2, 2, 5.5))
       Food.create(Food("Weider Banana", 376, 83.2, 2, 5.5))
       Food.create(Food("Weider Vanilla", 376, 83.2, 2, 5.5))
-      Food.create(Food("Frosta Rigatoni", 111.8, 4.3, 3.1, 17.3))
+      Food.create(Food("Frosta Rigatoni", 111, 4.3, 3.1, 17.3))
       Food.create(Food("Frosta Huehnchen Curry", 109, 6.3, 2.1, 16.1))
       Food.create(Food("Zur", 23, 0.8, 0.4, 4))
       Food.create(Food("Weisswurst", 230, 6.6, 25, 0))

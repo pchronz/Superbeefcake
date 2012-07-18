@@ -5,7 +5,7 @@ import anorm.SqlParser._
 import play.api.db._
 import play.api.Play.current
 
-case class Food(name: String, kCal: Double, protein: Double, fat: Double, carbs: Double) {
+case class Food(name: String, kCal: Int, protein: Double, fat: Double, carbs: Double) {
   override def toString() = {
     this.name
   }
@@ -14,7 +14,7 @@ case class Food(name: String, kCal: Double, protein: Double, fat: Double, carbs:
 object Food {
   val food = {
     get[String]("name") ~
-    get[Double]("kCal") ~
+    get[Int]("kCal") ~
     get[Double]("protein") ~
     get[Double]("fat") ~
     get[Double]("carbs") map {
@@ -87,7 +87,12 @@ object Food {
           SQL("SELECT * FROM food WHERE username = {username}").on("username"->user.username).as(food *)
       }
   }
-
+  
+  def update(originalName: String, food: Food, user: Beefcake) {
+      DB.withConnection { implicit c =>
+          SQL("UPDATE food SET name={name}, kCal={kCal}, protein={protein}, fat={fat}, carbs={carbs} WHERE username={username} AND name={originalName}").on("name"->food.name, "kCal"->food.kCal, "protein"->food.protein, "fat"->food.fat, "carbs"->food.carbs, "username"->user.username, "originalName"->originalName).executeUpdate()
+      }
+  }
 }
 
 // vim: set ts=4 sw=4 et:

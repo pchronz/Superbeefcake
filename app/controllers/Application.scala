@@ -657,12 +657,26 @@ object Application extends Controller {
     Redirect(routes.Application.manageOwnFoodEntries())
   }
 
-  def updateFood(name: Option[String], amount: Option[Int], protein: Option[String], fat: Option[String], carbs: Option[String]) = Action { implicit request =>
-    (name, amount, protein, fat, carbs) match {
-      case (Some(name), Some(amount), Some(protein), Some(fat), Some(carbs)) =>
-        Logger.info("Updating food entry " + name)
-        // TODO really update the entry
-      case _ => Logger.warn("Update food could not be performed due to mising parameters")
+  def updateFood(originalName: Option[String], name: Option[String], amount: Option[Int], energy: Option[Int], protein: Option[String], fat: Option[String], carbs: Option[String]) = Action { implicit request =>
+    val user = getUserFromSession(session)
+    (originalName, name, amount, energy, protein, fat, carbs) match {
+      case (Some(originalName), Some(name), Some(amount), Some(energy), Some(protein), Some(fat), Some(carbs)) =>
+        Logger.info("Updating food entry " + originalName)
+        // XXX ineffcient: performing a query and then the insert or update
+        // this is supposed to work as one operation but seems to be vendor-specific (on duplicate key, unique constraint, ...)
+        val multiplier = if(amount != 100) 100.0/amount else 1.0
+        val newFood = Food(name=name, kCal=(energy*multiplier).toInt, protein=stringToDouble(protein)*multiplier, fat=stringToDouble(fat)*multiplier, carbs=stringToDouble(carbs)*multiplier)
+        Logger.info("New Food: " + newFood)
+        Food.update(originalName, newFood, user)
+      case _ =>
+        Logger.warn("Update food could not be performed due to mising parameters")
+        Logger.warn("Original Name: " + originalName)
+        Logger.warn("Name: " + name)
+        Logger.warn("Amount: " + amount)
+        Logger.warn("Energy: " + energy)
+        Logger.warn("Protein: " + protein)
+        Logger.warn("Fat: " + fat)
+        Logger.warn("Carbs: " + carbs)
     }
     Ok(name.getOrElse(""))
   }
