@@ -4,7 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index
-GET		/eat						controllers.Application.eat(day: Option[Int], month: Option[Int], year: Option[Int])
+GET		/eat						controllers.Application.eat(day: Option[Int] ?= None, month: Option[Int] ?= None, year: Option[Int] ?= None)
 GET		/analyze					controllers.Application.analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int])
 POST	/analyzePost				controllers.Application.analyzePost
 GET		/login						controllers.Application.login

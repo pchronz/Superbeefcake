@@ -144,9 +144,10 @@ object Application extends Controller {
       "name" -> text,
       "amount" -> number,
       "kCal" -> number,
-      "protein" -> number,
-      "fat" -> number,
-      "carbs" -> number
+      "protein" -> text,
+      "fat" -> text,
+      "carbs" -> text,
+      "redirectTo" -> text
     )
   )
 
@@ -166,16 +167,19 @@ object Application extends Controller {
             val name = fields._1
             val amount = fields._2
             val kCal = fields._3
-            val protein = fields._4
-            val fat = fields._5
-            val carbs = fields._6
+            val protein = stringToDouble(fields._4)
+            val fat = stringToDouble(fields._5)
+            val carbs = stringToDouble(fields._6)
             val date = sessionToDate(session)
 
+            val ratio = 100/amount
+
             // the new food
-            val food = Food(name=name, kCal=kCal, protein=protein, fat=fat, carbs=carbs)
+            val food = Food(name=name, kCal=(kCal*ratio).toInt, protein=protein*ratio, fat=fat*ratio, carbs=carbs*ratio)
             Food.addUserFood(food, user)
             Logger.info("Added new food (" + food.toString + ") for user " + user.toString)
-            Redirect(routes.Application.eat(Some(date.day), Some(date.month), Some(date.year)))
+            val redirectTo = fields._7
+            Redirect(redirectTo)
           }
       )
     }

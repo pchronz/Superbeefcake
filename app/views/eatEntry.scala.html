@@ -133,9 +133,18 @@
   @bs2Modal(Some("modal-macro-manual"), Some("Please enter the values for your new food")) {
     @form(routes.Application.submitUserFoodEntry, ('class -> "form-horizontal")) {
 		<tr>
-			<input type="hidden" name="day" value="@{day match { case None => Date().day; case Some(day) => day}}" />
-			<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
-			<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
+            @(day, month, year, routes.Application.eat(day, month, year)) match {
+              case (Some(day), Some(month), Some(year), route) =>
+                <input type="hidden" name="redirectTo" value="@route" />
+                <input type="hidden" name="day" value="@day" />
+                <input type="hidden" name="month" value="@month" />
+                <input type="hidden" name="year" value="@year" />
+              case _ =>
+                <input type="hidden" name="redirectTo" value="@routes.Application.eat()" />
+                <input type="hidden" name="day" value="@Date().day" />
+                <input type="hidden" name="month" value="@Date().month" />
+                <input type="hidden" name="year" value="@Date().year" />
+              }
 			<td>@bs2TextField("name", 2, Some("Name"))</td>
 			<td>@bs2TextField("amount", 1, Some("Amount"))</td>
 			<td>@bs2TextField("kCal", 1, Some("Energy"))</td>
