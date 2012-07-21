@@ -1,4 +1,4 @@
-@(ownFoods: List[Food])
+@(ownFoods: List[Food], beefcake: Beefcake)
 
 @import helper._
 @import helper.twitterBootstrap2._
@@ -6,14 +6,14 @@
 @import models.Date
 
 
-@main(Html("Superbeefcake"), "", None) {
+@main(Html("Superbeefcake"), "", Some(beefcake)) {
   @bs2Row() {
       @bs2Span(8, Some(1)) {
         <h1>Your own food entries...</h1>
         @bs2Table(List(Html("Name"), Html(""), Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
           @ownFoods.map { ownFood => 
               <tr>
-                <td> <span id="span-@ownFood.name" style="display:none;"><i class="icon-search"></i><a href="#" id="save-@ownFood.name">Save</a></span></td>
+                <td> <span id="span-@ownFood.name" style="display:none;"><a href="#" id="save-@ownFood.name" class="btn btn-primary"><i class="icon-search icon-white"></i> Save</a></span></td>
                 <td> <input type="text" name="name" id="name-@ownFood.name" value="@ownFood.name" class="span2 food-input" /> <input type="hidden" value="@ownFood.name" name="original_name" id="original-name-@ownFood.name" /> </td>
                 <td> <input type="text" name="amount" id="amount-@ownFood.name" value="100" class="span1 food-input" /> </td>
                 <td> <input type="text" name="energy" id="energy-@ownFood.name" value="@ownFood.kCal" class="span1 food-input" /> </td>
@@ -84,6 +84,13 @@
         }
     }
   }
+
+  <script type="text/javascript" charset="utf-8">
+      $(function(){
+          // select the navbar link for this view as active
+          $("#manage-foods-nav-link").closest("li").addClass("active");
+      });
+  </script>
 }
 
 

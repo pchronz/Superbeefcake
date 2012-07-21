@@ -622,7 +622,7 @@ object Application extends Controller {
   def manageOwnFoodEntries = Action { implicit request =>
     val user = getUserFromSession(session)
     val ownFoods = Food.listUserFood(user)
-    Ok(views.html.ownFoods(ownFoods))
+    Ok(views.html.ownFoods(ownFoods, user))
   }
 
   def deleteOwnFood(foodName: String) = Action { implicit request =>

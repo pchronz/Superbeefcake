@@ -133,18 +133,18 @@
   @bs2Modal(Some("modal-macro-manual"), Some("Please enter the values for your new food")) {
     @form(routes.Application.submitUserFoodEntry, ('class -> "form-horizontal")) {
 		<tr>
-            @(day, month, year, routes.Application.eat(day, month, year)) match {
+            @{(day, month, year, routes.Application.eat(day, month, year)) match {
               case (Some(day), Some(month), Some(year), route) =>
-                <input type="hidden" name="redirectTo" value="@route" />
-                <input type="hidden" name="day" value="@day" />
-                <input type="hidden" name="month" value="@month" />
-                <input type="hidden" name="year" value="@year" />
-              case _ =>
-                <input type="hidden" name="redirectTo" value="@routes.Application.eat()" />
-                <input type="hidden" name="day" value="@Date().day" />
-                <input type="hidden" name="month" value="@Date().month" />
-                <input type="hidden" name="year" value="@Date().year" />
-              }
+                <input type="hidden" name="redirectTo" value={route.toString} />
+                <input type="hidden" name="day" value={day.toString} />
+                <input type="hidden" name="month" value={month.toString} />
+                <input type="hidden" name="year" value={year.toString} />
+              case (_,_,_,route) =>
+                <input type="hidden" name="redirectTo" value={route.toString} />
+                <input type="hidden" name="day" value={Date().day.toString} />
+                <input type="hidden" name="month" value={Date().month.toString} />
+                <input type="hidden" name="year" value={Date().year.toString} />
+              }}
 			<td>@bs2TextField("name", 2, Some("Name"))</td>
 			<td>@bs2TextField("amount", 1, Some("Amount"))</td>
 			<td>@bs2TextField("kCal", 1, Some("Energy"))</td>
