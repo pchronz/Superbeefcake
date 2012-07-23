@@ -8,12 +8,12 @@ import play.api.Play.current
 case class MacroEntry(id: Option[Int], food: Option[String], time: Date, amount: Int, kCal: Double, protein: Double, fat: Double, carbs: Double)
 
 object MacroEntry {
-  def apply(id: Option[Int], time: Option[Date], foodName: String, amount: Int, user: Option[Beefcake] = None): Option[MacroEntry] = {
+  def apply(id: Option[Int], time: Option[Date], foodId: Int, amount: Int, user: Option[Beefcake] = None): Option[MacroEntry] = {
     val timeConcrete: Date = time match {
       case None => Date()
       case Some(t) => t
     }
-    val food = Food.findByName(foodName, user) 
+    val food = Food.getById(foodId, user) 
     food match {
       case None => None
       case Some(food) => {

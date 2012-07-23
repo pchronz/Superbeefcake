@@ -28,7 +28,7 @@ GET     /manageOwnFoods             controllers.Application.manageOwnFoodEntries
 # preview pages
 GET		/preview/analyze			controllers.Preview.analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int])
 POST	/preview/analyzePost		controllers.Preview.analyzePost
-GET     /deleteOwnFood              controllers.Application.deleteOwnFood(foodName: String)
+GET     /deleteOwnFood              controllers.Application.deleteOwnFood(id: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               	controllers.Assets.at(path="/public", file)
@@ -38,5 +38,5 @@ GET		/suggestFood					controllers.Application.suggestFood(query: String)
 GET		/updateMacroEntry/:id/:amount	controllers.Application.updateMacroEntry(id: Int, amount:Int) 
 GET		/updateMeasureEntry/:id/:field/:value	controllers.Application.updateMeasureEntry(id: Int, field: String, value: String)
 GET		/updateGoal/:field/:value	controllers.Application.updateGoal(field: String, value: String)
-GET     /updateFood                 controllers.Application.updateFood(originalName: Option[String] ?= None, name: Option[String] ?= None, amount: Option[Int] ?= None, energy: Option[Int] ?= None, protein: Option[String] ?= None, fat: Option[String] ?= None, carbs: Option[String] ?= None)
+GET     /updateFood                 controllers.Application.updateFood(id: Option[Int] ?= None, name: Option[String] ?= None, amount: Option[Int] ?= None, energy: Option[Int] ?= None, protein: Option[String] ?= None, fat: Option[String] ?= None, carbs: Option[String] ?= None)
 

@@ -13,14 +13,14 @@
         @bs2Table(List(Html("Name"), Html(""), Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
           @ownFoods.map { ownFood => 
               <tr>
-                <td> <span id="span-@ownFood.name" style="display:none;"><a href="#" id="save-@ownFood.name" class="btn btn-primary"><i class="icon-search icon-white"></i> Save</a></span></td>
-                <td> <input type="text" name="name" id="name-@ownFood.name" value="@ownFood.name" class="span2 food-input" /> <input type="hidden" value="@ownFood.name" name="original_name" id="original-name-@ownFood.name" /> </td>
-                <td> <input type="text" name="amount" id="amount-@ownFood.name" value="100" class="span1 food-input" /> </td>
-                <td> <input type="text" name="energy" id="energy-@ownFood.name" value="@ownFood.kCal" class="span1 food-input" /> </td>
-                <td> <input type="text" name="protein" id="protein-@ownFood.name" value="@ownFood.protein" class="span1 food-input" /> </td>
-                <td> <input type="text" name="fat" id="fat-@ownFood.name" value="@ownFood.fat" class="span1 food-input" /> </td>
-                <td> <input type="text" name="carbs" id="carbs-@ownFood.name" value="@ownFood.carbs" class="span1 food-input" /> </td>
-                <td> <a tabindex="-1" href="@{routes.Application.deleteOwnFood(ownFood.name)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a> </td>
+                <td> <span id="span-@ownFood.id.get" style="display:none;"><a href="#" id="save-@ownFood.id.get" class="btn btn-primary"><i class="icon-search icon-white"></i> Save</a></span></td>
+                <td> <input type="text" name="name" id="name-@ownFood.id.get" value="@ownFood.id.get" class="span2 food-input" /> <input type="hidden" value="@ownFood.id.get" name="id" id="id-@ownFood.id.get" /> </td>
+                <td> <input type="text" name="amount" id="amount-@ownFood.id.get" value="100" class="span1 food-input" /> </td>
+                <td> <input type="text" name="energy" id="energy-@ownFood.id.get" value="@ownFood.kCal" class="span1 food-input" /> </td>
+                <td> <input type="text" name="protein" id="protein-@ownFood.id.get" value="@ownFood.protein" class="span1 food-input" /> </td>
+                <td> <input type="text" name="fat" id="fat-@ownFood.id.get" value="@ownFood.fat" class="span1 food-input" /> </td>
+                <td> <input type="text" name="carbs" id="carbs-@ownFood.id.get" value="@ownFood.carbs" class="span1 food-input" /> </td>
+                <td> <a tabindex="-1" href="@{routes.Application.deleteOwnFood(ownFood.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a> </td>
               </tr>
             }
             @{/* add a new food entry */}
@@ -37,16 +37,16 @@
             <script type="text/javascript" charset="utf-8">
               // perform AJAX call when save button is clicked
               $("a[id^='save-']").click(function() {
-                var foodName = $(this).attr('id').split('-')[1];
+                var id = $(this).attr('id').split('-')[1];
                 var url = "@routes.Application.updateFood()";
                 var data = {};
-                data['originalName'] = $("#original-name-" + foodName).attr('value');
-                data['name'] = $("#name-" + foodName).attr('value');
-                data['amount'] = $("#amount-" + foodName).attr('value');
-                data['energy'] = $("#energy-" + foodName).attr('value');
-                data['protein'] = $("#protein-" + foodName).attr('value');
-                data['fat'] = $("#fat-" + foodName).attr('value');
-                data['carbs'] = $("#carbs-" + foodName).attr('value');
+                data['id'] = $("#id-" + id).attr('value');
+                data['name'] = $("#name-" + id).attr('value');
+                data['amount'] = $("#amount-" + id).attr('value');
+                data['energy'] = $("#energy-" + id).attr('value');
+                data['protein'] = $("#protein-" + id).attr('value');
+                data['fat'] = $("#fat-" + id).attr('value');
+                data['carbs'] = $("#carbs-" + id).attr('value');
                 $.get(url, data, function(data, textStatus, jqXHR) {
                   // data contains the foodName
                   $("a[id^='" + data + "']").hide();

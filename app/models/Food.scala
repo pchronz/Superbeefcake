@@ -5,20 +5,21 @@ import anorm.SqlParser._
 import play.api.db._
 import play.api.Play.current
 
-case class Food(name: String, kCal: Int, protein: Double, fat: Double, carbs: Double) {
+case class Food(id: Option[Int] = None, name: String, kCal: Int, protein: Double, fat: Double, carbs: Double) {
   override def toString() = {
-    this.name
+    this.id + ": " + this.name
   }
 }
 
 object Food {
   val food = {
+    get[Int]("id") ~
     get[String]("name") ~
     get[Int]("kCal") ~
     get[Double]("protein") ~
     get[Double]("fat") ~
     get[Double]("carbs") map {
-      case name ~ kCal ~ protein ~ fat ~ carbs => Food(name, kCal, protein, fat, carbs)
+        case id ~ name ~ kCal ~ protein ~ fat ~ carbs => Food(Some(id), name, kCal, protein, fat, carbs)
     }
   }
 
@@ -47,20 +48,20 @@ object Food {
     }
   }
 
-  def deleteByName(name: String, user: Beefcake) {
+  def deleteById(id: Int, user: Beefcake) {
     DB.withConnection { implicit c =>
-    SQL("DELETE FROM food WHERE name={name} AND username={username}").on("name"->name, "username"->user.username).executeUpdate()
+    SQL("DELETE FROM food WHERE id={id} AND username={username}").on("id"->id, "username"->user.username).executeUpdate()
     }
   }
 
-  def findByName(name: String, user: Option[Beefcake]): Option[Food] = {
+  def getById(id: Int, user: Option[Beefcake]): Option[Food] = {
     val foods = DB.withConnection { implicit c =>
-        SQL("SELECT * FROM food WHERE name = {name}").on("name"->name).as(food *)
+        SQL("SELECT * FROM food WHERE id = {id}").on("id"->id).as(food *)
     }
     foods.length match {
         case 0 => None
         case 1 => Some(foods(0))
-        case _ => println("Found multiple food entries for name: " + name); Some(foods(0))
+        case _ => println("Found multiple food entries for id: " + id); Some(foods(0))
     }
   }
 
@@ -88,9 +89,9 @@ object Food {
       }
   }
   
-  def update(originalName: String, food: Food, user: Beefcake) {
+  def update(food: Food, user: Beefcake) {
       DB.withConnection { implicit c =>
-          SQL("UPDATE food SET name={name}, kCal={kCal}, protein={protein}, fat={fat}, carbs={carbs} WHERE username={username} AND name={originalName}").on("name"->food.name, "kCal"->food.kCal, "protein"->food.protein, "fat"->food.fat, "carbs"->food.carbs, "username"->user.username, "originalName"->originalName).executeUpdate()
+          SQL("UPDATE food SET name={name}, kCal={kCal}, protein={protein}, fat={fat}, carbs={carbs} WHERE username={username} AND id={id}").on("name"->food.name, "kCal"->food.kCal, "protein"->food.protein, "fat"->food.fat, "carbs"->food.carbs, "username"->user.username, "id"->food.id.get).executeUpdate()
       }
   }
 }

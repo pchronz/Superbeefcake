@@ -9,8 +9,10 @@ CREATE TABLE beefcake (
 	lastUpdated LONG NOT NULL
 );
 
+CREATE SEQUENCE food_id_seq;
 CREATE TABLE food (
-	name VARCHAR(256) NOT NULL PRIMARY KEY,
+    id INTEGER NOT NULL DEFAULT nextval('food_id_seq') PRIMARY KEY,
+	name VARCHAR(256) NOT NULL UNIQUE,
 	kCal INTEGER NOT NULL,
 	protein FLOAT NOT NULL,
 	fat FLOAT NOT NULL,

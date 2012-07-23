@@ -221,7 +221,7 @@ object Application extends Controller {
 
   val macroEntryByFoodForm = Form(
     tuple(
-      "foodName" -> text,
+      "foodId" -> number,
       "amount" -> number,
       "day" -> number,
       "month" -> number,
@@ -236,7 +236,6 @@ object Application extends Controller {
     }
   }
 
-
   def submitMacroEntryByFood = Action { implicit request =>
     val user = getUserFromSession(session)
     macroEntryByFoodForm.bindFromRequest.fold (
@@ -246,8 +245,8 @@ object Application extends Controller {
         redirectFailed(user)
       },
       {fields =>
-        val (foodName, amount, day, month, year) = fields
-        MacroEntry(None, Some(Date(day, month, year)), foodName, amount, Some(user)) match {
+        val (foodId, amount, day, month, year) = fields
+        MacroEntry(None, Some(Date(day, month, year)), foodId, amount, Some(user)) match {
           case None => redirectFailed(user)
           case Some(macroEntry) => {
             MacroEntry.create(macroEntry, user)
@@ -625,9 +624,9 @@ object Application extends Controller {
     Ok(views.html.ownFoods(ownFoods, user))
   }
 
-  def deleteOwnFood(foodName: String) = Action { implicit request =>
+  def deleteOwnFood(id: Int) = Action { implicit request =>
     val user = getUserFromSession(session)
-    Food.deleteByName(foodName, user)
+    Food.deleteById(id, user)
     Redirect(routes.Application.manageOwnFoodEntries())
   }
 
@@ -661,20 +660,19 @@ object Application extends Controller {
     Redirect(routes.Application.manageOwnFoodEntries())
   }
 
-  def updateFood(originalName: Option[String], name: Option[String], amount: Option[Int], energy: Option[Int], protein: Option[String], fat: Option[String], carbs: Option[String]) = Action { implicit request =>
+  def updateFood(id: Option[Int], name: Option[String], amount: Option[Int], energy: Option[Int], protein: Option[String], fat: Option[String], carbs: Option[String]) = Action { implicit request =>
     val user = getUserFromSession(session)
-    (originalName, name, amount, energy, protein, fat, carbs) match {
-      case (Some(originalName), Some(name), Some(amount), Some(energy), Some(protein), Some(fat), Some(carbs)) =>
-        Logger.info("Updating food entry " + originalName)
+    (id, name, amount, energy, protein, fat, carbs) match {
+      case (Some(id), Some(name), Some(amount), Some(energy), Some(protein), Some(fat), Some(carbs)) =>
+        Logger.info("Updating food entry " + id)
         // XXX ineffcient: performing a query and then the insert or update
         // this is supposed to work as one operation but seems to be vendor-specific (on duplicate key, unique constraint, ...)
         val multiplier = if(amount != 100) 100.0/amount else 1.0
         val newFood = Food(name=name, kCal=(energy*multiplier).toInt, protein=stringToDouble(protein)*multiplier, fat=stringToDouble(fat)*multiplier, carbs=stringToDouble(carbs)*multiplier)
         Logger.info("New Food: " + newFood)
-        Food.update(originalName, newFood, user)
+        Food.update(newFood, user)
       case _ =>
         Logger.warn("Update food could not be performed due to mising parameters")
-        Logger.warn("Original Name: " + originalName)
         Logger.warn("Name: " + name)
         Logger.warn("Amount: " + amount)
         Logger.warn("Energy: " + energy)
