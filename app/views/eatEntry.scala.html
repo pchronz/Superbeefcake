@@ -15,6 +15,7 @@
 					<input type="hidden" name="day" value="@{day match { case None => Date().day; case Some(day) => day}}" />
 					<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
 					<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
+                    <input type="hidden" name="foodId" value="" />
 					<input type="text" name="foodName" class="span3" placeholder="Food" data-provide="typeahead" autocomplete="off" />
 					@bs2TextField("amount", 2, Some("Amount"))
 					<input type="submit" value="Add" class="btn btn-primary" />

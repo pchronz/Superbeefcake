@@ -90,8 +90,12 @@ object Food {
   }
   
   def update(food: Food, user: Beefcake) {
-      DB.withConnection { implicit c =>
-          SQL("UPDATE food SET name={name}, kCal={kCal}, protein={protein}, fat={fat}, carbs={carbs} WHERE username={username} AND id={id}").on("name"->food.name, "kCal"->food.kCal, "protein"->food.protein, "fat"->food.fat, "carbs"->food.carbs, "username"->user.username, "id"->food.id.get).executeUpdate()
+      food.id match {
+          case None =>
+          case Some(id) =>
+              DB.withConnection { implicit c =>
+                  SQL("UPDATE food SET name={name}, kCal={kCal}, protein={protein}, fat={fat}, carbs={carbs} WHERE username={username} AND id={id}").on("name"->food.name, "kCal"->food.kCal, "protein"->food.protein, "fat"->food.fat, "carbs"->food.carbs, "username"->user.username, "id"->food.id.get).executeUpdate()
+          }
       }
   }
 }

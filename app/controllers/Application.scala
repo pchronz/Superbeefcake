@@ -219,6 +219,13 @@ object Application extends Controller {
     }
   }
 
+  def redirectFailed(user: Beefcake) = {
+    user match {
+      case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index)
+      case _ => Redirect(routes.Application.eat(None, None, None))
+    }
+  }
+
   val macroEntryByFoodForm = Form(
     tuple(
       "foodId" -> number,
@@ -228,13 +235,6 @@ object Application extends Controller {
       "year" -> number
     )
   )
-
-  def redirectFailed(user: Beefcake) = {
-    user match {
-      case Beefcake(_, _, _, true, _) => Redirect(routes.Application.index)
-      case _ => Redirect(routes.Application.eat(None, None, None))
-    }
-  }
 
   def submitMacroEntryByFood = Action { implicit request =>
     val user = getUserFromSession(session)
@@ -320,10 +320,11 @@ object Application extends Controller {
 
     val foodNames = foodSuggestions.map { suggestion =>
       // using the name and replacing quotation marks to sanitize the JSON-based response to the client
-      suggestion.name.replace("\"", "\\\"")
+      "{\"name\": \"" + suggestion.name.replace("\"", "\"") + "\"," + "\"id\": \"" + suggestion.id.get.toString + "\"}"
     }
 
-    val response = "{\"items\": [\"" + foodNames.mkString("\", \"") + "\"]}"
+    val response = "{\"items\": [" + foodNames.mkString(", ") + "]}"
+    Logger.info(response)
     Ok(response)
   }
 
@@ -637,28 +638,10 @@ object Application extends Controller {
       "energy"->number,
       "protein"->text,
       "fat"->text,
-      "carbs"->text
+      "carbs"->text,
+      "id"->number
     )
   )
-
-  def updateOwnFoodEntry() = Action { implicit request =>
-    updateFoodEntryForm.bindFromRequest.fold(
-      {form =>
-        Logger.error("Error while binding updated food entry")
-      },
-      {fields =>
-        Logger.info("Updating food entry")
-        val name = fields._1
-        val amount = fields._2
-        val energy = fields._3
-        val protein = stringToDouble(fields._4)
-        val fat = stringToDouble(fields._5)
-        val carbs = stringToDouble(fields._6)
-        // TODO insert or update in *one* operation
-      }
-    )
-    Redirect(routes.Application.manageOwnFoodEntries())
-  }
 
   def updateFood(id: Option[Int], name: Option[String], amount: Option[Int], energy: Option[Int], protein: Option[String], fat: Option[String], carbs: Option[String]) = Action { implicit request =>
     val user = getUserFromSession(session)
@@ -668,7 +651,7 @@ object Application extends Controller {
         // XXX ineffcient: performing a query and then the insert or update
         // this is supposed to work as one operation but seems to be vendor-specific (on duplicate key, unique constraint, ...)
         val multiplier = if(amount != 100) 100.0/amount else 1.0
-        val newFood = Food(name=name, kCal=(energy*multiplier).toInt, protein=stringToDouble(protein)*multiplier, fat=stringToDouble(fat)*multiplier, carbs=stringToDouble(carbs)*multiplier)
+        val newFood = Food(id=Some(id), name=name, kCal=(energy*multiplier).toInt, protein=stringToDouble(protein)*multiplier, fat=stringToDouble(fat)*multiplier, carbs=stringToDouble(carbs)*multiplier)
         Logger.info("New Food: " + newFood)
         Food.update(newFood, user)
       case _ =>

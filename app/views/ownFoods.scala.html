@@ -10,34 +10,32 @@
   @bs2Row() {
       @bs2Span(8, Some(1)) {
         <h1>Your own food entries...</h1>
-        @bs2Table(List(Html("Name"), Html(""), Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
+        @bs2Table(List(Html("Name"), Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
           @ownFoods.map { ownFood => 
               <tr>
-                <td> <span id="span-@ownFood.id.get" style="display:none;"><a href="#" id="save-@ownFood.id.get" class="btn btn-primary"><i class="icon-search icon-white"></i> Save</a></span></td>
-                <td> <input type="text" name="name" id="name-@ownFood.id.get" value="@ownFood.id.get" class="span2 food-input" /> <input type="hidden" value="@ownFood.id.get" name="id" id="id-@ownFood.id.get" /> </td>
-                <td> <input type="text" name="amount" id="amount-@ownFood.id.get" value="100" class="span1 food-input" /> </td>
-                <td> <input type="text" name="energy" id="energy-@ownFood.id.get" value="@ownFood.kCal" class="span1 food-input" /> </td>
-                <td> <input type="text" name="protein" id="protein-@ownFood.id.get" value="@ownFood.protein" class="span1 food-input" /> </td>
-                <td> <input type="text" name="fat" id="fat-@ownFood.id.get" value="@ownFood.fat" class="span1 food-input" /> </td>
-                <td> <input type="text" name="carbs" id="carbs-@ownFood.id.get" value="@ownFood.carbs" class="span1 food-input" /> </td>
-                <td> <a tabindex="-1" href="@{routes.Application.deleteOwnFood(ownFood.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a> </td>
+                <td> <input type="text" name="name" id="name-@ownFood.id.get" value="@ownFood.name" class="span2 food-input" title="Please hit enter to update" rel="tooltip" /> <input type="hidden" value="@ownFood.id.get" name="id" id="id-@ownFood.id.get" /> </td>
+                <td> <input type="text" name="amount" id="amount-@ownFood.id.get" value="100" class="span1 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
+                <td> <input type="text" name="energy" id="energy-@ownFood.id.get" value="@ownFood.kCal" class="span1 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
+                <td> <input type="text" name="protein" id="protein-@ownFood.id.get" value="@ownFood.protein" class="span1 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
+                <td> <input type="text" name="fat" id="fat-@ownFood.id.get" value="@ownFood.fat" class="span1 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
+                <td> <input type="text" name="carbs" id="carbs-@ownFood.id.get" value="@ownFood.carbs" class="span1 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
+                <td> <i class="icon-exclamation-sign" style="display:none;" id="unsave-@ownFood.id.get"> </i> <i class="icon-ok" style="display:none;" id="save-@ownFood.id.get"> </i> <a tabindex="-1" href="@{routes.Application.deleteOwnFood(ownFood.id.get)}" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a> </td>
               </tr>
             }
             @{/* add a new food entry */}
             <tr>
-              <td> <span id="span-new" style="display:none;"><a class="btn btn-primary" id="create-new"><i class="icon-plus icon-white"></i> Add</a></span></td>
-              <td> <input type="text" name="name" id="name-new" value="" placeholder="New entry..." class="span2 food-input" /> </td>
-              <td> <input type="text" name="amount" id="amount-new" value="" placeholder="100" class="span1 food-input" /> </td>
-              <td> <input type="text" name="kCal" id="energy-new" value="" placeholder="0" class="span1 food-input" /> </td>
-              <td> <input type="text" name="protein" id="protein-new" value="" placeholder="0.0" class="span1 food-input" /> </td>
-              <td> <input type="text" name="fat" id="fat-new" value="" placeholder="0.0" class="span1 food-input" /> </td>
-              <td> <input type="text" name="carbs" id="carbs-new" value="" placeholder="0.0" class="span1 food-input" /> </td>
+              <td> <input type="text" name="name" id="name-new" value="" placeholder="New entry..." class="span2 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
+              <td> <input type="text" name="amount" id="amount-new" value="" placeholder="100" class="span1 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
+              <td> <input type="text" name="kCal" id="energy-new" value="" placeholder="0" class="span1 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
+              <td> <input type="text" name="protein" id="protein-new" value="" placeholder="0.0" class="span1 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
+              <td> <input type="text" name="fat" id="fat-new" value="" placeholder="0.0" class="span1 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
+              <td> <input type="text" name="carbs" id="carbs-new" value="" placeholder="0.0" class="span1 food-input" rel="tooltip" title="Please hit enter to update" /> </td>
               <td> </td>
             </tr>
             <script type="text/javascript" charset="utf-8">
+              var activeInputId = "";
               // perform AJAX call when save button is clicked
-              $("a[id^='save-']").click(function() {
-                var id = $(this).attr('id').split('-')[1];
+              function updateEntry(id) {
                 var url = "@routes.Application.updateFood()";
                 var data = {};
                 data['id'] = $("#id-" + id).attr('value');
@@ -48,29 +46,55 @@
                 data['fat'] = $("#fat-" + id).attr('value');
                 data['carbs'] = $("#carbs-" + id).attr('value');
                 $.get(url, data, function(data, textStatus, jqXHR) {
-                  // data contains the foodName
-                  $("a[id^='" + data + "']").hide();
-                  // TODO message that all is save now
+                    // on success remove the tooltip
+                    $("#" + activeInputId).tooltip("hide");
+                    $("#unsave-" + id).hide();
+                    $("#save-" + id).show();
                 });
-              });
+              }
 
+              // initialize all tooltips
+              $(".food-input").tooltip({trigger: 'manual', placement: 'bottom'});
               // show save button on value change
-              $(".food-input").keypress(function() {
+              $(".food-input").bind("keypress change focus", function(e) {
                 var id = $(this).attr('id');
                 var foodName = id.split('-')[1];
-                $("#span-" + foodName).css("display", "");
+                $("#save-" + foodName).hide();
+                $("#unsave-" + foodName).show();
+                if(e.keyCode == 13) {
+                  if(foodName == "new") {
+                    submitNewEntry();
+                  }
+                  else {
+                    updateEntry(foodName);
+                  }
+                }
+                if(activeInputId != id) {
+                  $(this).tooltip("show");
+                  $("#" + activeInputId).tooltip("hide");
+                  activeInputId = id;
+                }
               });
-              $("#create-new").click(function() {
+              function submitNewEntry() {
+                var fail = false;
+
                 // set the values of the hidden form to equal the entered ones
                 var fields = ["name", "amount", "energy", "protein", "fat", "carbs"];
                 for(i in fields) {
                   var value = $("#" + fields[i] + "-new").attr("value");
                   $("#" + fields[i] + "-hidden").attr("value", value);
+                  if(value == "" || value == undefined) fail = true;
                 }
 
-                // submit
-                $("#hidden-form").submit();
-              });
+                if(!fail) {
+                  // submit
+                  $("#hidden-form").submit();
+                }
+                else {
+                  // TODO nice error box
+                  alert("Better check yoself, your values do not look to good!");
+                }
+              }
             </script>
         }
         @form(routes.Application.submitUserFoodEntry, ('class -> "form-horizontal"), ('id->"hidden-form")) {

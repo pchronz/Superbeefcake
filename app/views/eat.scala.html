@@ -63,6 +63,8 @@
 				console.log("Getting new suggestions...");
 				$.getJSON(url + query, function(response) {
 					console.log("New suggestions: " + response.items);
+                    console.log(response.items[0]);
+                    // TODO only display the names
 					typeahead.process(response.items);
 				});
 			}
