@@ -52,6 +52,7 @@
 	@eatEntry(day, month, year, macroEntries, macroEntryForm, macroEntryByFoodForm)
 
 	<script type="text/javascript" charset="utf-8">
+        var ids = {};
 		$(function(){
 			// select the navbar link for this view as active
 			$("#eat-nav-link").closest("li").addClass("active");
@@ -60,12 +61,14 @@
 			// typeahead
 			$("input[name='foodName']").typeahead({source: function(typeahead, query) {
 				var url = '@routes.Application.suggestFood("")';
-				console.log("Getting new suggestions...");
 				$.getJSON(url + query, function(response) {
-					console.log("New suggestions: " + response.items);
-                    console.log(response.items[0]);
-                    // TODO only display the names
-					typeahead.process(response.items);
+                    ids = {};
+                    names = [];
+                    for(i in response.items) {
+                      ids[response.items[i].name] = response.items[i].id;
+                      names.push(response.items[i].name);
+                    }
+					typeahead.process(names);
 				});
 			}
 			, matcher: function(item) {

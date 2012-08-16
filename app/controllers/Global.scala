@@ -65,7 +65,7 @@ object Global extends GlobalSettings {
         val fatNum = fat.replaceAll(",", ".").toDouble
         val carbsNum = carbs.replaceAll(",", ".").toDouble
         if(unit == "g") {
-          val ratio = 1.0/quantity.toDouble
+          val ratio = 100.0/quantity.toDouble
           val foodItem = Food(name=name, kCal=(ratio*energyNum).toInt, protein=ratio*proteinNum, fat=ratio*fatNum, carbs=ratio*carbsNum)
           Food.create(foodItem)
           successCounter += 1

@@ -8,7 +8,7 @@
 
 @bs2Row() {
 	@bs2Span(8, Some(1)) {
-		@form(routes.Application.submitMacroEntryByFood, ('class->"form-inline")) {
+      @form(routes.Application.submitMacroEntryByFood, ('class->"form-inline"), ('id->"new-macro-entry")) {
 			<fieldset>
 				<legend>Track your meals</legend>
 				<div class="control-group">
@@ -16,6 +16,13 @@
 					<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
 					<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
                     <input type="hidden" name="foodId" value="" />
+                    <script type="text/javascript" charset="utf-8">
+                      $("#new-macro-entry").submit(function() {
+                          var name = $("input[name='foodName']").attr("value");
+                          var id = ids[name];
+                          $("input[name='foodId']").attr('value', id);
+                      });
+                    </script>
 					<input type="text" name="foodName" class="span3" placeholder="Food" data-provide="typeahead" autocomplete="off" />
 					@bs2TextField("amount", 2, Some("Amount"))
 					<input type="submit" value="Add" class="btn btn-primary" />
@@ -147,15 +154,17 @@
                 <input type="hidden" name="year" value={Date().year.toString} />
               }}
 			<td>@bs2TextField("name", 2, Some("Name"))</td>
-			<td>@bs2TextField("amount", 1, Some("Amount"))</td>
 			<td>@bs2TextField("kCal", 1, Some("Energy"))</td>
 			<td>@bs2TextField("protein", 1, Some("Protein"))</td>
 			<td>@bs2TextField("fat", 1, Some("Fat"))</td>
 			<td>@bs2TextField("carbs", 1, Some("Carbs"))</td>
-			<td><input type="submit" value="Add" class="btn btn-primary" /></td>
+			<td><input type="submit" value="Add" class="btn btn-primary" /> <a href="#" id="add-food-helper">?</a></td>
+            <script type="text/javascript">
+              $("#add-food-helper").popover({title: "Add new food", content: "This menu will add a new type of food to your private database. You can then just type in this food to create a new log entry."});
+            </script>
 		</tr>
 	}
-}{@Html("")}
+    }{@Html("")}
 
 @{/* Delete sheet warning modal */}
 @bs2Modal(Some("modal-clear-sheet-warning"), Some("Are you sure?")) {
