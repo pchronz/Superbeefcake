@@ -8,7 +8,7 @@
 
 @bs2Row() {
 	@bs2Span(8, Some(1)) {
-      @form(routes.Application.submitMacroEntryByFood, ('class->"form-inline"), ('id->"new-macro-entry")) {
+      @form(routes.Application.submitMacroEntryByFood, ('class->"form-horizontal"), ('id->"new-macro-entry")) {
 			<fieldset>
 				<legend>Track your meals</legend>
 				<div class="control-group">
@@ -24,7 +24,7 @@
                       });
                     </script>
 					<input type="text" name="foodName" class="span3" placeholder="Food" data-provide="typeahead" autocomplete="off" />
-					@bs2TextField("amount", 2, Some("Amount"))
+					@bs2TextField("amount", 2, Some("Amount (g)"))
 					<input type="submit" value="Add" class="btn btn-primary" />
 					<a href="#" id="link-manual-macro">Manual Entry</a>
 					<script type="text/javascript" charset="utf-8">
@@ -34,6 +34,44 @@
 							});
 						});
 					</script>
+                    <script type="text/javascript" charset="utf-8">
+                        var ids = {};
+                        $(function(){
+                            // select the navbar link for this view as active
+                            $("#eat-nav-link").closest("li").addClass("active");
+
+                            // typeahead
+                            $("input[name='foodName']").typeahead({source: function(typeahead, query) {
+                                var url = '@routes.Application.suggestFood("")';
+                                $.getJSON(url + query, function(response) {
+                                    ids = {};
+                                    names = [];
+                                    for(i in response.items) {
+                                      ids[response.items[i].name] = response.items[i].id;
+                                      names.push(response.items[i].name);
+                                    }
+                                    typeahead.process(names);
+                                });
+                            }
+                            , matcher: function(item) {
+                                //// all of the words in the query need to appear in the item
+                                //var queryWords = this.query.split(" ");
+                                //var found = true;
+                                //for(word in queryWords) {
+                                //	var itemUpper = item.toUpperCase();
+                                //	var wordUpper = queryWords[word].toUpperCase();
+                                //	if(itemUpper.indexOf(wordUpper) ==  -1) found = false;
+                                //}
+                                //return found;
+                                // whatever
+                                return true;
+                            }
+                            });
+
+                            // focus the food input field
+                            $("input[name='foodName']").focus();
+                        });
+                    </script>
 				</div>
 			</fieldset>
 		}
@@ -138,33 +176,65 @@
 }
 
 @{/* Manual entry modal */}
-  @bs2Modal(Some("modal-macro-manual"), Some("Please enter the values for your new food")) {
-    @form(routes.Application.submitUserFoodEntry, ('class -> "form-horizontal")) {
-		<tr>
-            @{(day, month, year, routes.Application.eat(day, month, year)) match {
-              case (Some(day), Some(month), Some(year), route) =>
-                <input type="hidden" name="redirectTo" value={route.toString} />
-                <input type="hidden" name="day" value={day.toString} />
-                <input type="hidden" name="month" value={month.toString} />
-                <input type="hidden" name="year" value={year.toString} />
-              case (_,_,_,route) =>
-                <input type="hidden" name="redirectTo" value={route.toString} />
-                <input type="hidden" name="day" value={Date().day.toString} />
-                <input type="hidden" name="month" value={Date().month.toString} />
-                <input type="hidden" name="year" value={Date().year.toString} />
-              }}
-			<td>@bs2TextField("name", 2, Some("Name"))</td>
-			<td>@bs2TextField("kCal", 1, Some("Energy"))</td>
-			<td>@bs2TextField("protein", 1, Some("Protein"))</td>
-			<td>@bs2TextField("fat", 1, Some("Fat"))</td>
-			<td>@bs2TextField("carbs", 1, Some("Carbs"))</td>
-			<td><input type="submit" value="Add" class="btn btn-primary" /> <a href="#" id="add-food-helper">?</a></td>
-            <script type="text/javascript">
-              $("#add-food-helper").popover({title: "Add new food", content: "This menu will add a new type of food to your private database. You can then just type in this food to create a new log entry."});
-            </script>
-		</tr>
-	}
-    }{@Html("")}
+  @bs2Modal(Some("modal-macro-manual"), Some("Add a new food to your database")) {
+    @bs2Row(){
+      @bs2Span(3, None) {
+        @form(routes.Application.submitUserFoodEntry, ('class -> "form-horizontal")) {
+          <fieldset>
+                @{(day, month, year, routes.Application.eat(day, month, year)) match {
+                  case (Some(day), Some(month), Some(year), route) =>
+                    <input type="hidden" name="redirectTo" value={route.toString} />
+                    <input type="hidden" name="day" value={day.toString} />
+                    <input type="hidden" name="month" value={month.toString} />
+                    <input type="hidden" name="year" value={year.toString} />
+                  case (_,_,_,route) =>
+                    <input type="hidden" name="redirectTo" value={route.toString} />
+                    <input type="hidden" name="day" value={Date().day.toString} />
+                    <input type="hidden" name="month" value={Date().month.toString} />
+                    <input type="hidden" name="year" value={Date().year.toString} />
+                  }}
+                  <div class="control-group">
+                    <label class="control-label" for="name">Name</label>
+                    <div class="controls">
+                      @bs2TextField("name", 2, Some("Name"))
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label" for="kCal">Energy (kCal)</label>
+                    <div class="controls">
+                      @bs2TextField("kCal", 2, Some("Energy"))
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label" for="protein">Protein (g)</label>
+                    <div class="controls">
+                      @bs2TextField("protein", 2, Some("Protein"))
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label" for="fat">Fat (g)</label>
+                    <div class="controls">
+                      @bs2TextField("fat", 2, Some("Fat"))
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label" for="carbs">Carbs (g)</label>
+                    <div class="controls">
+                      @bs2TextField("carbs", 2, Some("Carbs"))
+                    </div>
+                  </div>
+          </fieldset>
+          }
+        }
+        @bs2Span(2, Some(1)) {
+          <div class="alert alert-info">
+            This menu will add a new type of food to your private database. You can then just type in this food to create a new log entry.
+          </div>
+        }
+      }
+    }{
+      <input type="submit" value="Add" class="btn btn-primary" />
+    }
 
 @{/* Delete sheet warning modal */}
 @bs2Modal(Some("modal-clear-sheet-warning"), Some("Are you sure?")) {

@@ -12,35 +12,5 @@
 		}
 	}
 	@eatEntry(None, None, None, macroEntries, macroEntryForm, macroEntryByFoodForm)
-	<script type="text/javascript" charset="utf-8">
-		$(function(){
-			// select the navbar link for this view as active
-			$("#eat-nav-link").closest("li").addClass("active");
-
-			// typeahead
-			$("input[name='foodName']").typeahead({source: function(typeahead, query) {
-				var url = '@routes.Application.suggestFood("")';
-				console.log("Getting new suggestions...");
-				$.getJSON(url + query, function(response) {
-					console.log("New suggestions: " + response.items);
-					typeahead.process(response.items);
-				});
-			}
-			, matcher: function(item) {
-				// all of the words in the query need to appear in the item
-				var queryWords = this.query.split(" ");
-				var found = true;
-				for(word in queryWords) {
-					var itemUpper = item.toUpperCase();
-					var wordUpper = queryWords[word].toUpperCase();
-					if(itemUpper.indexOf(wordUpper) ==  -1) found = false;
-				}
-				return found;
-			}
-			});
-
-			// focus the food input field
-			$("input[name='foodName']").focus();
-		});
-	</script>
 }
+

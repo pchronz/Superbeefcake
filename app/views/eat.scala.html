@@ -50,44 +50,5 @@
 
 	@{/* tracking pane */}
 	@eatEntry(day, month, year, macroEntries, macroEntryForm, macroEntryByFoodForm)
-
-	<script type="text/javascript" charset="utf-8">
-        var ids = {};
-		$(function(){
-			// select the navbar link for this view as active
-			$("#eat-nav-link").closest("li").addClass("active");
-
-			// TODO move this into the eatEntry template
-			// typeahead
-			$("input[name='foodName']").typeahead({source: function(typeahead, query) {
-				var url = '@routes.Application.suggestFood("")';
-				$.getJSON(url + query, function(response) {
-                    ids = {};
-                    names = [];
-                    for(i in response.items) {
-                      ids[response.items[i].name] = response.items[i].id;
-                      names.push(response.items[i].name);
-                    }
-					typeahead.process(names);
-				});
-			}
-			, matcher: function(item) {
-				//// all of the words in the query need to appear in the item
-				//var queryWords = this.query.split(" ");
-				//var found = true;
-				//for(word in queryWords) {
-				//	var itemUpper = item.toUpperCase();
-				//	var wordUpper = queryWords[word].toUpperCase();
-				//	if(itemUpper.indexOf(wordUpper) ==  -1) found = false;
-				//}
-				//return found;
-				// whatever
-				return true;
-			}
-			});
-
-			// focus the food input field
-			$("input[name='foodName']").focus();
-		});
-	</script>
 }
+
