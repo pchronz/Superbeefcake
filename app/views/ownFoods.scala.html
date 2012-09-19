@@ -7,6 +7,13 @@
 
 
 @main(Html("Superbeefcake"), "", Some(beefcake)) {
+  <script type="text/javascript" src="@routes.Assets.at("javascript/ownFoods.js")"></script>
+  <script type="text/javascript" charset="utf-8">
+      $(function(){
+          // select the navbar link for this view as active
+          $("#manage-foods-nav-link").closest("li").addClass("active");
+      });
+  </script>
   @bs2Row() {
       @bs2Span(8, Some(1)) {
         <h1>Your own food entries...</h1>
@@ -33,68 +40,7 @@
               <td> </td>
             </tr>
             <script type="text/javascript" charset="utf-8">
-              var activeInputId = "";
-              // perform AJAX call when save button is clicked
-              function updateEntry(id) {
-                var url = "@routes.Application.updateFood()";
-                var data = {};
-                data['id'] = $("#id-" + id).attr('value');
-                data['name'] = $("#name-" + id).attr('value');
-                data['amount'] = $("#amount-" + id).attr('value');
-                data['energy'] = $("#energy-" + id).attr('value');
-                data['protein'] = $("#protein-" + id).attr('value');
-                data['fat'] = $("#fat-" + id).attr('value');
-                data['carbs'] = $("#carbs-" + id).attr('value');
-                $.get(url, data, function(data, textStatus, jqXHR) {
-                    // on success remove the tooltip
-                    $("#" + activeInputId).tooltip("hide");
-                    $("#unsave-" + id).hide();
-                    $("#save-" + id).show();
-                });
-              }
-
-              // initialize all tooltips
-              $(".food-input").tooltip({trigger: 'manual', placement: 'bottom'});
-              // show save button on value change
-              $(".food-input").bind("keypress change focus", function(e) {
-                var id = $(this).attr('id');
-                var foodName = id.split('-')[1];
-                $("#save-" + foodName).hide();
-                $("#unsave-" + foodName).show();
-                if(e.keyCode == 13) {
-                  if(foodName == "new") {
-                    submitNewEntry();
-                  }
-                  else {
-                    updateEntry(foodName);
-                  }
-                }
-                if(activeInputId != id) {
-                  $(this).tooltip("show");
-                  $("#" + activeInputId).tooltip("hide");
-                  activeInputId = id;
-                }
-              });
-              function submitNewEntry() {
-                var fail = false;
-
-                // set the values of the hidden form to equal the entered ones
-                var fields = ["name", "amount", "energy", "protein", "fat", "carbs"];
-                for(i in fields) {
-                  var value = $("#" + fields[i] + "-new").attr("value");
-                  $("#" + fields[i] + "-hidden").attr("value", value);
-                  if(value == "" || value == undefined) fail = true;
-                }
-
-                if(!fail) {
-                  // submit
-                  $("#hidden-form").submit();
-                }
-                else {
-                  // TODO nice error box
-                  alert("Better check yoself, your values do not look to good!");
-                }
-              }
+              $(initOwnFoods("@routes.Application.updateFood()"));
             </script>
         }
         @form(routes.Application.submitUserFoodEntry, ('class -> "form-horizontal"), ('id->"hidden-form")) {
@@ -108,13 +54,6 @@
         }
     }
   }
-
-  <script type="text/javascript" charset="utf-8">
-      $(function(){
-          // select the navbar link for this view as active
-          $("#manage-foods-nav-link").closest("li").addClass("active");
-      });
-  </script>
 }
 
 

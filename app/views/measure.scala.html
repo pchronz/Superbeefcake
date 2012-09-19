@@ -5,6 +5,9 @@
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
+<script type="text/javascript" src="@routes.Assets.at("javascript/measure.js")"></script>
+<script type="text/javascript" src="@routes.Assets.at("javascript/datePicker.js")"></script>
+
 @main(Html("Superbeefcake!"), "", Some(beefcake)) {
 	@bs2Row() {
 		@form(routes.Application.submitMeasureDateFilter){
@@ -29,11 +32,7 @@
 				</fieldset>
 			}
 			<script type="text/javascript" charset="utf-8">
-				$(function() {
-					$("select[name^='start'], select[name^='end']").change(function() {
-						$(this).closest("form").submit();
-					});
-				});
+				$(initMeasure());
 			</script>
 		}
 	}
@@ -45,23 +44,8 @@
 					@form(routes.Application.submitMeasureEntry, ('class->"form-inline")) {
 						<td>
 							<input type="text" title="1..31" class="span1" name="day" placeholder="Day" value="@{Date().day.toString}" />
-							<script type="text/javascript" charset="utf-8">
-								$(function(){
-									$("input[name='day']").tooltip({trigger: 'focus'});
-								});
-							</script>
 							<input type="text" title="1..12" class="span1" name="month" placeholder="Month" value="@{Date().month.toString}" />
-							<script type="text/javascript" charset="utf-8">
-								$(function(){
-									$("input[name='month']").tooltip({trigger: 'focus'});
-								});
-							</script>
 							<input type="text" title="2012..2014" class="span1" name="year" placeholder="Year" value="@{Date().year.toString}" />
-							<script type="text/javascript" charset="utf-8">
-								$(function(){
-									$("input[name='year']").tooltip({trigger: 'focus'});
-								});
-							</script>
 						</td>
 						<td>
 							<input type="hidden" name="field" value="weight" />
@@ -74,52 +58,13 @@
 				</tr>
 				@{/* the form and function are there so there is no page reload when you hit enter when there is only one entry to update */}
 				<form id="form-update">
-					<script type="text/javascript" charset="utf-8">
-						$(function() {
-							$("#form-update").submit(function() {
-								return false;
-							});
-						});
-					</script>
 					@measureEntries.filter(entry => entry.field.toLowerCase == "weight").sortBy(a=>a.time.get)(Date).reverse.map{ measureEntry =>
 						<tr>
 							<td>@measureEntry.time</td>
 							<td>
 								<input type="text" class="span1" name="value" id="measure-entry-@measureEntry.id" value="@measureEntry.value">
 								<script type="text/javascript" charset="utf-8">
-									$(function() {
-										var tooltipQuery = "#measure-entry-@measureEntry.id";
-
-										// tooltip
-										$(tooltipQuery).tooltip({trigger: "focus", title: "Press Enter to save"});
-
-										$(tooltipQuery).focus(function() {
-											// status label
-											$("#label-saving-@measureEntry.id.get").addClass('hide');
-											$("#label-saved-@measureEntry.id.get").addClass('hide');
-										});
-										$(tooltipQuery).blur(function() {
-											// status label
-											$("#label-saving-@measureEntry.id.get").addClass('hide');
-											$("#label-saved-@measureEntry.id.get").addClass('hide');
-										});
-
-										// ajax call
-										$(tooltipQuery).change(function(){
-											// status label
-											$("#label-saved-@measureEntry.id.get").addClass('hide');
-											$("#label-saving-@measureEntry.id.get").removeClass('hide');
-											$(this).tooltip('hide');
-											// read the value and send the AJAX request
-											var newVal = $(this).val();
-											$.get("@routes.Application.updateMeasureEntry(measureEntry.id.get, "weight", "")" + newVal, function(date) {
-												// status label
-												$("#label-saving-@measureEntry.id.get").addClass('hide');
-												$("#label-saved-@measureEntry.id.get").removeClass('hide');
-												console.log("All fine!");
-											});
-										});
-									});
+									$(regMeasureEntry("@measureEntry.id.get", "@routes.Application.updateMeasureEntry(measureEntry.id.get, "weight", "")"));
 								</script>
 								<span class="label label-warning hide" id="label-saving-@measureEntry.id.get" style="position: relative; top: -5px;">Saving...</span>
 								<span class="label label-success hide" id="label-saved-@measureEntry.id.get" style="position: relative; top: -5px;">Saved</span>
@@ -141,13 +86,5 @@
 		}
 	}
 
-	<script type="text/javascript" charset="utf-8">
-		$(function(){
-			// select the navbar link for this view as active
-			$("#measure-nav-link").closest("li").addClass("active");
-
-			// put the focus on the first input field
-			$("#input-weight-new").focus();
-		});
-	</script>
 }
+

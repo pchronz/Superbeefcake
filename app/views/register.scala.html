@@ -33,51 +33,10 @@
 					@bs2PasswordField(name="passwordRepeat", size=3, placeholder=Some("Password again"))
 					<div class="controls">
 						<input id="submit-button" type="submit" class="btn btn-primary" value="Register" />
+                        <script type="text/javascript" src="@routes.Assets/at("javascript/register.js")"></script>
 						<script type="text/javascript" charset="utf-8">
 							$(function() {
-								function validateEmail(email) {
-									var atpos=email.indexOf("@Html("@")");
-									var dotpos=email.lastIndexOf(".");
-									if (atpos<1 || dotpos<atpos+2 || dotpos+2>=email.length) {
-										return false;
-									}
-									return true;
-								}
-								$("#submit-button").click(function() {
-									var username = $("input[name='username']").val();
-									var email = $("input[name='email']").val();
-									var password = $("input[name='password']").val();
-									var passwordRepeat = $("input[name='passwordRepeat']").val();
-									if(username.length < 4) {
-										$("#alert-username").show();
-										return false;
-									}
-									else {
-										$("#alert-username").hide();
-									}
-									if(!validateEmail(email)) {
-										$("#alert-email").show();
-										return false;
-									}
-									else {
-										$("#alert-email").hide();
-									}
-									if(password != passwordRepeat) {
-										$("#alert-passwords-match").show();
-										return false;
-									}
-									else {
-										$("#alert-passwords-match").hide();
-									}
-									if(password.length < 4) {
-										$("#alert-password-length").show();
-										return false;
-									}
-									else {
-										$("#alert-password-match").hide();
-									}
-									return true;
-								});
+                                initRegister();
 							});
 						</script>
 					</div>

@@ -1,0 +1,21 @@
+@initMeasure = (id) ->
+  $("#date-prev-" + id).click(() -> 
+      console.log("prev")
+      # TODO read current date
+      # TODO decrement by a day
+      # TODO write back
+      false
+  )
+  $("#date-today-" + id).click(() ->
+      console.log("today")
+      # TODO set to current date
+      false
+  )
+  $("#date-next-" + id).click(() -> 
+      console.log("next")
+      # TODO read current date
+      # TODO increment by a day
+      # TODO write back
+      false
+  )
+

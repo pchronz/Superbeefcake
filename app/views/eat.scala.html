@@ -5,6 +5,8 @@
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
+<script type="text/javascript" src="@routes.Assets.at("javascript/eatEntry.js")"></script>
+
 @main(Html("Superbeefcake!"), "", Some(beefcake)) {
 	@bs2Row() {
 		@form(routes.Application.submitDateFilter, ('class, "form-vertical")) {
@@ -31,13 +33,6 @@
 									else Html("<option>" + i.toString + "</option>")
 								}
 							</select>
-							<script type="text/javascript" charset="utf-8">
-								$(function() {
-									$("select[name='day'], select[name='month'], select[name='year']").change(function(){
-										$(this).closest("form").submit();
-									});
-								});
-							</script>
 						</div>
 					</div>
 				</fieldset>

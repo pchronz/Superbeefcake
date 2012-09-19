@@ -5,6 +5,7 @@
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
+<script type="text/javascript" src="@routes.Assets.at("javascript/eatEntry.js")"></script>
 
 @bs2Row() {
 	@bs2Span(8, Some(1)) {
@@ -16,73 +17,29 @@
 					<input type="hidden" name="month" value="@{month match { case None => Date().month; case Some(month) => month}}" />
 					<input type="hidden" name="year" value="@{year match { case None => Date().year; case Some(year) => year}}" />
                     <input type="hidden" name="foodId" value="" />
-                    <script type="text/javascript" charset="utf-8">
-                      $("#new-macro-entry").submit(function() {
-                          var name = $("input[name='foodName']").attr("value");
-                          var id = ids[name];
-                          $("input[name='foodId']").attr('value', id);
-                      });
-                    </script>
 					<input type="text" name="foodName" class="span3" placeholder="Food" data-provide="typeahead" autocomplete="off" />
 					@bs2TextField("amount", 2, Some("Amount (g)"))
 					<input type="submit" value="Add" class="btn btn-primary" />
 					<a href="#" id="link-manual-macro">Manual Entry</a>
-					<script type="text/javascript" charset="utf-8">
-						$(function(){
-							$("#link-manual-macro").click(function() {
-								$("#modal-macro-manual").modal("show");
-							});
-						});
-					</script>
-                    <script type="text/javascript" charset="utf-8">
-                        var ids = {};
-                        $(function(){
-                            // select the navbar link for this view as active
-                            $("#eat-nav-link").closest("li").addClass("active");
-
-                            // typeahead
-                            $("input[name='foodName']").typeahead({source: function(typeahead, query) {
-                                var url = '@routes.Application.suggestFood("")';
-                                $.getJSON(url + query, function(response) {
-                                    ids = {};
-                                    names = [];
-                                    for(i in response.items) {
-                                      ids[response.items[i].name] = response.items[i].id;
-                                      names.push(response.items[i].name);
-                                    }
-                                    typeahead.process(names);
-                                });
-                            }
-                            , matcher: function(item) {
-                                //// all of the words in the query need to appear in the item
-                                //var queryWords = this.query.split(" ");
-                                //var found = true;
-                                //for(word in queryWords) {
-                                //	var itemUpper = item.toUpperCase();
-                                //	var wordUpper = queryWords[word].toUpperCase();
-                                //	if(itemUpper.indexOf(wordUpper) ==  -1) found = false;
-                                //}
-                                //return found;
-                                // whatever
-                                return true;
-                            }
-                            });
-
-                            // focus the food input field
-                            $("input[name='foodName']").focus();
-                        });
-                    </script>
 				</div>
 			</fieldset>
 		}
 	}
 }
 
+<!-- needed as long as we still use scala templates -->
+<script type="text/javascript">
+  var suggestFoodUrl = '@routes.Application.suggestFood("")';
+</script>
+
 
 @bs2Row() {
 	@bs2Span(8, Some(1)) {
 		@bs2Table(List(Html(""),Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
 			@macroEntries.sortWith{_.id.get < _.id.get}.map{macroEntry => 
+              <script type="text/javscript">
+                regMacroEntry("@macroEntry.id.get");
+              </script>
 				<tr>
 					<td>
 						@{macroEntry.food match {
@@ -95,54 +52,6 @@
 						<input type="text" name="amount" id="amount-@macroEntry.id.get" value="@macroEntry.amount.toInt.toString" class="span1" style="margin-bottom: 0px;" rel="tooltip" title="Press Enter to udpate" />
 						<span class="label label-warning hide" id="label-saving-@macroEntry.id.get" style="position: relative; top: -5px;">Saving...</span>
 						<span class="label label-success hide" id="label-saved-@macroEntry.id.get" style="position: relative; top: -5px;">Saved</span>
-						<script type="text/javascript" charset="utf-8">
-							var tooltipQuery = "#amount-@macroEntry.id.get";
-							$(tooltipQuery).tooltip({trigger: "focus"});
-							$(tooltipQuery).blur(function() {
-								// status label
-								$("#label-saving-@macroEntry.id.get").addClass('hide');
-								$("#label-saved-@macroEntry.id.get").addClass('hide');
-							});
-							$(tooltipQuery).change(function() {
-								// status label
-								$("#label-saved-@macroEntry.id.get").addClass('hide');
-								$("#label-saving-@macroEntry.id.get").removeClass('hide');
-								$(this).tooltip('hide');
-
-								var newAmount = $(this).val();
-								$.get("@routes.Application.updateMacroEntry(macroEntry.id.get, 0)" + newAmount, function(data) {
-									// status label
-									$("#label-saving-@macroEntry.id.get").addClass('hide');
-									$("#label-saved-@macroEntry.id.get").removeClass('hide');
-
-									var resp = eval(data)[0];
-									// update the entry in the view
-									$("#td-energy-@macroEntry.id.get").html(resp.energy);
-									$("#td-protein-@macroEntry.id.get").html(resp.protein);
-									$("#td-fat-@macroEntry.id.get").html(resp.fat);
-									$("#td-carbs-@macroEntry.id.get").html(resp.carbs);
-
-									// update the total in the view as well
-									// amount
-									var totalAmount = 0;
-									$("input[id^='amount-']").each(function(){
-										totalAmount += Number($(this).val());
-									});
-									$("#amount-total").html(totalAmount);
-
-									// energy, protein, fat, carbs
-									var fields = ["energy", "protein", "fat", "carbs"];
-									for(i in fields) {
-										var field = fields[i];
-										var total= 0;
-										$("td[id^='td-" + field + "-']").each(function(){
-											total+= Number($(this).html());
-										});
-										$("#" + field + "-total").html(total);
-									}
-								});
-							});
-						</script>
 					</td>
 					<td id="td-energy-@macroEntry.id.get">@macroEntry.kCal.toInt.toString</td>
 					<td id="td-protein-@macroEntry.id.get">@macroEntry.protein.toInt.toString</td>
@@ -163,11 +72,7 @@
 				<td>
 					<a id="link-clear-date" href="#" style="font-weight: bold; font-size: 16px; line-height: 16px; color: black; text-shadow: 0 1px 0 white; opacity: 0.2;">x</a>
 					<script type="text/javascript" charset="utf-8">
-						$(function() {
-							$("#link-clear-date").click(function() {
-								$("#modal-clear-sheet-warning").modal("show");
-							});
-						});
+                      initEatEntry();
 					</script>
 				</td>
 			</tr>
@@ -243,5 +148,4 @@
 	<a class="btn btn-primary" href="@{routes.Application.deleteAllEntries(day match {case None=> Date().day; case Some(d)=>d}, month match{ case None => Date().month; case Some(m) => m}, year match {case None => Date().year; case Some(y) => y})}">Yeah, I know!</a>
 	<a class="btn" href="#" data-dismiss="modal">Nope</a>
 }
-
 

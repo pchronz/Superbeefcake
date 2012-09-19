@@ -5,7 +5,14 @@
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
+<script type="text/javascript" src="@routes.Assets.at("javascript/analyze.js")"></script>
+
 @main(Html("Superbeefcake!"), "", beefcake) {
+<script type="text/javascript" charset="utf-8">
+    $(function(){
+        initAnalyze();
+    });
+</script>
 	@bs2Row() {
 		@form(postTarget, ('class, "form-vertical")) {
 			@bs2Span(3, Some(1)) {
@@ -32,13 +39,6 @@
 									else Html("<option>" + i.toString + "</option>")
 								}
 							</select>
-							<script type="text/javascript" charset="utf-8">
-								$(function() {
-									$("select[name='startday'], select[name='startmonth'], select[name='startyear']").change(function(){
-										$(this).closest("form").submit();
-									});
-								});
-							</script>
 						</div>
 					</div>
 				</fieldset>
@@ -66,13 +66,6 @@
 									else Html("<option>" + i.toString + "</option>")
 								}
 							</select>
-							<script type="text/javascript" charset="utf-8">
-								$(function() {
-									$("select[name='endday'], select[name='endmonth'], select[name='endyear']").change(function(){
-										$(this).closest("form").submit();
-									});
-								});
-							</script>
 						</div>
 					</div>
 				</fieldset>
@@ -108,68 +101,6 @@
                   </div>
               </div>
             }
-              <script type="text/javascript" charset="utf-8">
-                var activeQuery = "#input-energy-goal";
-                var knownQueries = [];
-                function selectGoal(query) {
-                    $(activeQuery).siblings("input[type='radio']").attr('checked', 'checked');
-                }
-                function initQueries() {
-                  var inputs = $("input[id$='goal']");
-                  var i;
-                  for(i = 0; i < inputs.length; i++) {
-                    var query = "#" + $(inputs[i]).attr('id');
-                    knownQueries.push(query);
-                  }
-                  if(knownQueries.length > 0) activeQuery = knownQueries[0];
-                }
-
-                function initTooltips() {
-                  var i;
-                  for(i = 0; i < knownQueries.length; i++) {
-                    var query = knownQueries[i];
-                    $(query).tooltip({trigger: 'manual'});
-                    $(query).bind("keypress mouseup", function(event) {
-                      if(event.which != 13) {
-                        var el = $(this);
-                        setTimeout(function(){$(el).tooltip('show');}, 500);
-                      }
-                    });
-
-                    $(query).bind("keypress", function(event) {
-                      var goalName = $(this).attr('id').split("-")[1];
-                      if(event.which == 13) {
-                        var newGoal = $(this).val();
-                        var el = $(this);
-                        $.get("/updateGoal/" + goalName + "/" + newGoal, function(){
-                          el.tooltip('hide');
-                          plotEnergyWeight();
-                        });
-                      }
-                    });
-                  }
-                }
-                $(function() {
-                    $("input[id$='goal']").focus(function() {
-                      activeQuery = "#" + $(this).attr('id');
-                      selectGoal(activeQuery);
-                      plotEnergyWeight();
-                    });
-
-                    // make sure the page will not be reloaded when the user hits enter
-                    $("#form-update").submit(function() {
-                        return false;
-                    });
-
-                    // initially activate the selected radio button
-                    initQueries();
-
-                    // init all tooltips
-                    initTooltips();
-
-                    selectGoal(activeQuery);
-                });
-              </script>
             </fieldset>
         </form>
 	}
@@ -179,6 +110,7 @@
 			<div id="energy-placeholder" style="width: 600px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				function plotEnergyWeight() {
+                    // XXX have fun converting to CoffeeScript!
 					// energy goal
 					var energyGoal = parseInt($("#input-energy-goal").val());
 					var weightGoal = parseInt($("#input-weight-goal").val());
@@ -231,6 +163,7 @@
 			<div id="macros-placeholder" style="width: 600px; height: 250px; position: relative; "></div>
 			<script type="text/javascript" charset="utf-8">
 				$(function () {
+                    // XXX want to convert this from scala to CoffeeScript? good luck!
 					var protein = [@{proteinSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
 					var proteinLabel = "Protein (Average: @{(proteinSeries.map{entry => entry._2}.foldLeft(0.0){_+_} / proteinSeries.length).toInt} g/day)";
 					var fat = [@{fatSeries.sortWith{(a, b) => a._1.toLong < b._1.toLong}.map{entry=> "[" + entry._1.toLong.toString + ", " + entry._2 + "]"}.mkString(", ")}];
@@ -255,11 +188,5 @@
 			</script>
 		}
 	}
-
-	<script type="text/javascript" charset="utf-8">
-		$(function(){
-			// select the navbar link for this view as active
-			$("#analyze-nav-link").closest("li").addClass("active");
-		});
-	</script>
 }
+

@@ -3,30 +3,15 @@
 @import models.Date
 
 <div id="date-picker-@id">
+  <script type="text/javscript" src="@routes.Assets.at("javascript/datePicker.js")"></script>
   <div class="btn-group" style="margin-bottom: 5px;">
-    <button class="btn" id="date-prev-@id"><i class="icon-arrow-left"></i></button>
-    <button class="btn" id="date-today-@id">Today</button>
-    <button class="btn" id="date-next-@id"><i class="icon-arrow-right"></i></button>
+    <form>
+      <button class="btn" id="date-prev-@id"><i class="icon-arrow-left"></i></button>
+      <button class="btn" id="date-today-@id">Today</button>
+      <button class="btn" id="date-next-@id"><i class="icon-arrow-right"></i></button>
+    </form>
     <script type="text/javascript">
-      $("#date-prev-@id").click(function() {
-          console.log("prev");
-          // TODO read current date
-          // TODO decrement by a day
-          // TODO write back
-          return false;
-      });
-      $("#date-today-@id").click(function() {
-          console.log("today");
-          // TODO set to current date
-          return false;
-      });
-      $("#date-next-@id").click(function() {
-          console.log("next");
-          // TODO read current date
-          // TODO increment by a day
-          // TODO write back
-          return false;
-      });
+      initDatePicker("@id");
     </script>
   </div>
 
