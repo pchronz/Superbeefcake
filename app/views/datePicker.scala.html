@@ -2,14 +2,13 @@
 
 @import models.Date
 
+<script type="text/javascript" src="@routes.Assets.at("javascript/datePicker.js")"></script>
 <div id="date-picker-@id">
-  <script type="text/javscript" src="@routes.Assets.at("javascript/datePicker.js")"></script>
   <div class="btn-group" style="margin-bottom: 5px;">
-    <form>
       <button class="btn" id="date-prev-@id"><i class="icon-arrow-left"></i></button>
       <button class="btn" id="date-today-@id">Today</button>
       <button class="btn" id="date-next-@id"><i class="icon-arrow-right"></i></button>
-    </form>
+    <script type="text/javscript" src="@routes.Assets.at("javascript/datePicker.js")"></script>
     <script type="text/javascript">
       initDatePicker("@id");
     </script>

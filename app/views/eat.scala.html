@@ -5,9 +5,14 @@
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
-<script type="text/javascript" src="@routes.Assets.at("javascript/eatEntry.js")"></script>
-
 @main(Html("Superbeefcake!"), "", Some(beefcake)) {
+  <script type="text/javascript" src="@routes.Assets.at("javascript/eat.js")"></script>
+  <script type="text/javascript" src="@routes.Assets.at("javascript/eatEntry.js")"></script>
+  <script type="text/javascript">
+    $(function() {
+        initEat();
+    });
+  </script>
 	@bs2Row() {
 		@form(routes.Application.submitDateFilter, ('class, "form-vertical")) {
 			@bs2Span(3, Some(1)) {
@@ -15,24 +20,10 @@
 					<legend>Choose your date</legend>
 					<div class="control-group">
 						<div class="controls">
-							<select class="span1" name="day">
-								@{for(i <- 1 to 31) yield 
-									if(i == day.get) Html("<option selected='selected'>" + i.toString + "</option>")
-									else Html("<option>" + i.toString + "</option>")
-								}
-							</select>
-							<select class="span1" name="month">
-								@{for(i <- 1 to 12) yield
-									if(i == month.get) Html("<option selected='selected'>" + i.toString + "</option>")
-									else Html("<option>" + i.toString + "</option>")
-								}
-							</select>
-							<select class="span1" name="year">
-								@{for(i <- 2012 to 2012) yield
-									if(i == year.get) Html("<option selected='selected'>" + i.toString + "</option>")
-									else Html("<option>" + i.toString + "</option>")
-								}
-							</select>
+                          @{datePicker((day, month, year) match {
+                            case (Some(d), Some(m), Some(y))=>Some(new Date(d,m,y))
+                            case _ => Some(Date())
+                            }, Some("start"), "start")}
 						</div>
 					</div>
 				</fieldset>

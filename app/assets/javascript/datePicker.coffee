@@ -8,6 +8,8 @@
     $("#year-"+id).val(date.getFullYear())
     $("#month-"+id).val(date.getMonth()+1)
     $("#day-"+id).val(date.getDate())
+    # notify the doc that the fields habe been changed
+    $("#year-"+id+"#month-"+id+", #day-"+id).change()
     
   $("#date-prev-" + id).click(() -> 
       # read current date

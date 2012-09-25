@@ -2,11 +2,17 @@
   # select the navbar link for this view as active
   $("#analyze-nav-link").closest("li").addClass("active")
 
-  $("select[name='startday'], select[name='startmonth'], select[name='startyear']").change(() ->
+  $("select[name='start-day'], select[name='start-month'], select[name='start-year']").change(() ->
+    $(this).closest("form").submit()
+  )
+  $("#date-prev-start, #date-today-start, #date-next-start").click(() ->
     $(this).closest("form").submit()
   )
 
-  $("select[name='endday'], select[name='endmonth'], select[name='endyear']").change(() ->
+  $("select[name='end-day'], select[name='end-month'], select[name='end-year']").change(() ->
+    $(this).closest("form").submit()
+  )
+  $("#date-prev-end, #date-today-end, #date-next-end").click(() ->
     $(this).closest("form").submit()
   )
 

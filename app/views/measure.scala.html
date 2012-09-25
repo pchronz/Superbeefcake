@@ -5,10 +5,9 @@
 @import helper.twitterBootstrap2.Bootstrap2Helpers._
 @import models.Date
 
-<script type="text/javascript" src="@routes.Assets.at("javascript/measure.js")"></script>
-<script type="text/javascript" src="@routes.Assets.at("javascript/datePicker.js")"></script>
-
 @main(Html("Superbeefcake!"), "", Some(beefcake)) {
+  <script type="text/javascript" src="@routes.Assets.at("javascript/measure.js")"></script>
+  <script type="text/javascript" src="@routes.Assets.at("javascript/datePicker.js")"></script>
 	@bs2Row() {
 		@form(routes.Application.submitMeasureDateFilter){
 			@bs2Span(3, Some(1)) {

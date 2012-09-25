@@ -89,7 +89,7 @@ object Application extends Controller {
           case _ => {
             val date = sessionToDate(request.session)
             val macroEntries = MacroEntry.findByDate(date, user)
-            Ok(views.html.eat(Some(date.day), Some(date.month), Some(date.year), macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm, user))
+            Ok(views.html.eat(day, month, year, macroEntries, macroEntryForm, macroEntryByFoodForm, dateFilterForm, user))
           }
         }
       }
@@ -187,9 +187,9 @@ object Application extends Controller {
 
   val dateFilterForm = Form (
     tuple(
-      "day" -> number,
-      "month" -> number,
-      "year" -> number
+      "start-day" -> number,
+      "start-month" -> number,
+      "start-year" -> number
     )
   )
 
@@ -329,6 +329,7 @@ object Application extends Controller {
   }
 
   def analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int]) = Action { implicit request =>
+    Logger.info("Analyze")
     getUserFromSession(session) match {
       case user @ Beefcake(_, _, _, true, _) => Logger.info("Redirecting with user : " + user); Redirect(routes.Preview.analyze(sDay, sMonth, sYear, eDay, eMonth, eYear)).withSession(addAdhocUserToSession(user, session))
       case user => {
@@ -352,6 +353,11 @@ object Application extends Controller {
         val proteinSeries = MacroEntry.getTimeSeries("protein", Some(sDate), Some(eDate), user)
         val fatSeries = MacroEntry.getTimeSeries("fat", Some(sDate), Some(eDate), user)
         val carbsSeries = MacroEntry.getTimeSeries("carbs", Some(sDate), Some(eDate), user)
+        println(sDate)
+        println(eDate)
+        println(proteinSeries)
+        println(carbsSeries)
+        println(fatSeries)
         val weightSeries = MeasureEntry.getTimeSeries("weight", Some(sDate), Some(eDate), user)
         val goalStrings = List("energy", "weight")
         // query goals and add them to the goals map if found
@@ -366,15 +372,16 @@ object Application extends Controller {
 
   val analyzeDateForm = Form(
     tuple(
-      "startday"->number,
-      "startmonth"->number,
-      "startyear"->number,
-      "endday"->number,
-      "endmonth"->number,
-      "endyear"->number
+      "start-day"->number,
+      "start-month"->number,
+      "start-year"->number,
+      "end-day"->number,
+      "end-month"->number,
+      "end-year"->number
     )
   )
   def analyzePost() = Action { implicit request =>
+    Logger.info("Analyze post")
     analyzeDateForm.bindFromRequest.fold (
       {form =>  
         Logger.error("Could not bind analyze date from request")
