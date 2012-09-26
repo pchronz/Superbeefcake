@@ -9,7 +9,7 @@ case class Date(day: Int, month: Int, year: Int) extends Ordered[Date] {
   }
 
   def compare(that: Date) = {
-    (this.toLong - that.toLong).toInt
+    ((this.toLong - that.toLong)/1000).toInt
   }
 
   override def toString(): String = {

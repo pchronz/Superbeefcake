@@ -19,7 +19,7 @@
   @activeQuery = "#input-energy-goal"
   knownQueries = []
   selectGoal = (query) ->
-      $(activeQuery).siblings("input[type='radio']").attr('checked', 'checked')
+    $(activeQuery).siblings("input[type='radio']").attr('checked', 'checked')
   initQueries = () -> 
     inputs = $("input[id$='goal']")
     for input in inputs 
@@ -49,22 +49,22 @@
           )
       )
 
-      $("input[id$='goal']").focus(() -> 
-        activeQuery = "#" + $(this).attr('id')
-        selectGoal(activeQuery)
-        plotEnergyWeight()
-      )
+  $("input[id$='goal']").focus(() -> 
+    activeQuery = "#" + $(this).attr('id')
+    selectGoal(activeQuery)
+    plotEnergyWeight()
+  )
 
-      # make sure the page will not be reloaded when the user hits enter
-      $("#form-update").submit(() -> 
-        false
-      )
+  # make sure the page will not be reloaded when the user hits enter
+  $("#form-update").submit(() -> 
+    false
+  )
 
-      # initially activate the selected radio button
-      initQueries()
+  # initially activate the selected radio button
+  initQueries()
 
-      # init all tooltips
-      initTooltips()
+  # init all tooltips
+  initTooltips()
 
-      selectGoal(activeQuery)
+  selectGoal(activeQuery)
 

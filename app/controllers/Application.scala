@@ -353,11 +353,6 @@ object Application extends Controller {
         val proteinSeries = MacroEntry.getTimeSeries("protein", Some(sDate), Some(eDate), user)
         val fatSeries = MacroEntry.getTimeSeries("fat", Some(sDate), Some(eDate), user)
         val carbsSeries = MacroEntry.getTimeSeries("carbs", Some(sDate), Some(eDate), user)
-        println(sDate)
-        println(eDate)
-        println(proteinSeries)
-        println(carbsSeries)
-        println(fatSeries)
         val weightSeries = MeasureEntry.getTimeSeries("weight", Some(sDate), Some(eDate), user)
         val goalStrings = List("energy", "weight")
         // query goals and add them to the goals map if found

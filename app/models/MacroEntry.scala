@@ -1,5 +1,6 @@
 package models
 
+import play.api._
 import anorm._
 import anorm.SqlParser._
 import play.api.db._
@@ -111,6 +112,7 @@ object MacroEntry {
   }
 
   def getTimeSeries(field: String, start: Option[Date], end: Option[Date], beefcake: Beefcake): List[(Date, Double)] = {
+    Logger.info("Getting time series for " + field + " from " + start + " until " + end)
     DB.withConnection{ implicit c =>
         // anorm's on-function is simply incapable. total crap. who wrote this?
         val groupField = SQL("SELECT SUM(" + field + "), day, month, year FROM macroEntry WHERE username = {username} GROUP BY day, month, year").on("username"->beefcake.username)
