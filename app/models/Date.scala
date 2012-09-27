@@ -45,7 +45,7 @@ object Date extends Ordering[Date] {
   }
 
   def compare(x: Date, y: Date): Int = {
-    (x.toLong - y.toLong).toInt
+    ((x.toLong - y.toLong)/1000).toInt
   }
 }
 

@@ -16,26 +16,28 @@
     $(this).closest("form").submit()
   )
 
-  @activeQuery = "#input-energy-goal"
+  window.activeQuery = "#input-energy-goal"
   knownQueries = []
   selectGoal = (query) ->
-    $(activeQuery).siblings("input[type='radio']").attr('checked', 'checked')
+    $(query).siblings("input[type='radio']").attr('checked', 'checked')
+
   initQueries = () -> 
     inputs = $("input[id$='goal']")
     for input in inputs 
       query = "#" + $(input).attr('id')
       knownQueries.push(query)
-    activeQuery = if knownQueries.length > 0 then knownQueries[0]
+    window.activeQuery = if knownQueries.length > 0 then knownQueries[0]
   
 
   initTooltips = () ->
     for query in knownQueries
-      $(query).tooltip({trigger: 'manual'})
+      $("*[rel='tooltip']").tooltip({trigger: 'manual'})
       $(query).bind("keypress mouseup", (event) -> 
-        if not event.which == 13 
+        if event.which != 13 
           el = $(this)
-          setTimeout(() -> $(el).tooltip('show'),
-          500)
+          setTimeout(() -> 
+            $(el).tooltip('show')
+          , 500)
       )
 
       $(query).bind("keypress", (event) -> 
@@ -50,8 +52,8 @@
       )
 
   $("input[id$='goal']").focus(() -> 
-    activeQuery = "#" + $(this).attr('id')
-    selectGoal(activeQuery)
+    window.activeQuery = "#" + $(this).attr('id')
+    selectGoal(window.activeQuery)
     plotEnergyWeight()
   )
 
@@ -66,5 +68,5 @@
   # init all tooltips
   initTooltips()
 
-  selectGoal(activeQuery)
+  selectGoal(window.activeQuery)
 

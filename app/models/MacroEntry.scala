@@ -156,7 +156,7 @@ object MacroEntry {
       val dates = SQL("SELECT day, month, year FROM macroEntry WHERE username = {username}").on("username"->beefcake.username)
       val allDates = dates().map{ row =>
         Date(row[Int]("day"), row[Int]("month"), row[Int]("year"))
-      }
+      }.toList
       allDates.length match {
         case 0 => None
         case _ =>  Some(allDates.max(Date))
@@ -169,10 +169,10 @@ object MacroEntry {
       val dates = SQL("SELECT day, month, year FROM macroEntry WHERE username = {username}").on("username"->beefcake.username)
       val allDates = dates().map{ row =>
         Date(row[Int]("day"), row[Int]("month"), row[Int]("year"))
-      }
+      }.toList
       allDates.length match {
         case 0 => None
-        case _ =>  Some(allDates.min(Date))
+        case _ => Some(allDates.min(Date))
       }
     }
   }
