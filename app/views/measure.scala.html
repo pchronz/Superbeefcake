@@ -10,7 +10,7 @@
   <script type="text/javascript" src="@routes.Assets.at("javascript/datePicker.js")"></script>
 	@bs2Row() {
 		@form(routes.Application.submitMeasureDateFilter){
-			@bs2Span(3, Some(1)) {
+			@bs2Span(3, Some(2)) {
 				<fieldset>
 					<legend class="control-label">Start date</legend>
 					<div class="control-group">
@@ -37,7 +37,7 @@
 	}
 
 	@bs2Row() {
-		@bs2Span(6, Some(1)) {
+		@bs2Span(6, Some(2)) {
 			@bs2Table(List(Html("Date"), Html("Weight"), Html(""))){
 				<tr>
 					@form(routes.Application.submitMeasureEntry, ('class->"form-inline")) {

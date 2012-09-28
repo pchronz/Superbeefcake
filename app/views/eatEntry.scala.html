@@ -37,8 +37,10 @@
 	@bs2Span(8, Some(1)) {
 		@bs2Table(List(Html(""),Html("Amount"), Html("kCal"), Html("Protein"), Html("Fat"), Html("Carbs"), Html("")), 'class -> "table-condensed table-striped") {
 			@macroEntries.sortWith{_.id.get < _.id.get}.map{macroEntry => 
-              <script type="text/javscript">
-                regMacroEntry("@macroEntry.id.get");
+              <script type="text/javascript">
+                $(function() {
+                  regMacroEntry("@macroEntry.id.get", "@routes.Application.updateMacroEntry(macroEntry.id.get, 0)");
+                });
               </script>
 				<tr>
 					<td>

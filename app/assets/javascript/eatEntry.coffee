@@ -37,51 +37,50 @@
   # focus the food input field
   $("input[name='foodName']").focus()
 
-  regMacroEntry = (macroId) ->
+  @regMacroEntry = (macroId, restOp) ->
     tooltipQuery = "#amount-" + macroId;
     $(tooltipQuery).tooltip({trigger: "focus"});
     $(tooltipQuery).blur(() ->
-        # status label
-        $("#label-saving-" + macroId).addClass('hide');
-        $("#label-saved-" + macroId).addClass('hide');
+      # status label
+      $("#label-saving-" + macroId).addClass('hide');
+      $("#label-saved-" + macroId).addClass('hide');
     );
     $(tooltipQuery).change(() ->
+      # status label
+      $("#label-saved-" + macroId).addClass('hide');
+      $("#label-saving-" + macroId).removeClass('hide');
+      $(this).tooltip('hide');
+
+      newAmount = $(this).val();
+      $.get(restOp + newAmount, (data) ->
         # status label
-        $("#label-saved-" + macroId).addClass('hide');
-        $("#label-saving-" + macroId).removeClass('hide');
-        $(this).tooltip('hide');
+        $("#label-saving-" + macroId).addClass('hide');
+        $("#label-saved-" + macroId).removeClass('hide');
 
-        newAmount = $(this).val();
-        $.get("@routes.Application.updateMacroEntry(macroEntry.id.get, 0)" + newAmount, (data) ->
-          # status label
-          $("#label-saving-" + macroId).addClass('hide');
-          $("#label-saved-" + macroId).removeClass('hide');
+        resp = eval(data)[0];
+        # update the entry in the view
+        $("#td-energy-" + macroId).html(resp.energy);
+        $("#td-protein-" + macroId).html(resp.protein);
+        $("#td-fat-" + macroId).html(resp.fat);
+        $("#td-carbs-" + macroId).html(resp.carbs);
 
-          resp = eval(data)[0];
-          # update the entry in the view
-          $("#td-energy-" + macroId).html(resp.energy);
-          $("#td-protein-" + macroId).html(resp.protein);
-          $("#td-fat-" + macroId).html(resp.fat);
-          $("#td-carbs-" + macroId).html(resp.carbs);
-
-          # update the total in the view as well
-          # amount
-          totalAmount = 0;
-          $("input[id^='amount-']").each(() ->
-              totalAmount += Number($(this).val());
-          );
-          $("#amount-total").html(totalAmount);
-
-          # energy, protein, fat, carbs
-          fields = ["energy", "protein", "fat", "carbs"];
-          for field in fields
-              total= 0;
-              $("td[id^='td-" + field + "-']").each(() ->
-                  total+= Number($(this).html());
-              );
-              $("#" + field + "-total").html(total);
-          
+        # update the total in the view as well
+        # amount
+        totalAmount = 0;
+        $("input[id^='amount-']").each(() ->
+            totalAmount += Number($(this).val());
         );
+        $("#amount-total").html(totalAmount);
+
+        # energy, protein, fat, carbs
+        fields = ["energy", "protein", "fat", "carbs"];
+        for field in fields
+          total= 0;
+          $("td[id^='td-" + field + "-']").each(() ->
+              total+= Number($(this).html());
+          );
+          $("#" + field + "-total").html(total);
+      );
     );
 
 

@@ -25,12 +25,22 @@
 							<li><a href="@{routes.Application.manageOwnFoodEntries()}" id="manage-foods-nav-link">Manage Foods</a></li>
 						</ul>
 						<ul class="nav pull-right">
-							@{beefcake match {
-								case None | Some(Beefcake(_, _, _, true, _)) => Html("<li><a href=\"" + routes.Application.login + "\">Login</a></li>")
-								case Some(user) => Html("<li><a href=\"" + routes.Application.deauth + "\">Logout</a></li>")
-							}}
-
-							
+                          @{beefcake match {
+                            case None | Some(Beefcake(_, _, _, true, _)) => Html("<li><a href=\"" + routes.Application.login + "\">Login</a></li>")
+                            case Some(user) => Html("""
+                              <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown">
+                                  Account
+                                  <b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                        <li><a href="changePassword">Change password</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="deauth">Logout</a></li>
+                                </ul>
+                              </li>
+                            """)
+                          }}
 						</ul>
 					</div>
 				</div>

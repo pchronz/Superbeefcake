@@ -24,7 +24,7 @@ object Application extends Controller {
     }
   }
 
-  def getUserFromSession(session: Session): Beefcake = {
+  def getUserFromSession(implicit session: Session): Beefcake = {
     def createAdhocUser(session: Session): Beefcake = {
       Logger.info("Creating new adhoc user")
       val user = Beefcake.createAdhoc()
@@ -142,8 +142,8 @@ object Application extends Controller {
   val userFoodEntryForm = Form (
     tuple(
       "name" -> text,
-      "amount" -> number,
-      "kCal" -> number,
+      "amount" -> text,
+      "kCal" -> text,
       "protein" -> text,
       "fat" -> text,
       "carbs" -> text,
@@ -165,8 +165,8 @@ object Application extends Controller {
           }, 
           {fields =>
             val name = fields._1
-            val amount = fields._2
-            val kCal = fields._3
+            val amount = stringToDouble(fields._2)
+            val kCal = stringToDouble(fields._3)
             val protein = stringToDouble(fields._4)
             val fat = stringToDouble(fields._5)
             val carbs = stringToDouble(fields._6)
@@ -666,6 +666,44 @@ object Application extends Controller {
         Logger.warn("Carbs: " + carbs)
     }
     Ok(name.getOrElse(""))
+  }
+
+  def changePasswordView = Action { implicit request =>
+    Ok(views.html.changePassword())
+  }
+
+  val changePasswordForm = Form(
+    tuple(
+      "old-password"->text,
+      "new-password"->text,
+      "new-password-confirmation"->text
+    )
+  )
+  def changePassword = Action { implicit request =>
+    val user = getUserFromSession
+    changePasswordForm.bindFromRequest.fold(
+      {form =>
+        Logger.error("Could not bind change password form")
+        Redirect(routes.Application.deauth)
+      },
+      {fields =>
+        val oldPassword = fields._1
+        val newPassword = fields._2
+        val newPasswordConf = fields._3
+        if(newPassword != newPasswordConf) {
+          Ok(views.html.changePassword())
+        }
+        else {
+          if(oldPassword == user.password) {
+            Beefcake.changePassword(user, newPassword)
+            Redirect(routes.Application.deauth)
+          }
+          else {
+            Ok(views.html.changePassword())
+          }
+        }
+      }
+    )
   }
 }
 

@@ -74,6 +74,12 @@ object Beefcake {
         user().length > 0
     }
   }
+
+  def changePassword(beefcake: Beefcake, newPassword: String) = {
+      DB.withConnection { implicit c =>
+          SQL("UPDATE beefcake SET password={password} WHERE username={username}").on("username"->beefcake.username, "password"->newPassword).executeUpdate()
+      }
+  }
 }
 
 

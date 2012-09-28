@@ -24,6 +24,8 @@ POST	/submitMeasureEntry			controllers.Application.submitMeasureEntry
 POST	/submitMeasureDateFilter	controllers.Application.submitMeasureDateFilter
 GET		/deleteMeasureEntries		controllers.Application.deleteMeasureEntries(jsonIds : String)
 GET     /manageOwnFoods             controllers.Application.manageOwnFoodEntries
+GET     /changePassword             controllers.Application.changePasswordView
+POST    /changePassword             controllers.Application.changePassword
 
 # preview pages
 GET		/preview/analyze			controllers.Preview.analyze(sDay: Option[Int], sMonth: Option[Int], sYear: Option[Int], eDay: Option[Int], eMonth: Option[Int], eYear: Option[Int])
