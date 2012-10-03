@@ -83,16 +83,12 @@ object Beefcake {
   }
 
   def authenticate(user: Beefcake, password: String): Boolean = {
-    Logger.info("Trying to authenticate: " + user + " w/ " + password)
     password.salt(user.username) bcrypt= user.password
   }
 
   def changePassword(beefcake: Beefcake, newPassword: String) = {
       // hash the password using bcrypt
       val newPasswordSecure = saltAndHash(beefcake.username, newPassword)
-      println(newPassword)
-      println(newPasswordSecure)
-      println(newPassword bcrypt= newPasswordSecure)
       DB.withConnection { implicit c =>
           SQL("UPDATE beefcake SET password={password} WHERE username={username}").on("username"->beefcake.username, "password"->newPasswordSecure).executeUpdate()
       }
