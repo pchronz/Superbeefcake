@@ -4,6 +4,13 @@ import models._
 object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
+    // Bootstrap foods
+    if(Food.all().isEmpty) {
+      Logger.info("Bootstrapping foods")
+      loadManualEntries()
+      //parseUsdaArsFoods()
+      parseGesAbFoods()
+    }
     // bootstrap users
     if(Beefcake.all().isEmpty) {
       Logger.info("Bootstrapping beefcakes")
@@ -15,13 +22,6 @@ object Global extends GlobalSettings {
       (1 to 11).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(date.day - 1, date.month, date.year), 100, 100, 30, 5, 30), michael)}
       (1 to 9).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(), 100, 100, 30, 5, 30), michael)}
       (1 to 8).foreach{i => Logger.info("adding new macroentry in bootstrap"); MacroEntry.create(MacroEntry(None, None, Date(date.day + 1, date.month, date.year), 100, 100, 30, 5, 30), michael)}
-    }
-    // Bootstrap foods
-    if(Food.all().isEmpty) {
-      Logger.info("Bootstrapping foods")
-      loadManualEntries()
-      //parseUsdaArsFoods()
-      parseGesAbFoods()
     }
     Logger.info("Following foods are in the DB...")
     Logger.info("There are " + Food.all().length + " food entries in the database.")

@@ -281,9 +281,8 @@ object Application extends Controller {
             Redirect(routes.Application.login())
           }
           case Some(user) => {
-            if(user.password == password) {
+            if(Beefcake.authenticate(user, password)) {
               Logger.info("User " + user.username + " just logged in successfully.")
-              // TODO update with current date
               val date = Date()
               redirectWithDateFromSession(session).withSession(Map("beefcake"->user.username, "day"->date.day.toString, "month"->date.month.toString, "year"->date.year.toString).foldLeft(session)((a,b) => a+b))
             }
@@ -397,7 +396,8 @@ object Application extends Controller {
       "username"->nonEmptyText,
       "password"->nonEmptyText,
       "passwordRepeat"->nonEmptyText,
-      "email"->nonEmptyText
+      "email"->nonEmptyText,
+      "betaKey"->number
     )
   )
 
@@ -412,7 +412,8 @@ object Application extends Controller {
             val password = fields._2
             val passwordRepeat = fields._3
             val email = fields._4
-            // TODO error messages
+            val betaKey = fields._5
+            if(betaKey % 13 != 0) Redirect(routes.Application.register)
             if(password != password) Redirect(routes.Application.register)
             if(password.length < 4) Redirect(routes.Application.register)
             val Email = """\w+@\w+\.[a-zA-Z]+""".r
@@ -694,7 +695,7 @@ object Application extends Controller {
           Ok(views.html.changePassword())
         }
         else {
-          if(oldPassword == user.password) {
+          if(Beefcake.authenticate(user, oldPassword)) {
             Beefcake.changePassword(user, newPassword)
             Redirect(routes.Application.deauth)
           }

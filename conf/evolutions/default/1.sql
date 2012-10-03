@@ -3,7 +3,7 @@
 # --- !Ups
 CREATE TABLE beefcake (
 	username VARCHAR(32) NOT NULL PRIMARY KEY,
-	password VARCHAR(64) NOT NULL,
+	password VARCHAR(256) NOT NULL,
 	email VARCHAR(64) NOT NULL UNIQUE,
 	adhoc BOOLEAN NOT NULL,
 	lastUpdated LONG NOT NULL
