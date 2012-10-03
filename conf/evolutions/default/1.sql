@@ -55,5 +55,4 @@ CREATE TABLE measureGoal (
 );
 
 # --- !Downs
-DROP TABLE macroEntry;
 
