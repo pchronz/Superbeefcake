@@ -42,3 +42,7 @@ GET		/updateMeasureEntry/:id/:field/:value	controllers.Application.updateMeasure
 GET		/updateGoal/:field/:value	controllers.Application.updateGoal(field: String, value: String)
 GET     /updateFood                 controllers.Application.updateFood(id: Option[Int] ?= None, name: Option[String] ?= None, amount: Option[Int] ?= None, energy: Option[Int] ?= None, protein: Option[String] ?= None, fat: Option[String] ?= None, carbs: Option[String] ?= None)
 
+# administration
+GET     /administer                     controllers.Application.administer()
+POST    /submitNewUser                  controllers.Application.submitNewUser()
+

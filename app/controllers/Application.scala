@@ -706,5 +706,39 @@ object Application extends Controller {
       }
     )
   }
+
+  def administer = Action { implicit request =>
+    val user = getUserFromSession(session)
+    if(user.username == "peter") {
+      val users = Beefcake.all()
+      val registeredUsers = for(u<-users if !u.adhoc) yield u
+      Ok(views.html.administer(user, registeredUsers))
+    }
+    else {
+      Redirect(routes.Application.index)
+    }
+  }
+
+  val newUserForm = Form (
+    tuple(
+      "username" -> text,
+      "password" -> text
+    )
+  )
+
+  def submitNewUser = Action { implicit request =>
+    newUserForm.bindFromRequest.fold(
+      {form =>
+        Logger.error("Error while binding new user request")
+      },
+      {fields =>
+        val username = fields._1
+        val password = fields._2
+        // create a new user
+        Beefcake.create(Beefcake(username, password, "foo@foo.com", false))
+      }
+    )
+    Redirect(routes.Application.administer())
+  }
 }
 
