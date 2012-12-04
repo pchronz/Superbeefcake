@@ -42,6 +42,12 @@ object Food {
       }
   }
 
+  def allUserFoods(): List[Food] = {
+      DB.withConnection { implicit c =>
+          SQL("SELECT * FROM food WHERE username IS NOT NULL").as(food *)
+      }
+  }
+
   def deleteAll() {
     DB.withConnection{ implicit c =>
       SQL("DELETE FROM food *").executeUpdate()
@@ -96,6 +102,12 @@ object Food {
               DB.withConnection { implicit c =>
                   SQL("UPDATE food SET name={name}, kCal={kCal}, protein={protein}, fat={fat}, carbs={carbs} WHERE username={username} AND id={id}").on("name"->food.name, "kCal"->food.kCal, "protein"->food.protein, "fat"->food.fat, "carbs"->food.carbs, "username"->user.username, "id"->food.id.get).executeUpdate()
           }
+      }
+  }
+
+  def acceptFood(id: String) {
+      DB.withConnection { implicit c =>
+          SQL("UPDATE food set username = NULL WHERE id = {id}").on("id"->id).executeUpdate
       }
   }
 }

@@ -45,4 +45,5 @@ GET     /updateFood                 controllers.Application.updateFood(id: Optio
 # administration
 GET     /administer                     controllers.Application.administer()
 POST    /submitNewUser                  controllers.Application.submitNewUser()
+GET     /acceptFood                     controllers.Application.acceptFood(id: String)
 

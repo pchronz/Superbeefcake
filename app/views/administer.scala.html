@@ -1,4 +1,4 @@
-@(beefcake: Beefcake, users: List[Beefcake])
+@(beefcake: Beefcake, users: List[Beefcake], foods: List[Food])
 
 @import helper._
 @import helper.twitterBootstrap2._
@@ -28,6 +28,38 @@
       @{for(u<-users) yield 
         <p>{u.username}</p>
       }
+    }
+  }
+  @bs2Row() {
+    @bs2Span(9, None) {
+      <h2>User foods</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Energy</th>
+              <th>Protein</th>
+              <th>Fat</th>
+              <th>Carbs</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @{for(f<-foods) yield {
+            Html("""
+              <tr>
+                <td>"""+f.name+"""</td>
+                <td>"""+f.kCal+"""</td>
+                <td>"""+f.protein+"""</td>
+                <td>"""+f.fat+"""</td>
+                <td>"""+f.carbs+"""</td>
+                <td><a href="/administer" onclick="$.get('/acceptFood', {id: '""" + f.id.get + """'}); return true;"><i class="icon-ok"></i></a></td>
+              </tr>
+              """)
+            }
+            }
+          </tbody>
+        </table>
     }
   }
 }

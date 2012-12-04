@@ -710,9 +710,13 @@ object Application extends Controller {
   def administer = Action { implicit request =>
     val user = getUserFromSession(session)
     if(user.username == "peter") {
-      val users = Beefcake.all()
+      // users
+      val users = Beefcake.all
       val registeredUsers = for(u<-users if !u.adhoc) yield u
-      Ok(views.html.administer(user, registeredUsers))
+
+      // macro entries
+      val foods = Food.allUserFoods
+      Ok(views.html.administer(user, registeredUsers, foods))
     }
     else {
       Redirect(routes.Application.index)
@@ -739,6 +743,18 @@ object Application extends Controller {
       }
     )
     Redirect(routes.Application.administer())
+  }
+
+  def acceptFood(id: String) = Action { implicit request =>
+    Logger.info("Accept food: " + id)
+    val user = getUserFromSession(session)
+    if(user.username == "peter") {
+      Food.acceptFood(id)
+      Ok
+    }
+    else {
+      Forbidden
+    }
   }
 }
 
