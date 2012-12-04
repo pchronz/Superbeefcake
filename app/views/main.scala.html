@@ -23,7 +23,10 @@
 							<li><a href="@{routes.Application.measure(None, None, None, None, None, None)}" id="measure-nav-link">Measure</a></li>
 							<li><a href="@{routes.Application.analyze(None, None, None, None, None, None)}" id="analyze-nav-link">Analyze</a></li>
 							<li><a href="@{routes.Application.manageOwnFoodEntries()}" id="manage-foods-nav-link">Manage Foods</a></li>
-							<li><a href="@{routes.Application.administer()}" id="admin-nav-link">Administration</a></li>
+                            @{beefcake match {
+                              case Some(b) => if(b.username == "peter") {<li><a href="/administer" id="admin-nav-link">Administration</a></li>} else Html("")
+                              case None => Html("")
+                            } }
 						</ul>
 						<ul class="nav pull-right">
                           @{beefcake match {
